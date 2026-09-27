@@ -68,18 +68,6 @@
             background-color: rgba(15, 23, 42, 0.6);
         }
 
-        /* Modal Overlay */
-        #ninModalOverlay {
-            backdrop-filter: blur(4px);
-            background-color: rgba(15, 23, 42, 0.55);
-        }
-
-        /* Expanded border for outer modal */
-        .modal-outer {
-            border: 3px solid #94a3b8;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
-        }
-
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
@@ -90,6 +78,60 @@
         }
         ::-webkit-scrollbar-thumb {
             background: #0066b2;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            backdrop-filter: blur(4px);
+            background-color: rgba(15, 23, 42, 0.55);
+        }
+        .modal-box {
+            border: 3px solid #94a3b8;
+            background: #ffffff;
+        }
+        .modal-inner {
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+
+        /* Orbiting dots circle animation for الدخول المدرسي */
+        .orbit-container {
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+        .orbit-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            margin: -4px 0 0 -4px;
+            animation: orbitDots 1.6s linear infinite;
+        }
+        .orbit-dot:nth-child(1) { animation-delay: 0s; }
+        .orbit-dot:nth-child(2) { animation-delay: -0.2s; }
+        .orbit-dot:nth-child(3) { animation-delay: -0.4s; }
+        .orbit-dot:nth-child(4) { animation-delay: -0.6s; }
+        .orbit-dot:nth-child(5) { animation-delay: -0.8s; }
+        .orbit-dot:nth-child(6) { animation-delay: -1.0s; }
+        .orbit-dot:nth-child(7) { animation-delay: -1.2s; }
+        .orbit-dot:nth-child(8) { animation-delay: -1.4s; }
+
+        @keyframes orbitDots {
+            0% {
+                transform: rotate(0deg) translateX(18px) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: rotate(360deg) translateX(18px) rotate(-360deg);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -121,21 +163,37 @@
                 </h1>
             </div>
 
-            <!-- Top Action Navigation Buttons (الصفحة الرئيسية / تسيير المستخدمين) -->
-            <div class="flex justify-end items-center gap-2 mb-6">
+            <!-- Top Action Navigation Buttons -->
+            <div class="flex flex-wrap justify-end items-center gap-2 mb-6">
                 <button onclick="navigateTo('home')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-5 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-house"></i>
                     الصفحة الرئيسية
                 </button>
-                <button onclick="navigateTo('users')" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
+                <button onclick="navigateTo('users-cards')" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-users-gear"></i>
                     تسيير المستخدمين
                 </button>
+                <button onclick="triggerAction('tamadrus')" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    التمدرس
+                </button>
             </div>
 
-            <!-- 2. Home Page View (Dashboard) -->
+            <!-- 2. Home Page View (Empty White Windows) -->
             <div id="view-home" class="view-page">
-                <!-- Inner Faded Gray Window Container holding cards -->
+                <div class="bg-slate-100 p-4 md:p-6 border border-slate-200 min-h-[420px] flex flex-col items-center justify-center">
+                    <div class="bg-white border border-slate-300 p-8 w-full max-w-3xl text-center square-card">
+                        <div class="border border-slate-200 p-10 bg-white">
+                            <i class="fa-solid fa-window-maximize text-5xl text-slate-300 mb-4"></i>
+                            <p class="text-slate-500 text-sm font-semibold">الصفحة الرئيسية - النوافذ فارغة تماماً</p>
+                            <p class="text-slate-400 text-xs mt-2">اختر "تسيير المستخدمين" أو "التمدرس" من الشريط العلوي للوصول إلى الأقسام</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2b. Users Cards View (تسيير المستخدمين - الأيقونات) -->
+            <div id="view-users-cards" class="view-page hidden">
                 <div class="bg-slate-100 p-4 md:p-6 border border-slate-200">
                     <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 animate-shake-thrice">
                         
@@ -371,7 +429,6 @@
                     <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
                         <table class="w-full text-right text-xs border-collapse">
                             <thead>
-                                <!-- White Background Headers -->
                                 <tr class="bg-white border-b-2 border-slate-300 text-slate-800">
                                     <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف</th>
                                     <th class="p-2 border border-slate-200 font-extrabold">اللقب</th>
@@ -387,7 +444,7 @@
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
-                                <!-- Dynamic User Rows Populated by JS -->
+                                <!-- Dynamic User Rows -->
                             </tbody>
                         </table>
                     </div>
@@ -407,42 +464,53 @@
                             </button>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            <!-- 4. Update NIN View (تحيين رقم التعريف الوطني) - Table like Users -->
+            <!-- 4. Update NIN View (تحيين رقم التعريف الوطني) - جدول مثل المستخدمين -->
             <div id="view-nin" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
-                    <!-- Title Inner Window -->
                     <div class="bg-slate-50 border border-slate-200 p-3 mb-6">
                         <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
                             <i class="fa-solid fa-id-card"></i> تحيين رقم التعريف الوطني
                         </h2>
                     </div>
 
-                    <!-- Filter / Search for NIN table -->
-                    <div class="bg-blue-50 border border-blue-200 p-4 mb-6 square-card">
-                        <h4 class="text-xs font-bold text-blue-800 mb-3 uppercase tracking-wider flex items-center gap-1">
-                            <i class="fa-solid fa-filter"></i> بحث وتصفية
+                    <!-- Filter -->
+                    <div class="bg-red-50 border border-red-200 p-4 mb-6 square-card">
+                        <h4 class="text-xs font-bold text-red-800 mb-3 uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-filter"></i> تصفية وقوائم الاختيار
                         </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">الصفة / الرتبة</label>
+                                <select id="ninFilterRole" onchange="filterNINUsers()" class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
+                                    <option value="">جميع الصفات</option>
+                                    <option value="أستاذ تعليم متوسط">أستاذ تعليم متوسط</option>
+                                    <option value="مشرف تربية">مشرف تربية</option>
+                                    <option value="مقتصد">مقتصد</option>
+                                    <option value="مساعد رئيسي">مساعد رئيسي</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">المادة</label>
+                                <select id="ninFilterSubject" onchange="filterNINUsers()" class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
+                                    <option value="">جميع المواد</option>
+                                    <option value="اللغة العربية">اللغة العربية</option>
+                                    <option value="الرياضيات">الرياضيات</option>
+                                    <option value="اللغة الفرنسية">اللغة الفرنسية</option>
+                                    <option value="علوم الطبيعة والحياة">علوم الطبيعة والحياة</option>
+                                    <option value="إدارة">إدارة</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">بحث بالإسم / اللقب / الرقم</label>
                                 <input type="text" id="ninFilterSearch" onkeyup="filterNINUsers()" placeholder="اكتب للبحث..." class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">حالة رقم التعريف</label>
-                                <select id="ninFilterStatus" onchange="filterNINUsers()" class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
-                                    <option value="">الكل</option>
-                                    <option value="updated">مُحدَّث</option>
-                                    <option value="empty">غير مُحدَّث</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
 
-                    <!-- Inner White Window for NIN Table -->
+                    <!-- Table -->
                     <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
                         <table class="w-full text-right text-xs border-collapse">
                             <thead>
@@ -452,7 +520,7 @@
                                     <th class="p-2 border border-slate-200 font-extrabold">الاسم</th>
                                     <th class="p-2 border border-slate-200 font-extrabold">الصفة</th>
                                     <th class="p-2 border border-slate-200 font-extrabold">المادة</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف الوطني (NIN)</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف الوطني الحالي</th>
                                     <th class="p-2 border border-slate-200 font-extrabold text-center">عمليات</th>
                                 </tr>
                             </thead>
@@ -462,7 +530,7 @@
                         </table>
                     </div>
 
-                    <!-- Pagination for NIN -->
+                    <!-- Pagination -->
                     <div class="flex flex-col sm:flex-row justify-between items-center mt-4 pt-3 border-t border-slate-200 gap-3">
                         <span id="ninPaginationInfo" class="text-xs font-semibold text-slate-600">
                             عرض 1 - 10 من أصل 12 مستخدم
@@ -519,6 +587,125 @@
                 </div>
             </div>
 
+            <!-- 6. التمدرس View -->
+            <div id="view-tamadrus" class="view-page hidden">
+                <div class="bg-slate-100 p-4 md:p-6 border border-slate-200">
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-6">
+                        <h2 class="text-lg md:text-xl font-bold text-indigo-700 flex items-center gap-2">
+                            <i class="fa-solid fa-graduation-cap"></i> التمدرس
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                        
+                        <!-- Card: الدخول المدرسي with orbiting dots -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-48 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">الدخول المدرسي</h3>
+                                <div class="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow overflow-hidden">
+                                    <div class="orbit-container">
+                                        <span class="orbit-dot"></span>
+                                        <span class="orbit-dot"></span>
+                                        <span class="orbit-dot"></span>
+                                        <span class="orbit-dot"></span>
+                                        <span class="orbit-dot"></span>
+                                        <span class="orbit-dot"></span>
+                                        <span class="orbit-dot"></span>
+                                        <span class="orbit-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">تسجيل ومتابعة عمليات الدخول المدرسي للتلاميذ</p>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'الدخول المدرسي')" class="square-btn w-auto px-6 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card: التسجيلات -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-48 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">التسجيلات الجديدة</h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">إدارة طلبات التسجيل والتسجيلات الجديدة</p>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'التسجيلات الجديدة')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card: إعادة التسجيل -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-48 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">إعادة التسجيل</h3>
+                                <div class="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">متابعة عمليات إعادة التسجيل للتلاميذ</p>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'إعادة التسجيل')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card: التحويلات -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-48 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">التحويلات المدرسية</h3>
+                                <div class="w-12 h-12 rounded-full bg-amber-600 text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-right-left"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">إدارة طلبات التحويل بين المؤسسات</p>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'التحويلات المدرسية')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card: الإقصاء / الشطب -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-48 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">الإقصاء والشطب</h3>
+                                <div class="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-user-xmark"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">متابعة حالات الإقصاء والشطب من القوائم</p>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'الإقصاء والشطب')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card: الإحصائيات -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-48 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">إحصائيات التمدرس</h3>
+                                <div class="w-12 h-12 rounded-full bg-slate-700 text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">تقارير وإحصائيات حول نسب التمدرس</p>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'إحصائيات التمدرس')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
             <!-- Generic Info View for empty links -->
             <div id="view-info" class="view-page hidden text-center py-12">
                 <i class="fa-solid fa-circle-info text-5xl text-edu-blue mb-4"></i>
@@ -538,84 +725,62 @@
         </div>
     </div>
 
-    <!-- ==================== NIN Update Modal (نافذة بيضاء موسّعة الحدود) ==================== -->
-    <div id="ninModalOverlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
-        <!-- Outer expanded border white window -->
-        <div class="modal-outer bg-white p-3 max-w-lg w-full">
-            <!-- Inner white title window -->
-            <div class="bg-white border-2 border-slate-300 p-3 mb-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-base font-extrabold text-edu-blue flex items-center gap-2">
-                        <i class="fa-solid fa-id-card"></i>
-                        تحيين رقم التعريف الوطني
-                    </h3>
-                    <button onclick="closeNINModal()" class="square-btn text-slate-500 hover:text-red-600 text-lg px-2">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Inner white content window (input engine) -->
-            <div class="bg-white border-2 border-slate-300 p-5">
-                <div class="mb-4 pb-3 border-b border-slate-200">
-                    <p class="text-xs text-slate-500 mb-1">الموظف المحدد:</p>
-                    <p id="modalUserName" class="font-bold text-slate-800 text-sm"></p>
-                    <p id="modalUserRole" class="text-xs text-slate-600 mt-0.5"></p>
-                </div>
-
-                <form onsubmit="saveNINFromModal(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
-                            رقم التعريف الوطني (NIN) <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="modalNinInput" required maxlength="18" pattern="[0-9]{18}" 
-                               placeholder="أدخل 18 رقم الخاصة بالتعريف الوطني" 
-                               class="w-full text-sm p-3 border-2 border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue font-mono tracking-wider">
-                        <p class="text-[10px] text-slate-500 mt-1">يجب أن يتكون من 18 رقماً بالضبط</p>
-                    </div>
-
-                    <div class="pt-2 flex justify-end gap-2">
-                        <button type="button" onclick="closeNINModal()" class="square-btn bg-slate-200 hover:bg-slate-300 text-slate-800 px-5 py-2 text-xs font-bold">
-                            إلغاء
-                        </button>
-                        <button type="submit" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i> حفظ التحيين
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Notification / Toast Message -->
     <div id="toastMessage" class="fixed bottom-5 left-5 z-50 hidden bg-emerald-600 text-white px-5 py-3 square-card shadow-lg font-bold text-xs flex items-center gap-2">
         <i class="fa-solid fa-circle-check"></i> <span id="toastText">تمت العملية بنجاح</span>
     </div>
 
+    <!-- NIN Update Modal (نافذة موسعة الحدود) -->
+    <div id="ninModal" class="fixed inset-0 z-[60] hidden modal-overlay flex items-center justify-center p-4">
+        <div class="modal-box w-full max-w-lg shadow-2xl">
+            <!-- Outer white expanded border window -->
+            <div class="p-3">
+                <!-- Inner white window with title -->
+                <div class="modal-inner p-4 mb-3">
+                    <h3 class="text-base font-extrabold text-edu-blue flex items-center gap-2">
+                        <i class="fa-solid fa-id-card"></i>
+                        تحيين رقم التعريف الوطني
+                    </h3>
+                    <p id="ninModalUserName" class="text-xs text-slate-500 mt-1"></p>
+                </div>
+                <!-- Inner white window for input -->
+                <div class="modal-inner p-5">
+                    <label class="block text-xs font-bold text-slate-700 mb-2">رقم التعريف الوطني (NIN) - 18 رقم</label>
+                    <input type="text" id="ninModalInput" maxlength="18" placeholder="أدخل 18 رقم الخاصة بالتعريف الوطني" class="w-full text-sm p-3 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue font-mono tracking-wider">
+                    <div class="flex justify-end gap-2 mt-5">
+                        <button type="button" onclick="closeNINModal()" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-5 py-2 text-xs font-bold">إلغاء</button>
+                        <button type="button" onclick="saveNINFromModal()" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> حفظ التحيين
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        /* Sample Data set for users - with nin field added */
+        /* Sample Data set for users */
         let usersData = [
-            { id: "1982001", surname: "بن علي", name: "محمد", birthDate: "1982-04-12", birthPlace: "سطاوالي", address: "حي 500 مسكن", phone: "0661234567", role: "أستاذ تعليم متوسط", subject: "اللغة العربية", ccp: "1234567-89", nin: "" },
-            { id: "1985002", surname: "قاسمي", name: "أحمد", birthDate: "1985-09-20", birthPlace: "زرالدة", address: "وسط المدينة", phone: "0552345678", role: "أستاذ تعليم متوسط", subject: "الرياضيات", ccp: "2345678-90", nin: "185092012345678901" },
-            { id: "1990003", surname: "مزاهي", name: "فاطمة", birthDate: "1990-01-15", birthPlace: "الشراقة", address: "حي النصر", phone: "0773456789", role: "أستاذ تعليم متوسط", subject: "اللغة الفرنسية", ccp: "3456789-01", nin: "" },
-            { id: "1988004", surname: "سليماني", name: "عمر", birthDate: "1988-11-05", birthPlace: "عين البنيان", address: "حي السلام", phone: "0664567890", role: "مشرف تربية", subject: "إدارة", ccp: "4567890-12", nin: "188110512345678902" },
-            { id: "1992005", surname: "براهيمي", name: "سارة", birthDate: "1992-06-30", birthPlace: "سطاوالي", address: "حي البحر", phone: "0555678901", role: "أستاذ تعليم متوسط", subject: "علوم الطبيعة والحياة", ccp: "5678901-23", nin: "" },
-            { id: "1980006", surname: "طاهري", name: "رشيد", birthDate: "1980-03-18", birthPlace: "الجزائر", address: "حي المجاهدين", phone: "0776789012", role: "مقتصد", subject: "إدارة", ccp: "6789012-34", nin: "180031812345678903" },
-            { id: "1987007", surname: "حفيظ", name: "خالد", birthDate: "1987-08-22", birthPlace: "القليعة", address: "شارع الاستقلال", phone: "0667890123", role: "مساعد رئيسي", subject: "إدارة", ccp: "7890123-45", nin: "" },
+            { id: "1982001", surname: "بن علي", name: "محمد", birthDate: "1982-04-12", birthPlace: "سطاوالي", address: "حي 500 مسكن", phone: "0661234567", role: "أستاذ تعليم متوسط", subject: "اللغة العربية", ccp: "1234567-89", nin: "162082041200001234" },
+            { id: "1985002", surname: "قاسمي", name: "أحمد", birthDate: "1985-09-20", birthPlace: "زرالدة", address: "وسط المدينة", phone: "0552345678", role: "أستاذ تعليم متوسط", subject: "الرياضيات", ccp: "2345678-90", nin: "" },
+            { id: "1990003", surname: "مزاهي", name: "فاطمة", birthDate: "1990-01-15", birthPlace: "الشراقة", address: "حي النصر", phone: "0773456789", role: "أستاذ تعليم متوسط", subject: "اللغة الفرنسية", ccp: "3456789-01", nin: "162090011500002345" },
+            { id: "1988004", surname: "سليماني", name: "عمر", birthDate: "1988-11-05", birthPlace: "عين البنيان", address: "حي السلام", phone: "0664567890", role: "مشرف تربية", subject: "إدارة", ccp: "4567890-12", nin: "" },
+            { id: "1992005", surname: "براهيمي", name: "سارة", birthDate: "1992-06-30", birthPlace: "سطاوالي", address: "حي البحر", phone: "0555678901", role: "أستاذ تعليم متوسط", subject: "علوم الطبيعة والحياة", ccp: "5678901-23", nin: "162092063000003456" },
+            { id: "1980006", surname: "طاهري", name: "رشيد", birthDate: "1980-03-18", birthPlace: "الجزائر", address: "حي المجاهدين", phone: "0776789012", role: "مقتصد", subject: "إدارة", ccp: "6789012-34", nin: "" },
+            { id: "1987007", surname: "حفيظ", name: "خالد", birthDate: "1987-08-22", birthPlace: "القليعة", address: "شارع الاستقلال", phone: "0667890123", role: "مساعد رئيسي", subject: "إدارة", ccp: "7890123-45", nin: "162087082200004567" },
             { id: "1994008", surname: "عثماني", name: "مريم", birthDate: "1994-12-10", birthPlace: "سطاوالي", address: "حي 200 مسكن", phone: "0558901234", role: "أستاذ تعليم متوسط", subject: "الرياضيات", ccp: "8901234-56", nin: "" },
-            { id: "1983009", surname: "بلقاسم", name: "كريم", birthDate: "1983-02-14", birthPlace: "زرالدة", address: "حي الأمل", phone: "0779012345", role: "أستاذ تعليم متوسط", subject: "اللغة العربية", ccp: "9012345-67", nin: "183021412345678904" },
+            { id: "1983009", surname: "بلقاسم", name: "كريم", birthDate: "1983-02-14", birthPlace: "زرالدة", address: "حي الأمل", phone: "0779012345", role: "أستاذ تعليم متوسط", subject: "اللغة العربية", ccp: "9012345-67", nin: "162083021400005678" },
             { id: "1991010", surname: "حداد", name: "نورة", birthDate: "1991-07-04", birthPlace: "الشراقة", address: "حي الزيتون", phone: "0660123456", role: "مشرف تربية", subject: "إدارة", ccp: "0123456-78", nin: "" },
-            { id: "1986011", surname: "غيلان", name: "ياسين", birthDate: "1986-10-19", birthPlace: "سطاوالي", address: "حي الورود", phone: "0551234567", role: "أستاذ تعليم متوسط", subject: "اللغة الفرنسية", ccp: "1122334-45", nin: "" },
-            { id: "1995012", surname: "رحماني", name: "أسماء", birthDate: "1995-05-25", birthPlace: "عين البنيان", address: "حي الشاطئ", phone: "0772345678", role: "أستاذ تعليم متوسط", subject: "علوم الطبيعة والحياة", ccp: "2233445-56", nin: "195052512345678905" }
+            { id: "1986011", surname: "غيلان", name: "ياسين", birthDate: "1986-10-19", birthPlace: "سطاوالي", address: "حي الورود", phone: "0551234567", role: "أستاذ تعليم متوسط", subject: "اللغة الفرنسية", ccp: "1122334-45", nin: "162086101900006789" },
+            { id: "1995012", surname: "رحماني", name: "أسماء", birthDate: "1995-05-25", birthPlace: "عين البنيان", address: "حي الشاطئ", phone: "0772345678", role: "أستاذ تعليم متوسط", subject: "علوم الطبيعة والحياة", ccp: "2233445-56", nin: "" }
         ];
 
         let currentPage = 1;
         const pageSize = 10;
         let filteredUsers = [...usersData];
 
-        // NIN page state
+        // NIN specific
         let ninCurrentPage = 1;
-        const ninPageSize = 10;
         let filteredNINUsers = [...usersData];
         let currentNINUserId = null;
 
@@ -632,7 +797,7 @@
                 } else {
                     navigateTo(targetView);
                 }
-            }, 1000); // Exactly 1 second delay
+            }, 1000);
         }
 
         // Navigation between views
@@ -646,9 +811,9 @@
             if (viewId === 'users') {
                 renderUsersTable();
             } else if (viewId === 'nin') {
-                filteredNINUsers = [...usersData];
-                ninCurrentPage = 1;
-                renderNINTable();
+                filterNINUsers();
+            } else if (viewId === 'users-cards') {
+                // cards already in DOM
             }
         }
 
@@ -694,14 +859,13 @@
                 });
             }
 
-            // Pagination Controls Update
             document.getElementById('paginationInfo').textContent = `عرض ${total === 0 ? 0 : startIndex + 1} - ${endIndex} من أصل ${total} مستخدم`;
             document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages}`;
             document.getElementById('btnPrev').disabled = (currentPage === 1);
             document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
         }
 
-        // Search & Filter
+        // Search & Filter for users
         function filterUsers() {
             const role = document.getElementById('filterRole').value;
             const subject = document.getElementById('filterSubject').value;
@@ -738,40 +902,56 @@
             showToast("تم إلغاء الموظف بنجاح");
         }
 
-        // ==================== NIN Table Functions ====================
+        // ========== NIN Table Functions ==========
+        function filterNINUsers() {
+            const role = document.getElementById('ninFilterRole').value;
+            const subject = document.getElementById('ninFilterSubject').value;
+            const search = document.getElementById('ninFilterSearch').value.trim().toLowerCase();
+
+            filteredNINUsers = usersData.filter(u => {
+                const matchRole = !role || u.role === role;
+                const matchSubject = !subject || u.subject === subject;
+                const matchSearch = !search || 
+                    u.name.toLowerCase().includes(search) || 
+                    u.surname.toLowerCase().includes(search) || 
+                    u.id.includes(search);
+                return matchRole && matchSubject && matchSearch;
+            });
+
+            ninCurrentPage = 1;
+            renderNINTable();
+        }
+
         function renderNINTable() {
             const tbody = document.getElementById('ninTableBody');
             tbody.innerHTML = '';
 
             const total = filteredNINUsers.length;
-            const totalPages = Math.ceil(total / ninPageSize) || 1;
+            const totalPages = Math.ceil(total / pageSize) || 1;
             
             if (ninCurrentPage > totalPages) ninCurrentPage = totalPages;
             if (ninCurrentPage < 1) ninCurrentPage = 1;
 
-            const startIndex = (ninCurrentPage - 1) * ninPageSize;
-            const endIndex = Math.min(startIndex + ninPageSize, total);
+            const startIndex = (ninCurrentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, total);
             const pageUsers = filteredNINUsers.slice(startIndex, endIndex);
 
             if (pageUsers.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-slate-500">لا توجد نتائج مطابقة</td></tr>`;
             } else {
                 pageUsers.forEach(u => {
-                    const ninDisplay = u.nin && u.nin.length === 18 
-                        ? `<span class="font-mono text-emerald-700 font-semibold">${u.nin}</span>` 
-                        : `<span class="text-red-500 text-xs">غير مُحدَّث</span>`;
-                    
                     const tr = document.createElement('tr');
                     tr.className = "border-b hover:bg-slate-50 transition";
+                    const ninDisplay = u.nin ? u.nin : '<span class="text-slate-400">غير مسجل</span>';
                     tr.innerHTML = `
                         <td class="p-2 border border-slate-200 font-mono font-bold text-edu-blue">${u.id}</td>
                         <td class="p-2 border border-slate-200 font-semibold">${u.surname}</td>
                         <td class="p-2 border border-slate-200">${u.name}</td>
                         <td class="p-2 border border-slate-200">${u.role}</td>
                         <td class="p-2 border border-slate-200">${u.subject}</td>
-                        <td class="p-2 border border-slate-200">${ninDisplay}</td>
+                        <td class="p-2 border border-slate-200 font-mono text-xs">${ninDisplay}</td>
                         <td class="p-2 border border-slate-200 text-center">
-                            <button onclick="openNINModal('${u.id}')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 mx-auto" title="تحيين رقم التعريف">
+                            <button onclick="openNINModal('${u.id}')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 mx-auto">
                                 <i class="fa-solid fa-pen-to-square"></i> تحيين رقم التعريف
                             </button>
                         </td>
@@ -786,28 +966,6 @@
             document.getElementById('ninBtnNext').disabled = (ninCurrentPage === totalPages || totalPages === 0);
         }
 
-        function filterNINUsers() {
-            const search = document.getElementById('ninFilterSearch').value.trim().toLowerCase();
-            const status = document.getElementById('ninFilterStatus').value;
-
-            filteredNINUsers = usersData.filter(u => {
-                const matchSearch = !search || 
-                    u.name.toLowerCase().includes(search) || 
-                    u.surname.toLowerCase().includes(search) || 
-                    u.id.includes(search);
-                
-                const hasNin = u.nin && u.nin.length === 18;
-                const matchStatus = !status || 
-                    (status === 'updated' && hasNin) || 
-                    (status === 'empty' && !hasNin);
-                
-                return matchSearch && matchStatus;
-            });
-
-            ninCurrentPage = 1;
-            renderNINTable();
-        }
-
         function ninNextPage() {
             ninCurrentPage++;
             renderNINTable();
@@ -818,42 +976,34 @@
             renderNINTable();
         }
 
-        // ==================== NIN Modal Functions ====================
         function openNINModal(userId) {
             const user = usersData.find(u => u.id === userId);
             if (!user) return;
-
             currentNINUserId = userId;
-            document.getElementById('modalUserName').textContent = `${user.surname} ${user.name}`;
-            document.getElementById('modalUserRole').textContent = `${user.role} - ${user.subject}`;
-            document.getElementById('modalNinInput').value = user.nin || '';
-            
-            document.getElementById('ninModalOverlay').classList.remove('hidden');
+            document.getElementById('ninModalUserName').textContent = `${user.surname} ${user.name} — ${user.role}`;
+            document.getElementById('ninModalInput').value = user.nin || '';
+            document.getElementById('ninModal').classList.remove('hidden');
         }
 
         function closeNINModal() {
-            document.getElementById('ninModalOverlay').classList.add('hidden');
+            document.getElementById('ninModal').classList.add('hidden');
             currentNINUserId = null;
-            document.getElementById('modalNinInput').value = '';
+            document.getElementById('ninModalInput').value = '';
         }
 
-        function saveNINFromModal(e) {
-            e.preventDefault();
-            const nin = document.getElementById('modalNinInput').value.trim();
-
-            if (!/^\d{18}$/.test(nin)) {
-                showToast("رقم التعريف الوطني يجب أن يكون 18 رقماً بالضبط");
+        function saveNINFromModal() {
+            const nin = document.getElementById('ninModalInput').value.trim();
+            if (!nin || nin.length !== 18 || !/^\d+$/.test(nin)) {
+                showToast("يرجى إدخال رقم تعريف وطني صحيح مكون من 18 رقم");
                 return;
             }
-
-            const userIndex = usersData.findIndex(u => u.id === currentNINUserId);
-            if (userIndex !== -1) {
-                usersData[userIndex].nin = nin;
+            const user = usersData.find(u => u.id === currentNINUserId);
+            if (user) {
+                user.nin = nin;
+                showToast(`تم تحيين رقم التعريف الوطني (${nin}) للموظف بنجاح`);
+                closeNINModal();
+                renderNINTable();
             }
-
-            closeNINModal();
-            filterNINUsers();
-            showToast(`تم تحيين رقم التعريف الوطني (${nin}) بنجاح`);
         }
 
         function openAddStrikeModal() {
@@ -869,14 +1019,12 @@
             }, 3000);
         }
 
-        // Close modal on overlay click
-        document.getElementById('ninModalOverlay').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeNINModal();
-            }
+        // Close modal on outside click
+        document.getElementById('ninModal').addEventListener('click', function(e) {
+            if (e.target === this) closeNINModal();
         });
 
-        // Initialize on Load
+        // Initialize on Load → الصفحة الرئيسية فارغة
         window.onload = function() {
             navigateTo('home');
         };
