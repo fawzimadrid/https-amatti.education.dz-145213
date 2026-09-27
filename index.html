@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأرضية الرقمية لوزارة التربية الوطنية : فضاء المؤسسة</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        'edu-blue': '#0066b2',
+                        'edu-darkblue': '#004b87',
+                        'edu-lightgray': '#f3f4f6',
+                        'edu-cardgray': '#eaebd',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+            user-select: none;
+        }
+
+        /* Border box square styles (no sharp rounded radii) */
+        .square-card {
+            border-radius: 0px !important;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease-in-out;
+        }
+        .square-btn {
+            border-radius: 0px !important;
+        }
+
+        /* 3-shake keyframe animation */
+        @keyframes tripleShake {
+            0% { transform: translateX(0); }
+            10% { transform: translateX(-6px) rotate(-1deg); }
+            20% { transform: translateX(6px) rotate(1deg); }
+            30% { transform: translateX(-6px) rotate(-1deg); }
+            40% { transform: translateX(6px) rotate(1deg); }
+            50% { transform: translateX(-4px) rotate(0deg); }
+            60% { transform: translateX(4px) rotate(0deg); }
+            70%, 100% { transform: translateX(0); }
+        }
+
+        .animate-shake-thrice {
+            animation: tripleShake 1.2s ease-in-out 1;
+        }
+
+        /* Loading Overlay */
+        #loadingOverlay {
+            backdrop-filter: blur(3px);
+            background-color: rgba(15, 23, 42, 0.6);
+        }
+
+        /* Modal Overlay */
+        #ninModalOverlay {
+            backdrop-filter: blur(4px);
+            background-color: rgba(15, 23, 42, 0.55);
+        }
+
+        /* Expanded border for outer modal */
+        .modal-outer {
+            border: 3px solid #94a3b8;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0066b2;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-100 text-slate-800">
+
+    <!-- 1. Header Section -->
+    <header class="bg-edu-blue text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center text-sm md:text-base font-semibold">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <i class="fa-solid font-bold fa-school text-xl text-yellow-300"></i>
+                <span>مديرية التربية للجزائر غرب | متوسطة الشهيد خالد مكاوي -سطاوالي-</span>
+            </div>
+            <div class="flex items-center space-x-4 space-x-reverse text-xs md:text-sm mt-2 md:mt-0">
+                <span class="bg-edu-darkblue px-3 py-1 rounded-none border border-blue-400">
+                    <i class="fa-solid fa-user-gear ml-1"></i> حساب المؤسسة
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Outer White Window Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
+        <div class="bg-white border border-slate-300 shadow-sm p-4 md:p-6 mb-6">
+            
+            <!-- Center Title in White Section -->
+            <div class="text-center py-4 border-b border-slate-200 mb-6">
+                <h1 class="text-xl md:text-2xl font-extrabold text-edu-blue tracking-wide">
+                    الأرضية الرقمية لوزارة التربية الوطنية : فضاء المؤسسة
+                </h1>
+            </div>
+
+            <!-- Top Action Navigation Buttons (الصفحة الرئيسية / تسيير المستخدمين) -->
+            <div class="flex justify-end items-center gap-2 mb-6">
+                <button onclick="navigateTo('home')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-5 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i>
+                    الصفحة الرئيسية
+                </button>
+                <button onclick="navigateTo('users')" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear"></i>
+                    تسيير المستخدمين
+                </button>
+            </div>
+
+            <!-- 2. Home Page View (Dashboard) -->
+            <div id="view-home" class="view-page">
+                <!-- Inner Faded Gray Window Container holding cards -->
+                <div class="bg-slate-100 p-4 md:p-6 border border-slate-200">
+                    <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 animate-shake-thrice">
+                        
+                        <!-- Card 1: ملفات المستخدمين -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">ملفات المستخدمين</h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-folder-closed"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('users')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: تحيين معلومات الموظفين -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">تحيين معلومات الموظفين</h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-folder-open"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('users')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: تحيين الرقم التعريف الوطني -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">التعريف الوطني<br><span class="text-xs text-slate-500 font-normal">تحيين رقم</span></h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-id-card"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('nin')" class="square-btn w-auto px-6 py-1.5 bg-slate-800 hover:bg-black text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: محاضر التنصيب الدخول و الخروج -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">محاضر التنصيب<br><span class="text-xs text-slate-500 font-normal">الدخول و الخروج</span></h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-file-signature"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'محاضر التنصيب')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 5: عملية الإدماج -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">عملية الإدماج</h3>
+                                <div class="w-12 h-12 rounded-full bg-slate-800 text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'عملية الإدماج')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 6: غيابات المستخدمين -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">غيابات المستخدمين</h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-user-lock"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'غيابات المستخدمين')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 7: متابعة الإضرابات -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">متابعة الإضرابات</h3>
+                                <div class="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center text-xl shadow animate-pulse">
+                                    <i class="fa-solid fa-bell"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('strikes')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 8: الخدمات الاجتماعية -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">الخدمات الاجتماعية</h3>
+                                <div class="w-12 h-12 rounded-full bg-slate-800 text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-handshake"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'الخدمات الاجتماعية')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 9: منحة المردودية وتحسين الأداء -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">منحة المردودية<br><span class="text-xs text-slate-500 font-normal">وتحسين الأداء</span></h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-list-ol"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'منحة المردودية')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 10: الانتماء النقابي -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">الانتماء النقابي</h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-users-between-lines"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'الانتماء النقابي')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 11: التسجيل على قوائم التأهيل -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">التسجيل على<br><span class="text-xs text-slate-500 font-normal">قوائم التأهيل</span></h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-rectangle-list"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'قوائم التأهيل')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card 12: الامتحانات المهنية -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
+                            <div class="flex justify-between items-start">
+                                <h3 class="font-bold text-slate-800 text-base">الامتحانات المهنية</h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </div>
+                            </div>
+                            <div class="mt-auto">
+                                <button onclick="triggerAction('info', 'الامتحانات المهنية')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Users File View (ملفات المستخدمين) -->
+            <div id="view-users" class="view-page hidden">
+                <div class="bg-white border border-slate-300 p-4 md:p-6">
+                    <!-- Title Inner Window -->
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-6">
+                        <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
+                            <i class="fa-solid fa-folder-open"></i> ملفات المستخدمين
+                        </h2>
+                    </div>
+
+                    <!-- Filter / Select Container inside Light Faded Red Container -->
+                    <div class="bg-red-50 border border-red-200 p-4 mb-6 square-card">
+                        <h4 class="text-xs font-bold text-red-800 mb-3 uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-filter"></i> تصفية وقوائم الاختيار
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">الصفة / الرتبة</label>
+                                <select id="filterRole" onchange="filterUsers()" class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
+                                    <option value="">جميع الصفات</option>
+                                    <option value="أستاذ تعليم متوسط">أستاذ تعليم متوسط</option>
+                                    <option value="مشرف تربية">مشرف تربية</option>
+                                    <option value="مقتصد">مقتصد</option>
+                                    <option value="مساعد رئيسي">مساعد رئيسي</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">المادة</label>
+                                <select id="filterSubject" onchange="filterUsers()" class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
+                                    <option value="">جميع المواد</option>
+                                    <option value="اللغة العربية">اللغة العربية</option>
+                                    <option value="الرياضيات">الرياضيات</option>
+                                    <option value="اللغة الفرنسية">اللغة الفرنسية</option>
+                                    <option value="علوم الطبيعة والحياة">علوم الطبيعة والحياة</option>
+                                    <option value="إدارة">إدارة</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">بحث بالإسم / اللقب / الرقم</label>
+                                <input type="text" id="filterSearch" onkeyup="filterUsers()" placeholder="اكتب للبحث..." class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inner White Window for Table -->
+                    <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
+                        <table class="w-full text-right text-xs border-collapse">
+                            <thead>
+                                <!-- White Background Headers -->
+                                <tr class="bg-white border-b-2 border-slate-300 text-slate-800">
+                                    <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">اللقب</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">الاسم</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">تاريخ الميلاد</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">مكان الميلاد</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">العنوان</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">رقم الهاتف</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">الصفة</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">المادة</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">رقم الحساب البريدي</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold text-center">عمليات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Dynamic User Rows Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center mt-4 pt-3 border-t border-slate-200 gap-3">
+                        <span id="paginationInfo" class="text-xs font-semibold text-slate-600">
+                            عرض 1 - 10 من أصل 25 مستخدم
+                        </span>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <button id="btnPrev" onclick="prevPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
+                                <i class="fa-solid fa-chevron-right ml-1"></i> السابق
+                            </button>
+                            <span id="pageIndicator" class="text-xs font-bold bg-edu-blue text-white px-3 py-1.5">1 / 3</span>
+                            <button id="btnNext" onclick="nextPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
+                                التالي <i class="fa-solid fa-chevron-left mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 4. Update NIN View (تحيين رقم التعريف الوطني) - Table like Users -->
+            <div id="view-nin" class="view-page hidden">
+                <div class="bg-white border border-slate-300 p-4 md:p-6">
+                    <!-- Title Inner Window -->
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-6">
+                        <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
+                            <i class="fa-solid fa-id-card"></i> تحيين رقم التعريف الوطني
+                        </h2>
+                    </div>
+
+                    <!-- Filter / Search for NIN table -->
+                    <div class="bg-blue-50 border border-blue-200 p-4 mb-6 square-card">
+                        <h4 class="text-xs font-bold text-blue-800 mb-3 uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-filter"></i> بحث وتصفية
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">بحث بالإسم / اللقب / الرقم</label>
+                                <input type="text" id="ninFilterSearch" onkeyup="filterNINUsers()" placeholder="اكتب للبحث..." class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">حالة رقم التعريف</label>
+                                <select id="ninFilterStatus" onchange="filterNINUsers()" class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
+                                    <option value="">الكل</option>
+                                    <option value="updated">مُحدَّث</option>
+                                    <option value="empty">غير مُحدَّث</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inner White Window for NIN Table -->
+                    <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
+                        <table class="w-full text-right text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-white border-b-2 border-slate-300 text-slate-800">
+                                    <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">اللقب</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">الاسم</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">الصفة</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">المادة</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف الوطني (NIN)</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold text-center">عمليات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ninTableBody">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination for NIN -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center mt-4 pt-3 border-t border-slate-200 gap-3">
+                        <span id="ninPaginationInfo" class="text-xs font-semibold text-slate-600">
+                            عرض 1 - 10 من أصل 12 مستخدم
+                        </span>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <button id="ninBtnPrev" onclick="ninPrevPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
+                                <i class="fa-solid fa-chevron-right ml-1"></i> السابق
+                            </button>
+                            <span id="ninPageIndicator" class="text-xs font-bold bg-edu-blue text-white px-3 py-1.5">1 / 2</span>
+                            <button id="ninBtnNext" onclick="ninNextPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
+                                التالي <i class="fa-solid fa-chevron-left mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Strikes View (متابعة الإضرابات) -->
+            <div id="view-strikes" class="view-page hidden">
+                <div class="bg-white border border-slate-300 p-4 md:p-6">
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-6 flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
+                            <i class="fa-solid fa-bell"></i> متابعة الإضرابات والتوقف عن العمل
+                        </h2>
+                        <button onclick="openAddStrikeModal()" class="square-btn bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 text-xs font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> تسجيل إشعار إضراب
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200">
+                        <table class="w-full text-right text-xs">
+                            <thead class="bg-slate-100 text-slate-800 border-b">
+                                <tr>
+                                    <th class="p-3 border">تاريخ الإشعار</th>
+                                    <th class="p-3 border">التنظيم النقابي الداعي</th>
+                                    <th class="p-3 border">تاريخ البداية</th>
+                                    <th class="p-3 border">تاريخ النهاية</th>
+                                    <th class="p-3 border">نسبة الاستجابة</th>
+                                    <th class="p-3 border">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="strikesTableBody">
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-3 border font-mono">2026-02-10</td>
+                                    <td class="p-3 border font-bold">النقابة الوطنية للتربية</td>
+                                    <td class="p-3 border">2026-02-15</td>
+                                    <td class="p-3 border">2026-02-16</td>
+                                    <td class="p-3 border font-bold text-blue-600">4.2 %</td>
+                                    <td class="p-3 border"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs">مغلق</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generic Info View for empty links -->
+            <div id="view-info" class="view-page hidden text-center py-12">
+                <i class="fa-solid fa-circle-info text-5xl text-edu-blue mb-4"></i>
+                <h3 id="infoTitle" class="text-xl font-bold text-slate-800 mb-2"></h3>
+                <p class="text-sm text-slate-600 mb-6">هذه الصفحة قيد التطوير والتحديث عبر المنصة الرقمية.</p>
+                <button onclick="navigateTo('home')" class="square-btn bg-edu-blue text-white px-6 py-2 text-xs font-bold">العودة للرئيسية</button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Mandatory "Please Wait 1 Second" Screen Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center text-white">
+        <div class="bg-slate-900 border border-slate-700 p-6 square-card flex flex-col items-center gap-4 shadow-2xl">
+            <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-400"></i>
+            <span class="text-base font-bold tracking-wide">الرجاء الانتظار...</span>
+        </div>
+    </div>
+
+    <!-- ==================== NIN Update Modal (نافذة بيضاء موسّعة الحدود) ==================== -->
+    <div id="ninModalOverlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <!-- Outer expanded border white window -->
+        <div class="modal-outer bg-white p-3 max-w-lg w-full">
+            <!-- Inner white title window -->
+            <div class="bg-white border-2 border-slate-300 p-3 mb-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-extrabold text-edu-blue flex items-center gap-2">
+                        <i class="fa-solid fa-id-card"></i>
+                        تحيين رقم التعريف الوطني
+                    </h3>
+                    <button onclick="closeNINModal()" class="square-btn text-slate-500 hover:text-red-600 text-lg px-2">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Inner white content window (input engine) -->
+            <div class="bg-white border-2 border-slate-300 p-5">
+                <div class="mb-4 pb-3 border-b border-slate-200">
+                    <p class="text-xs text-slate-500 mb-1">الموظف المحدد:</p>
+                    <p id="modalUserName" class="font-bold text-slate-800 text-sm"></p>
+                    <p id="modalUserRole" class="text-xs text-slate-600 mt-0.5"></p>
+                </div>
+
+                <form onsubmit="saveNINFromModal(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            رقم التعريف الوطني (NIN) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="modalNinInput" required maxlength="18" pattern="[0-9]{18}" 
+                               placeholder="أدخل 18 رقم الخاصة بالتعريف الوطني" 
+                               class="w-full text-sm p-3 border-2 border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue font-mono tracking-wider">
+                        <p class="text-[10px] text-slate-500 mt-1">يجب أن يتكون من 18 رقماً بالضبط</p>
+                    </div>
+
+                    <div class="pt-2 flex justify-end gap-2">
+                        <button type="button" onclick="closeNINModal()" class="square-btn bg-slate-200 hover:bg-slate-300 text-slate-800 px-5 py-2 text-xs font-bold">
+                            إلغاء
+                        </button>
+                        <button type="submit" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> حفظ التحيين
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification / Toast Message -->
+    <div id="toastMessage" class="fixed bottom-5 left-5 z-50 hidden bg-emerald-600 text-white px-5 py-3 square-card shadow-lg font-bold text-xs flex items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i> <span id="toastText">تمت العملية بنجاح</span>
+    </div>
+
+    <script>
+        /* Sample Data set for users - with nin field added */
+        let usersData = [
+            { id: "1982001", surname: "بن علي", name: "محمد", birthDate: "1982-04-12", birthPlace: "سطاوالي", address: "حي 500 مسكن", phone: "0661234567", role: "أستاذ تعليم متوسط", subject: "اللغة العربية", ccp: "1234567-89", nin: "" },
+            { id: "1985002", surname: "قاسمي", name: "أحمد", birthDate: "1985-09-20", birthPlace: "زرالدة", address: "وسط المدينة", phone: "0552345678", role: "أستاذ تعليم متوسط", subject: "الرياضيات", ccp: "2345678-90", nin: "185092012345678901" },
+            { id: "1990003", surname: "مزاهي", name: "فاطمة", birthDate: "1990-01-15", birthPlace: "الشراقة", address: "حي النصر", phone: "0773456789", role: "أستاذ تعليم متوسط", subject: "اللغة الفرنسية", ccp: "3456789-01", nin: "" },
+            { id: "1988004", surname: "سليماني", name: "عمر", birthDate: "1988-11-05", birthPlace: "عين البنيان", address: "حي السلام", phone: "0664567890", role: "مشرف تربية", subject: "إدارة", ccp: "4567890-12", nin: "188110512345678902" },
+            { id: "1992005", surname: "براهيمي", name: "سارة", birthDate: "1992-06-30", birthPlace: "سطاوالي", address: "حي البحر", phone: "0555678901", role: "أستاذ تعليم متوسط", subject: "علوم الطبيعة والحياة", ccp: "5678901-23", nin: "" },
+            { id: "1980006", surname: "طاهري", name: "رشيد", birthDate: "1980-03-18", birthPlace: "الجزائر", address: "حي المجاهدين", phone: "0776789012", role: "مقتصد", subject: "إدارة", ccp: "6789012-34", nin: "180031812345678903" },
+            { id: "1987007", surname: "حفيظ", name: "خالد", birthDate: "1987-08-22", birthPlace: "القليعة", address: "شارع الاستقلال", phone: "0667890123", role: "مساعد رئيسي", subject: "إدارة", ccp: "7890123-45", nin: "" },
+            { id: "1994008", surname: "عثماني", name: "مريم", birthDate: "1994-12-10", birthPlace: "سطاوالي", address: "حي 200 مسكن", phone: "0558901234", role: "أستاذ تعليم متوسط", subject: "الرياضيات", ccp: "8901234-56", nin: "" },
+            { id: "1983009", surname: "بلقاسم", name: "كريم", birthDate: "1983-02-14", birthPlace: "زرالدة", address: "حي الأمل", phone: "0779012345", role: "أستاذ تعليم متوسط", subject: "اللغة العربية", ccp: "9012345-67", nin: "183021412345678904" },
+            { id: "1991010", surname: "حداد", name: "نورة", birthDate: "1991-07-04", birthPlace: "الشراقة", address: "حي الزيتون", phone: "0660123456", role: "مشرف تربية", subject: "إدارة", ccp: "0123456-78", nin: "" },
+            { id: "1986011", surname: "غيلان", name: "ياسين", birthDate: "1986-10-19", birthPlace: "سطاوالي", address: "حي الورود", phone: "0551234567", role: "أستاذ تعليم متوسط", subject: "اللغة الفرنسية", ccp: "1122334-45", nin: "" },
+            { id: "1995012", surname: "رحماني", name: "أسماء", birthDate: "1995-05-25", birthPlace: "عين البنيان", address: "حي الشاطئ", phone: "0772345678", role: "أستاذ تعليم متوسط", subject: "علوم الطبيعة والحياة", ccp: "2233445-56", nin: "195052512345678905" }
+        ];
+
+        let currentPage = 1;
+        const pageSize = 10;
+        let filteredUsers = [...usersData];
+
+        // NIN page state
+        let ninCurrentPage = 1;
+        const ninPageSize = 10;
+        let filteredNINUsers = [...usersData];
+        let currentNINUserId = null;
+
+        // Trigger transition action with exactly 1-second delay
+        function triggerAction(targetView, infoTitleText = '') {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                if (targetView === 'info') {
+                    document.getElementById('infoTitle').textContent = infoTitleText;
+                    navigateTo('info');
+                } else {
+                    navigateTo(targetView);
+                }
+            }, 1000); // Exactly 1 second delay
+        }
+
+        // Navigation between views
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view-page').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('view-' + viewId);
+            if (target) {
+                target.classList.remove('hidden');
+            }
+
+            if (viewId === 'users') {
+                renderUsersTable();
+            } else if (viewId === 'nin') {
+                filteredNINUsers = [...usersData];
+                ninCurrentPage = 1;
+                renderNINTable();
+            }
+        }
+
+        // Render Users Table with Pagination
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            const total = filteredUsers.length;
+            const totalPages = Math.ceil(total / pageSize) || 1;
+            
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, total);
+            const pageUsers = filteredUsers.slice(startIndex, endIndex);
+
+            if (pageUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center p-4 text-slate-500">لا توجد نتائج مطابقة</td></tr>`;
+            } else {
+                pageUsers.forEach(u => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="p-2 border border-slate-200 font-mono font-bold text-edu-blue">${u.id}</td>
+                        <td class="p-2 border border-slate-200 font-semibold">${u.surname}</td>
+                        <td class="p-2 border border-slate-200">${u.name}</td>
+                        <td class="p-2 border border-slate-200 font-mono">${u.birthDate}</td>
+                        <td class="p-2 border border-slate-200">${u.birthPlace}</td>
+                        <td class="p-2 border border-slate-200">${u.address}</td>
+                        <td class="p-2 border border-slate-200 font-mono">${u.phone}</td>
+                        <td class="p-2 border border-slate-200">${u.role}</td>
+                        <td class="p-2 border border-slate-200">${u.subject}</td>
+                        <td class="p-2 border border-slate-200 font-mono">${u.ccp}</td>
+                        <td class="p-2 border border-slate-200 text-center">
+                            <button onclick="deleteUser('${u.id}')" class="square-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs" title="إلغاء/حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // Pagination Controls Update
+            document.getElementById('paginationInfo').textContent = `عرض ${total === 0 ? 0 : startIndex + 1} - ${endIndex} من أصل ${total} مستخدم`;
+            document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages}`;
+            document.getElementById('btnPrev').disabled = (currentPage === 1);
+            document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
+        }
+
+        // Search & Filter
+        function filterUsers() {
+            const role = document.getElementById('filterRole').value;
+            const subject = document.getElementById('filterSubject').value;
+            const search = document.getElementById('filterSearch').value.trim().toLowerCase();
+
+            filteredUsers = usersData.filter(u => {
+                const matchRole = !role || u.role === role;
+                const matchSubject = !subject || u.subject === subject;
+                const matchSearch = !search || 
+                    u.name.toLowerCase().includes(search) || 
+                    u.surname.toLowerCase().includes(search) || 
+                    u.id.includes(search);
+                return matchRole && matchSubject && matchSearch;
+            });
+
+            currentPage = 1;
+            renderUsersTable();
+        }
+
+        function nextPage() {
+            currentPage++;
+            renderUsersTable();
+        }
+
+        function prevPage() {
+            currentPage--;
+            renderUsersTable();
+        }
+
+        function deleteUser(id) {
+            usersData = usersData.filter(u => u.id !== id);
+            filterUsers();
+            filterNINUsers();
+            showToast("تم إلغاء الموظف بنجاح");
+        }
+
+        // ==================== NIN Table Functions ====================
+        function renderNINTable() {
+            const tbody = document.getElementById('ninTableBody');
+            tbody.innerHTML = '';
+
+            const total = filteredNINUsers.length;
+            const totalPages = Math.ceil(total / ninPageSize) || 1;
+            
+            if (ninCurrentPage > totalPages) ninCurrentPage = totalPages;
+            if (ninCurrentPage < 1) ninCurrentPage = 1;
+
+            const startIndex = (ninCurrentPage - 1) * ninPageSize;
+            const endIndex = Math.min(startIndex + ninPageSize, total);
+            const pageUsers = filteredNINUsers.slice(startIndex, endIndex);
+
+            if (pageUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-slate-500">لا توجد نتائج مطابقة</td></tr>`;
+            } else {
+                pageUsers.forEach(u => {
+                    const ninDisplay = u.nin && u.nin.length === 18 
+                        ? `<span class="font-mono text-emerald-700 font-semibold">${u.nin}</span>` 
+                        : `<span class="text-red-500 text-xs">غير مُحدَّث</span>`;
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="p-2 border border-slate-200 font-mono font-bold text-edu-blue">${u.id}</td>
+                        <td class="p-2 border border-slate-200 font-semibold">${u.surname}</td>
+                        <td class="p-2 border border-slate-200">${u.name}</td>
+                        <td class="p-2 border border-slate-200">${u.role}</td>
+                        <td class="p-2 border border-slate-200">${u.subject}</td>
+                        <td class="p-2 border border-slate-200">${ninDisplay}</td>
+                        <td class="p-2 border border-slate-200 text-center">
+                            <button onclick="openNINModal('${u.id}')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 mx-auto" title="تحيين رقم التعريف">
+                                <i class="fa-solid fa-pen-to-square"></i> تحيين رقم التعريف
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('ninPaginationInfo').textContent = `عرض ${total === 0 ? 0 : startIndex + 1} - ${endIndex} من أصل ${total} مستخدم`;
+            document.getElementById('ninPageIndicator').textContent = `${ninCurrentPage} / ${totalPages}`;
+            document.getElementById('ninBtnPrev').disabled = (ninCurrentPage === 1);
+            document.getElementById('ninBtnNext').disabled = (ninCurrentPage === totalPages || totalPages === 0);
+        }
+
+        function filterNINUsers() {
+            const search = document.getElementById('ninFilterSearch').value.trim().toLowerCase();
+            const status = document.getElementById('ninFilterStatus').value;
+
+            filteredNINUsers = usersData.filter(u => {
+                const matchSearch = !search || 
+                    u.name.toLowerCase().includes(search) || 
+                    u.surname.toLowerCase().includes(search) || 
+                    u.id.includes(search);
+                
+                const hasNin = u.nin && u.nin.length === 18;
+                const matchStatus = !status || 
+                    (status === 'updated' && hasNin) || 
+                    (status === 'empty' && !hasNin);
+                
+                return matchSearch && matchStatus;
+            });
+
+            ninCurrentPage = 1;
+            renderNINTable();
+        }
+
+        function ninNextPage() {
+            ninCurrentPage++;
+            renderNINTable();
+        }
+
+        function ninPrevPage() {
+            ninCurrentPage--;
+            renderNINTable();
+        }
+
+        // ==================== NIN Modal Functions ====================
+        function openNINModal(userId) {
+            const user = usersData.find(u => u.id === userId);
+            if (!user) return;
+
+            currentNINUserId = userId;
+            document.getElementById('modalUserName').textContent = `${user.surname} ${user.name}`;
+            document.getElementById('modalUserRole').textContent = `${user.role} - ${user.subject}`;
+            document.getElementById('modalNinInput').value = user.nin || '';
+            
+            document.getElementById('ninModalOverlay').classList.remove('hidden');
+        }
+
+        function closeNINModal() {
+            document.getElementById('ninModalOverlay').classList.add('hidden');
+            currentNINUserId = null;
+            document.getElementById('modalNinInput').value = '';
+        }
+
+        function saveNINFromModal(e) {
+            e.preventDefault();
+            const nin = document.getElementById('modalNinInput').value.trim();
+
+            if (!/^\d{18}$/.test(nin)) {
+                showToast("رقم التعريف الوطني يجب أن يكون 18 رقماً بالضبط");
+                return;
+            }
+
+            const userIndex = usersData.findIndex(u => u.id === currentNINUserId);
+            if (userIndex !== -1) {
+                usersData[userIndex].nin = nin;
+            }
+
+            closeNINModal();
+            filterNINUsers();
+            showToast(`تم تحيين رقم التعريف الوطني (${nin}) بنجاح`);
+        }
+
+        function openAddStrikeModal() {
+            showToast("خاصية تسجيل الإضراب متاحة لمسؤول المؤسسة");
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toastMessage');
+            document.getElementById('toastText').textContent = text;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Close modal on overlay click
+        document.getElementById('ninModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeNINModal();
+            }
+        });
+
+        // Initialize on Load
+        window.onload = function() {
+            navigateTo('home');
+        };
+    </script>
+</body>
+</html>
