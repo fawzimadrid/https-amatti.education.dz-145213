@@ -1,11 +1,16 @@
+
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الأرضية الرقمية لوزارة التربية الوطنية : فضاء المؤسسة</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <script>
@@ -33,6 +38,8 @@
             background-color: #f8fafc;
             user-select: none;
         }
+
+        /* Border box square styles */
         .square-card {
             border-radius: 0px !important;
             border: 1px solid #cbd5e1;
@@ -41,6 +48,8 @@
         .square-btn {
             border-radius: 0px !important;
         }
+
+        /* 3-shake keyframe animation */
         @keyframes tripleShake {
             0% { transform: translateX(0); }
             10% { transform: translateX(-6px) rotate(-1deg); }
@@ -51,16 +60,30 @@
             60% { transform: translateX(4px) rotate(0deg); }
             70%, 100% { transform: translateX(0); }
         }
+
         .animate-shake-thrice {
             animation: tripleShake 1.2s ease-in-out 1;
         }
+
+        /* Loading Overlay */
         #loadingOverlay {
             backdrop-filter: blur(3px);
             background-color: rgba(15, 23, 42, 0.6);
         }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #0066b2; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0066b2;
+        }
+
+        /* Animated dots circle for الدخول المدرسي */
         .dots-circle {
             position: relative;
             width: 36px;
@@ -86,11 +109,14 @@
         .dots-circle span:nth-child(6) { animation-delay: -1.25s; }
         .dots-circle span:nth-child(7) { animation-delay: -1.5s; }
         .dots-circle span:nth-child(8) { animation-delay: -1.75s; }
+
         @keyframes orbit {
             0%   { transform: rotate(0deg) translateX(14px) rotate(0deg); opacity: 1; }
             50%  { opacity: 0.3; }
             100% { transform: rotate(360deg) translateX(14px) rotate(-360deg); opacity: 1; }
         }
+
+        /* Expanded clean modal styles - No blue borders */
         .modal-clean-overlay {
             backdrop-filter: blur(2px);
             background-color: rgba(15, 23, 42, 0.55);
@@ -100,6 +126,8 @@
             background: #ffffff;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
+
+        /* Unified Tab borders */
         .joined-tabs button {
             border: 1px solid #cbd5e1;
             border-left: none;
@@ -113,19 +141,15 @@
             color: #ffffff;
             font-weight: bold;
         }
-        .disabled-card {
-            opacity: 0.55;
-            filter: grayscale(0.7);
-            pointer-events: none;
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-100 text-slate-800">
 
-    <!-- Header -->
+    <!-- 1. Header Section -->
     <header class="bg-edu-blue text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center text-sm md:text-base font-semibold">
             <div class="flex items-center space-x-3 space-x-reverse">
+                <!-- Ministry Logo -->
                 <img src="https://www.education.gov.dz/wp-content/uploads/2023/07/mmmmmm.png" 
                      alt="شعار وزارة التربية الوطنية" 
                      class="h-12 w-auto object-contain bg-white/10 p-1 border border-white/20"
@@ -143,25 +167,30 @@
         </div>
     </header>
 
+    <!-- Main Outer White Window Container -->
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
         <div class="bg-white border border-slate-300 shadow-sm p-4 md:p-6 mb-6">
             
+            <!-- Center Title in White Section -->
             <div class="text-center py-3 border-b border-slate-200 mb-6 flex flex-col items-center justify-center">
                 <h1 class="text-xl md:text-2xl font-extrabold text-edu-blue tracking-wide">
                     الأرضية الرقمية لوزارة التربية الوطنية : فضاء المؤسسة
                 </h1>
             </div>
 
-            <!-- Top Buttons -->
+            <!-- Top Action Navigation Buttons (Original Buttons preserved + 2 New Top Buttons) -->
             <div class="flex flex-wrap justify-end items-center gap-2 mb-6">
+                <!-- New Top Button: تسيير الهياكل -->
                 <button onclick="openStructuresModal()" class="square-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-building-circle-check"></i>
                     تسيير الهياكل
                 </button>
+                <!-- New Top Button: فضاء أولياء التلاميذ -->
                 <button onclick="navigateTo('parents')" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-users-rectangle"></i>
                     فضاء أولياء التلاميذ
                 </button>
+                <!-- Existing Navigation Buttons -->
                 <button onclick="navigateTo('home')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-5 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-house"></i>
                     الصفحة الرئيسية
@@ -176,16 +205,18 @@
                 </button>
             </div>
 
-            <!-- HOME VIEW -->
+            <!-- 2. Home Page View (Dashboard) -->
             <div id="view-home" class="view-page">
+                <!-- Faded Red Window -->
                 <div class="bg-red-50 border border-red-200 p-4 mb-6 square-card">
                     <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
+                        <!-- الخريطة التربوية Button -->
                         <button onclick="openEducationalMapModal()" class="square-btn bg-red-100 hover:bg-red-200 text-red-900 px-5 py-2.5 text-sm font-bold shadow-sm transition flex items-center gap-2 border-2 border-green-500">
                             <i class="fa-solid fa-map-location-dot text-green-600"></i>
                             <span class="text-slate-400 font-normal">|</span>
                             الخريطة التربوية
                         </button>
-                        <!-- تم التصحيح: التفويج الآلي -->
+                        <!-- التفويج الآلي Button -->
                         <button onclick="triggerAction('info', 'التفويج الآلي')" class="square-btn bg-red-100 hover:bg-red-200 text-red-900 px-5 py-2.5 text-sm font-bold shadow-sm transition flex items-center gap-2 border-2 border-red-500">
                             <i class="fa-solid fa-robot"></i>
                             التفويج الآلي
@@ -193,9 +224,11 @@
                     </div>
                 </div>
 
+                <!-- Inner Faded Gray Window holding original cards without border modifications -->
                 <div class="bg-slate-100 p-4 md:p-6 border border-slate-200">
                     <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 animate-shake-thrice">
                         
+                        <!-- Card 1: ملفات المستخدمين -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">ملفات المستخدمين</h3>
@@ -210,6 +243,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 2: تحيين معلومات الموظفين -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">تحيين معلومات الموظفين</h3>
@@ -224,6 +258,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 3: تحيين الرقم التعريف الوطني -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">التعريف الوطني<br><span class="text-xs text-slate-500 font-normal">تحيين رقم</span></h3>
@@ -238,6 +273,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 4: محاضر التنصيب الدخول و الخروج -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">محاضر التنصيب<br><span class="text-xs text-slate-500 font-normal">الدخول و الخروج</span></h3>
@@ -252,6 +288,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 5: عملية الإدماج -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">عملية الإدماج</h3>
@@ -266,6 +303,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 6: غيابات المستخدمين (مفعلة) -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">غيابات المستخدمين</h3>
@@ -280,6 +318,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 7: متابعة الإضرابات -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">متابعة الإضرابات</h3>
@@ -294,6 +333,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 8: الخدمات الاجتماعية -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">الخدمات الاجتماعية</h3>
@@ -308,6 +348,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 9: منحة المردودية وتحسين الأداء -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">منحة المردودية<br><span class="text-xs text-slate-500 font-normal">وتحسين الأداء</span></h3>
@@ -322,6 +363,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 10: الانتماء النقابي -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">الانتماء النقابي</h3>
@@ -336,6 +378,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 11: التسجيل على قوائم التأهيل -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">التسجيل على<br><span class="text-xs text-slate-500 font-normal">قوائم التأهيل</span></h3>
@@ -350,6 +393,7 @@
                             </div>
                         </div>
 
+                        <!-- Card 12: الامتحانات المهنية -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">الامتحانات المهنية</h3>
@@ -368,13 +412,15 @@
                 </div>
             </div>
 
-            <!-- USERS VIEW -->
+            <!-- 3. Users File View (ملفات المستخدمين) -->
             <div id="view-users" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
+                    <!-- Title Inner Window -->
                     <div class="bg-slate-50 border border-slate-200 p-3 mb-6 flex flex-wrap justify-between items-center gap-2">
                         <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
                             <i class="fa-solid fa-folder-open"></i> ملفات المستخدمين
                         </h2>
+                        <!-- New Import Staff Data Button -->
                         <div class="flex items-center gap-2">
                             <input type="file" id="staffExcelInput" accept=".csv, .xlsx, .xls" class="hidden" onchange="importStaffData(event)">
                             <button onclick="document.getElementById('staffExcelInput').click()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold transition flex items-center gap-2 shadow-sm">
@@ -383,6 +429,7 @@
                         </div>
                     </div>
 
+                    <!-- Filter / Select Container inside Light Faded Red Container -->
                     <div class="bg-red-50 border border-red-200 p-4 mb-6 square-card">
                         <h4 class="text-xs font-bold text-red-800 mb-3 uppercase tracking-wider flex items-center gap-1">
                             <i class="fa-solid fa-filter"></i> تصفية وقوائم الاختيار
@@ -416,6 +463,7 @@
                         </div>
                     </div>
 
+                    <!-- Inner White Window for Table -->
                     <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
                         <table class="w-full text-right text-xs border-collapse">
                             <thead>
@@ -433,17 +481,22 @@
                                     <th class="p-2 border border-slate-200 font-extrabold text-center">عمليات</th>
                                 </tr>
                             </thead>
-                            <tbody id="usersTableBody"></tbody>
+                            <tbody id="usersTableBody">
+                                <!-- Dynamic User Rows -->
+                            </tbody>
                         </table>
                     </div>
 
+                    <!-- Pagination Controls -->
                     <div class="flex flex-col sm:flex-row justify-between items-center mt-4 pt-3 border-t border-slate-200 gap-3">
-                        <span id="paginationInfo" class="text-xs font-semibold text-slate-600">عرض 0 - 0 من أصل 0 مستخدم</span>
+                        <span id="paginationInfo" class="text-xs font-semibold text-slate-600">
+                            عرض 1 - 10 من أصل 25 مستخدم
+                        </span>
                         <div class="flex items-center space-x-2 space-x-reverse">
                             <button id="btnPrev" onclick="prevPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
                                 <i class="fa-solid fa-chevron-right ml-1"></i> السابق
                             </button>
-                            <span id="pageIndicator" class="text-xs font-bold bg-edu-blue text-white px-3 py-1.5">1 / 1</span>
+                            <span id="pageIndicator" class="text-xs font-bold bg-edu-blue text-white px-3 py-1.5">1 / 3</span>
                             <button id="btnNext" onclick="nextPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
                                 التالي <i class="fa-solid fa-chevron-left mr-1"></i>
                             </button>
@@ -452,10 +505,11 @@
                 </div>
             </div>
 
-            <!-- SCHOOLING VIEW -->
+            <!-- 6. التمدرس View - صفحة جديدة بأيقونات مخصصة -->
             <div id="view-schooling" class="view-page hidden">
                 <div class="bg-slate-100 p-4 md:p-6 border border-slate-200">
                     
+                    <!-- Notification Teal/Emerald Header Frame (بدون حدود ملونة) -->
                     <div class="bg-teal-700 text-white p-4 mb-6 shadow-sm flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-bullhorn text-yellow-300 text-xl"></i>
@@ -475,7 +529,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
                         
-                        <!-- الدخول المدرسي -->
+                        <!-- الدخول المدرسي - النقاط المتحركة في دائرة بيضاء بوضوح -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">الدخول المدرسي</h3>
@@ -493,7 +547,7 @@
                             </div>
                         </div>
 
-                        <!-- إسناد المواد -->
+                        <!-- إسناد المواد (جديدة) -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">إسناد المواد</h3>
@@ -508,22 +562,22 @@
                             </div>
                         </div>
 
-                        <!-- حجز النقاط - معطّلة رمادية -->
-                        <div class="square-card bg-slate-100 p-4 flex flex-col justify-between h-44 shadow-sm disabled-card">
+                        <!-- حجز النقاط (تم تغيير العنوان من النتائج المدرسية) -->
+                        <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
-                                <h3 class="font-bold text-slate-500 text-base">حجز النقاط</h3>
-                                <div class="w-12 h-12 rounded-full bg-slate-400 text-white flex items-center justify-center text-xl shadow">
+                                <h3 class="font-bold text-slate-800 text-base">حجز النقاط</h3>
+                                <div class="w-12 h-12 rounded-full bg-edu-blue text-white flex items-center justify-center text-xl shadow">
                                     <i class="fa-solid fa-pen-ruler"></i>
                                 </div>
                             </div>
                             <div class="mt-auto">
-                                <button disabled class="square-btn w-auto px-6 py-1.5 bg-slate-400 text-white font-bold text-xs cursor-not-allowed flex items-center gap-1">
-                                    <i class="fa-solid fa-lock"></i> معطّل حالياً
+                                <button onclick="triggerAction('grade-booking')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-right-to-bracket"></i> الدخول
                                 </button>
                             </div>
                         </div>
 
-                        <!-- حالة أول أكتوبر -->
+                        <!-- حالة أول أكتوبر (مفعّلة وتفتح صفحة جديدة) -->
                         <div class="square-card bg-white p-4 flex flex-col justify-between h-44 shadow-sm hover:shadow-md">
                             <div class="flex justify-between items-start">
                                 <h3 class="font-bold text-slate-800 text-base">حالة أول أكتوبر</h3>
@@ -572,34 +626,27 @@
                 </div>
             </div>
 
-            <!-- ENTRY VIEW (الدخول المدرسي) - لا بيانات وهمية -->
+            <!-- 7. الدخول المدرسي - صفحة كاملة برقم التعريف واللقب والاسم إلخ... -->
             <div id="view-entry" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
                     <div class="bg-slate-50 border border-slate-200 p-3 mb-6 flex flex-wrap justify-between items-center gap-2">
                         <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
                             <i class="fa-solid fa-door-open"></i> الدخول المدرسي - قائمة التلاميذ
                         </h2>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <!-- زر التفويج الآلي -->
-                            <button onclick="autoGroupStudents()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-bold transition flex items-center gap-1">
-                                <i class="fa-solid fa-robot"></i> التفويج الآلي
-                            </button>
-                            <!-- زر الإدراج في الفوج التربوي - معطّل -->
-                            <button disabled class="square-btn bg-slate-300 text-slate-500 px-3 py-2 text-xs font-bold cursor-not-allowed opacity-60 flex items-center gap-1" title="معطّل حالياً">
-                                <i class="fa-solid fa-users"></i> الإدراج في الفوج التربوي
-                            </button>
-                            <!-- إضافة تلميذ - معطّل -->
-                            <button disabled class="square-btn bg-slate-300 text-slate-500 px-3 py-2 text-xs font-bold cursor-not-allowed opacity-60 flex items-center gap-1" title="معطّل حالياً">
+                        <div class="flex items-center gap-2">
+                            <!-- Disabled Add New Student Button -->
+                            <button disabled class="square-btn bg-slate-300 text-slate-500 px-3 py-2 text-xs font-bold cursor-not-allowed opacity-60 flex items-center gap-1" title="هذا الزر معطل حالياً">
                                 <i class="fa-solid fa-user-plus"></i> إضافة تلميذ جديد
                             </button>
-                            <!-- استيراد -->
+                            <!-- Import Excel Button -->
                             <input type="file" id="studentsExcelInput" accept=".csv, .xlsx, .xls" class="hidden" onchange="importStudentsData(event)">
                             <button onclick="document.getElementById('studentsExcelInput').click()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold transition flex items-center gap-1">
-                                <i class="fa-solid fa-file-excel"></i> استيراد بيانات التلاميذ (Excel)
+                                <i class="fa-solid fa-file-excel"></i> استيراد بيانات التلاميذ إكسبرت (Excel)
                             </button>
                         </div>
                     </div>
 
+                    <!-- Students Table Container -->
                     <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
                         <table class="w-full text-right text-xs border-collapse">
                             <thead>
@@ -618,26 +665,28 @@
                                 </tr>
                             </thead>
                             <tbody id="studentsTableBody">
-                                <!-- فارغ تماماً - لا بيانات وهمية -->
+                                <!-- Dynamic Student Rows -->
                             </tbody>
                         </table>
                     </div>
 
+                    <!-- Pagination Controls Side-by-side -->
                     <div class="flex flex-col sm:flex-row justify-between items-center mt-4 pt-3 border-t border-slate-200 gap-3">
                         <span id="studentsPaginationInfo" class="text-xs font-semibold text-slate-600">
-                            عرض 0 - 0 من أصل 0 تلميذ
+                            عرض 1 - 10 من أصل 20 تلميذ
                         </span>
                         <div class="flex items-center space-x-2 space-x-reverse">
                             <button id="btnPrevStudents" onclick="prevStudentsPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
                                 <i class="fa-solid fa-chevron-right ml-1"></i> السابق
                             </button>
-                            <span id="studentsPageIndicator" class="text-xs font-bold bg-edu-blue text-white px-3 py-1.5">1 / 1</span>
+                            <span id="studentsPageIndicator" class="text-xs font-bold bg-edu-blue text-white px-3 py-1.5">1 / 2</span>
                             <button id="btnNextStudents" onclick="nextStudentsPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
                                 التالي <i class="fa-solid fa-chevron-left mr-1"></i>
                             </button>
                         </div>
                     </div>
 
+                    <!-- Bottom Action Buttons bar with Save before Cancel -->
                     <div class="mt-6 pt-4 border-t border-slate-200 flex justify-end gap-3">
                         <button onclick="saveEntryData()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-floppy-disk"></i> حفظ
@@ -649,7 +698,7 @@
                 </div>
             </div>
 
-            <!-- OCTOBER STATUS -->
+            <!-- 8. حالة أول أكتوبر View - ترتيب من رابعة متوسط إلى أولى متوسط -->
             <div id="view-october-status" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
                     <div class="bg-amber-50 border border-amber-200 p-3 mb-6 flex justify-between items-center">
@@ -673,7 +722,9 @@
                                     <th class="p-2 border border-slate-200 font-extrabold">الصفة</th>
                                 </tr>
                             </thead>
-                            <tbody id="octoberTableBody"></tbody>
+                            <tbody id="octoberTableBody">
+                                <!-- Populated dynamically sorted 4AM -> 1AM -->
+                            </tbody>
                         </table>
                     </div>
 
@@ -688,7 +739,7 @@
                 </div>
             </div>
 
-            <!-- ASSIGN SUBJECTS -->
+            <!-- 9. إسناد المواد View -->
             <div id="view-assign-subjects" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
                     <div class="bg-slate-50 border border-slate-200 p-3 mb-6">
@@ -708,7 +759,9 @@
                                     <th class="p-3 border text-center">الحالة</th>
                                 </tr>
                             </thead>
-                            <tbody id="assignTableBody"></tbody>
+                            <tbody id="assignTableBody">
+                                <!-- Filled by JS -->
+                            </tbody>
                         </table>
                     </div>
 
@@ -723,7 +776,7 @@
                 </div>
             </div>
 
-            <!-- GRADE BOOKING (معطّل من الواجهة الرئيسية) -->
+            <!-- 10. حجز النقاط View (مع التبويبات المتلاصقة بالخلفية البيضاء) -->
             <div id="view-grade-booking" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
                     <div class="bg-slate-50 border border-slate-200 p-3 mb-4">
@@ -732,16 +785,21 @@
                         </h2>
                     </div>
 
+                    <!-- Joined Tabs Container with white background -->
                     <div class="flex flex-wrap joined-tabs mb-6">
                         <button onclick="switchGradeTab('exemptions')" id="tab-exemptions" class="px-5 py-2.5 text-xs font-bold transition">الإعفاءات</button>
                         <button onclick="switchGradeTab('booking')" id="tab-booking" class="px-5 py-2.5 text-xs font-bold transition active-tab">حجز النقاط</button>
                         <button onclick="switchGradeTab('councils')" id="tab-councils" class="px-5 py-2.5 text-xs font-bold transition">مجالس الأقسام</button>
                         <button onclick="switchGradeTab('final-decisions')" id="tab-final-decisions" class="px-5 py-2.5 text-xs font-bold transition">القرار النهائي لمجالس الأقسام</button>
                         <button onclick="switchGradeTab('grade-sheets')" id="tab-grade-sheets" class="px-5 py-2.5 text-xs font-bold transition">كشوف النقاط</button>
+                        <!-- حالة أول أكتوبر معطلة داخل التبويبات -->
                         <button disabled class="px-5 py-2.5 text-xs font-bold text-slate-400 cursor-not-allowed opacity-50 bg-slate-100" title="معطلة داخل هذا التبويب">حالة أول أكتوبر (معطلة)</button>
                     </div>
 
-                    <div id="gradeTabContent" class="bg-slate-50 border border-slate-200 p-6 min-h-[220px]"></div>
+                    <!-- Tab Content Display Area -->
+                    <div id="gradeTabContent" class="bg-slate-50 border border-slate-200 p-6 min-h-[220px]">
+                        <!-- Dynamic Content Inserted Here -->
+                    </div>
 
                     <div class="mt-6 pt-4 border-t border-slate-200 flex justify-end gap-3">
                         <button onclick="showToast('تم حفظ النقاط والبيانات بنجاح')" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
@@ -754,7 +812,7 @@
                 </div>
             </div>
 
-            <!-- PARENTS VIEW -->
+            <!-- 11. فضاء أولياء التلاميذ View -->
             <div id="view-parents" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
                     <div class="bg-teal-50 border border-teal-200 p-3 mb-6 flex justify-between items-center">
@@ -776,7 +834,9 @@
                                     <th class="p-2.5 border text-center">العمليات والتفعيل</th>
                                 </tr>
                             </thead>
-                            <tbody id="parentsTableBody"></tbody>
+                            <tbody id="parentsTableBody">
+                                <!-- Dynamic Parents Data -->
+                            </tbody>
                         </table>
                     </div>
 
@@ -791,7 +851,7 @@
                 </div>
             </div>
 
-            <!-- ABSENCES VIEW -->
+            <!-- 12. غيابات المستخدمين View -->
             <div id="view-absences" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
                     <div class="bg-slate-50 border border-slate-200 p-3 mb-6">
@@ -803,7 +863,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-slate-50 p-4 border border-slate-200">
                         <div>
                             <label class="block text-xs font-bold mb-1">اختر الموظف</label>
-                            <select id="absentUserSelect" class="w-full text-xs p-2 border bg-white"></select>
+                            <select id="absentUserSelect" class="w-full text-xs p-2 border bg-white">
+                                <!-- Loaded dynamically -->
+                            </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold mb-1">تاريخ الغياب</label>
@@ -838,7 +900,7 @@
                                     <td class="p-2.5 border">أستاذ تعليم متوسط</td>
                                     <td class="p-2.5 border font-mono">2026-09-28</td>
                                     <td class="p-2.5 border text-emerald-700 font-semibold">عطلة مرضية (مبرر)</td>
-                                    <td class="p-2.5 border text-center"><button class="text-red-600 hover:underline" onclick="this.closest('tr').remove()">إلغاء</button></td>
+                                    <td class="p-2.5 border text-center"><button class="text-red-600 hover:underline">إلغاء</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -855,7 +917,7 @@
                 </div>
             </div>
 
-            <!-- NIN VIEW -->
+            <!-- 4. Update NIN View (تحيين رقم التعريف الوطني) -->
             <div id="view-nin" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
                     <div class="bg-slate-50 border border-slate-200 p-3 mb-6">
@@ -876,7 +938,9 @@
                                     <th class="p-2 border border-slate-200 font-extrabold text-center">عمليات</th>
                                 </tr>
                             </thead>
-                            <tbody id="ninTableBody"></tbody>
+                            <tbody id="ninTableBody">
+                                <!-- Dynamic rows -->
+                            </tbody>
                         </table>
                     </div>
 
@@ -888,7 +952,7 @@
                 </div>
             </div>
 
-            <!-- STRIKES VIEW - مع نافذة التسجيل والحذف -->
+            <!-- 5. Strikes View (متابعة الإضرابات) -->
             <div id="view-strikes" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
                     <div class="bg-slate-50 border border-slate-200 p-3 mb-6 flex justify-between items-center">
@@ -910,22 +974,16 @@
                                     <th class="p-3 border">تاريخ النهاية</th>
                                     <th class="p-3 border">نسبة الاستجابة</th>
                                     <th class="p-3 border">الحالة</th>
-                                    <th class="p-3 border text-center">عمليات</th>
                                 </tr>
                             </thead>
                             <tbody id="strikesTableBody">
-                                <tr class="border-b hover:bg-slate-50" data-id="strike-1">
+                                <tr class="border-b hover:bg-slate-50">
                                     <td class="p-3 border font-mono">2026-02-10</td>
                                     <td class="p-3 border font-bold">النقابة الوطنية للتربية</td>
                                     <td class="p-3 border">2026-02-15</td>
                                     <td class="p-3 border">2026-02-16</td>
                                     <td class="p-3 border font-bold text-blue-600">4.2 %</td>
                                     <td class="p-3 border"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs">مغلق</span></td>
-                                    <td class="p-3 border text-center">
-                                        <button onclick="confirmDeleteStrike('strike-1')" class="square-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -933,7 +991,7 @@
                 </div>
             </div>
 
-            <!-- INFO VIEW -->
+            <!-- Generic Info View for empty links -->
             <div id="view-info" class="view-page hidden text-center py-12">
                 <i class="fa-solid fa-circle-info text-5xl text-edu-blue mb-4"></i>
                 <h3 id="infoTitle" class="text-xl font-bold text-slate-800 mb-2"></h3>
@@ -944,7 +1002,7 @@
         </div>
     </main>
 
-    <!-- Loading Overlay -->
+    <!-- Mandatory "Please Wait 1 Second" Screen Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center text-white">
         <div class="bg-slate-900 border border-slate-700 p-6 square-card flex flex-col items-center gap-4 shadow-2xl">
             <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-400"></i>
@@ -952,12 +1010,12 @@
         </div>
     </div>
 
-    <!-- Toast -->
+    <!-- Notification / Toast Message -->
     <div id="toastMessage" class="fixed bottom-5 left-5 z-50 hidden bg-emerald-600 text-white px-5 py-3 square-card shadow-lg font-bold text-xs flex items-center gap-2">
         <i class="fa-solid fa-circle-check"></i> <span id="toastText">تمت العملية بنجاح</span>
     </div>
 
-    <!-- Educational Map Modal -->
+    <!-- Clean Expanded Modal 1: الخريطة التربوية (بدون حدود زرقاء موسعة جدا) -->
     <div id="educationalMapModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4">
         <div class="modal-clean-box p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div class="bg-slate-100 p-3 mb-4 flex justify-between items-center">
@@ -966,6 +1024,8 @@
                 </h3>
                 <button onclick="closeEducationalMapModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
             </div>
+
+            <!-- White Inner Container for Educational Map Table -->
             <div class="bg-white p-4 border border-slate-200 mb-6">
                 <table class="w-full text-right text-xs border-collapse">
                     <thead>
@@ -979,31 +1039,40 @@
                     <tbody>
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-3 border font-bold">السنة الأولى متوسط</td>
-                            <td class="p-3 border"><input type="number" id="group-1am" value="5" min="1" class="w-24 p-1.5 border border-slate-300 font-bold bg-white"></td>
+                            <td class="p-3 border">
+                                <input type="number" id="group-1am" value="5" min="1" class="w-24 p-1.5 border border-slate-300 font-bold bg-white">
+                            </td>
                             <td class="p-3 border text-slate-600">185 تلميذ</td>
                             <td class="p-3 border text-slate-500">مكتمل التأطير التربوي</td>
                         </tr>
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-3 border font-bold">السنة الثانية متوسط</td>
-                            <td class="p-3 border"><input type="number" id="group-2am" value="4" min="1" class="w-24 p-1.5 border border-slate-300 font-bold bg-white"></td>
+                            <td class="p-3 border">
+                                <input type="number" id="group-2am" value="4" min="1" class="w-24 p-1.5 border border-slate-300 font-bold bg-white">
+                            </td>
                             <td class="p-3 border text-slate-600">148 تلميذ</td>
                             <td class="p-3 border text-slate-500">مكتمل التأطير التربوي</td>
                         </tr>
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-3 border font-bold">السنة الثالثة متوسط</td>
-                            <td class="p-3 border"><input type="number" id="group-3am" value="4" min="1" class="w-24 p-1.5 border border-slate-300 font-bold bg-white"></td>
+                            <td class="p-3 border">
+                                <input type="number" id="group-3am" value="4" min="1" class="w-24 p-1.5 border border-slate-300 font-bold bg-white">
+                            </td>
                             <td class="p-3 border text-slate-600">142 تلميذ</td>
                             <td class="p-3 border text-slate-500">حاجة لأستاذ رياضة إضافة</td>
                         </tr>
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-3 border font-bold">السنة الرابعة متوسط</td>
-                            <td class="p-3 border"><input type="number" id="group-4am" value="4" min="1" class="w-24 p-1.5 border border-slate-300 font-bold bg-white"></td>
+                            <td class="p-3 border">
+                                <input type="number" id="group-4am" value="4" min="1" class="w-24 p-1.5 border border-slate-300 font-bold bg-white">
+                            </td>
                             <td class="p-3 border text-slate-600">136 تلميذ</td>
                             <td class="p-3 border text-slate-500">مقبلين على شهادة BEM</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
             <div class="flex justify-end gap-3 pt-3 border-t">
                 <button onclick="saveEducationalMap()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
                     <i class="fa-solid fa-floppy-disk"></i> حفظ نهائي في المنصة
@@ -1015,7 +1084,7 @@
         </div>
     </div>
 
-    <!-- Structures Modal -->
+    <!-- Clean Expanded Modal 2: تسيير الهياكل -->
     <div id="structuresModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4">
         <div class="modal-clean-box p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div class="bg-slate-100 p-3 mb-4 flex justify-between items-center">
@@ -1024,6 +1093,7 @@
                 </h3>
                 <button onclick="closeStructuresModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
             </div>
+
             <div class="bg-white p-4 border border-slate-200 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="p-3 border border-slate-200 bg-slate-50">
                     <h4 class="font-bold text-xs text-slate-700 mb-2">القاعات التدريسية والمخابر</h4>
@@ -1042,6 +1112,7 @@
                     </ul>
                 </div>
             </div>
+
             <div class="flex justify-end gap-3 pt-3 border-t">
                 <button onclick="showToast('تم تحديث بيانات الهياكل بنجاح'); closeStructuresModal();" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
                     <i class="fa-solid fa-floppy-disk"></i> حفظ
@@ -1053,7 +1124,7 @@
         </div>
     </div>
 
-    <!-- NIN Modal -->
+    <!-- Modal 3: تحيين رقم التعريف الوطني -->
     <div id="ninModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-4">
         <div class="modal-clean-box p-5 max-w-lg w-full shadow-2xl">
             <div class="bg-slate-50 border border-slate-200 p-3 mb-4">
@@ -1076,147 +1147,69 @@
         </div>
     </div>
 
-    <!-- ===== نافذة تسجيل إشعار إضراب (موسّعة بيضاء) ===== -->
-    <div id="addStrikeModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4">
-        <div class="modal-clean-box p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <!-- Modal 4: تسجيل إشعار إضراب - نافذة بيضاء موسعة -->
+    <div id="strikeModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4">
+        <div class="modal-clean-box p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
             <div class="bg-slate-100 p-3 mb-4 flex justify-between items-center">
                 <h3 class="text-lg font-extrabold text-red-700 flex items-center gap-2">
                     <i class="fa-solid fa-bell"></i> تسجيل إشعار إضراب جديد
                 </h3>
-                <button onclick="closeAddStrikeModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
+                <button onclick="closeStrikeModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
             </div>
-            
-            <!-- نافذة داخلية بيضاء -->
-            <div class="bg-white border border-slate-200 p-5 mb-4">
+
+            <!-- نافذة داخلية بيضاء لبيانات التسجيل -->
+            <div class="bg-white p-5 border border-slate-200 mb-6">
+                <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-200 pb-2">
+                    <i class="fa-solid fa-file-pen text-red-600"></i> بيانات إشعار الإضراب
+                </h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ الإشعار</label>
-                        <input type="date" id="strikeNoticeDate" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        <input type="date" id="strikeNotifyDate" class="w-full text-xs p-2.5 border border-slate-300 square-card bg-white focus:outline-none focus:border-red-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">التنظيم النقابي الداعي</label>
-                        <input type="text" id="strikeUnion" placeholder="مثال: النقابة الوطنية للتربية" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        <select id="strikeUnion" class="w-full text-xs p-2.5 border border-slate-300 square-card bg-white focus:outline-none focus:border-red-500">
+                            <option value="">-- اختر التنظيم النقابي --</option>
+                            <option value="النقابة الوطنية للتربية">النقابة الوطنية للتربية</option>
+                            <option value="الاتحاد الوطني لعمال التربية والتكوين">الاتحاد الوطني لعمال التربية والتكوين</option>
+                            <option value="نقابة أساتذة التعليم المتوسط">نقابة أساتذة التعليم المتوسط</option>
+                            <option value="تنسيق نقابي مشترك">تنسيق نقابي مشترك</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ بداية الإضراب</label>
-                        <input type="date" id="strikeStartDate" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        <input type="date" id="strikeStartDate" class="w-full text-xs p-2.5 border border-slate-300 square-card bg-white focus:outline-none focus:border-red-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ نهاية الإضراب</label>
-                        <input type="date" id="strikeEndDate" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        <input type="date" id="strikeEndDate" class="w-full text-xs p-2.5 border border-slate-300 square-card bg-white focus:outline-none focus:border-red-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">نسبة الاستجابة (%)</label>
-                        <input type="number" id="strikeRate" min="0" max="100" step="0.1" placeholder="0.0" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">نسبة الاستجابة المتوقعة (%)</label>
+                        <input type="number" id="strikeResponseRate" min="0" max="100" step="0.1" placeholder="مثال: 15.5" class="w-full text-xs p-2.5 border border-slate-300 square-card bg-white focus:outline-none focus:border-red-500">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">الحالة</label>
-                        <select id="strikeStatus" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        <select id="strikeStatus" class="w-full text-xs p-2.5 border border-slate-300 square-card bg-white focus:outline-none focus:border-red-500">
+                            <option value="مفتوح">مفتوح</option>
                             <option value="جاري">جاري</option>
                             <option value="مغلق">مغلق</option>
-                            <option value="معلق">معلق</option>
                         </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">ملاحظات إضافية / أسباب الإضراب</label>
+                        <textarea id="strikeNotes" rows="3" placeholder="أدخل أي ملاحظات أو تفاصيل إضافية حول الإشعار..." class="w-full text-xs p-2.5 border border-slate-300 square-card bg-white focus:outline-none focus:border-red-500 resize-none"></textarea>
                     </div>
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-3 border-t">
-                <button onclick="saveNewStrike()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
+                <button onclick="saveStrikeNotification()" class="square-btn bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
                     <i class="fa-solid fa-floppy-disk"></i> حفظ الإشعار
                 </button>
-                <button onclick="closeAddStrikeModal()" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2.5 text-xs font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-xmark"></i> إلغاء
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== نافذة تأكيد حذف الإضراب ===== -->
-    <div id="deleteStrikeConfirmOverlay" class="fixed inset-0 z-[60] hidden modal-clean-overlay flex items-center justify-center p-4">
-        <div class="modal-clean-box p-6 w-full max-w-md">
-            <div class="bg-white border border-slate-200 p-6 text-center">
-                <i class="fa-solid fa-triangle-exclamation text-4xl text-amber-500 mb-4"></i>
-                <h3 class="text-lg font-bold text-slate-800 mb-2">هل أنت متأكد من الحذف؟</h3>
-                <p class="text-xs text-slate-600 mb-6">سيتم حذف إشعار الإضراب نهائياً ولا يمكن التراجع عن هذه العملية.</p>
-                <div class="flex justify-center gap-3">
-                    <button onclick="executeDeleteStrike()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-xs font-bold">
-                        متأكد
-                    </button>
-                    <button onclick="closeDeleteStrikeConfirm()" class="square-btn bg-black hover:bg-slate-800 text-white px-6 py-2.5 text-xs font-bold">
-                        إلغاء
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== نافذة تعديل تلميذ ===== -->
-    <div id="editStudentModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4">
-        <div class="modal-clean-box p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="bg-slate-100 p-3 mb-4 flex justify-between items-center">
-                <h3 class="text-lg font-extrabold text-edu-blue flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square"></i> تعديل معلومات التلميذ
-                </h3>
-                <button onclick="closeEditStudentModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
-            </div>
-            <div class="bg-white border border-slate-200 p-5 mb-4">
-                <input type="hidden" id="editStudentId">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">اللقب</label>
-                        <input type="text" id="editSurname" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">الاسم</label>
-                        <input type="text" id="editName" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">الجنس</label>
-                        <select id="editGender" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                            <option value="ذكر">ذكر</option>
-                            <option value="أنثى">أنثى</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">تاريخ الميلاد</label>
-                        <input type="date" id="editBirthDate" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">مكان الميلاد</label>
-                        <input type="text" id="editBirthPlace" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">العنوان</label>
-                        <input type="text" id="editAddress" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">المستوى</label>
-                        <select id="editLevel" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                            <option value="السنة الأولى متوسط">السنة الأولى متوسط</option>
-                            <option value="السنة الثانية متوسط">السنة الثانية متوسط</option>
-                            <option value="السنة الثالثة متوسط">السنة الثالثة متوسط</option>
-                            <option value="السنة الرابعة متوسط">السنة الرابعة متوسط</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">رقم الفوج</label>
-                        <input type="text" id="editGroup" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">الصفة</label>
-                        <select id="editStatus" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
-                            <option value="متمدرس">متمدرس</option>
-                            <option value="منقطع">منقطع</option>
-                            <option value="محول">محول</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 pt-3 border-t">
-                <button onclick="saveEditedStudent()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات
-                </button>
-                <button onclick="closeEditStudentModal()" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2.5 text-xs font-bold flex items-center gap-2">
+                <button onclick="closeStrikeModal()" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2.5 text-xs font-bold flex items-center gap-2">
                     <i class="fa-solid fa-xmark"></i> إلغاء
                 </button>
             </div>
@@ -1224,7 +1217,7 @@
     </div>
 
     <script>
-        /* بيانات الموظفين (عينة) */
+        /* Sample Data set for users */
         let usersData = [
             { id: "1982001", surname: "بن علي", name: "محمد", birthDate: "1982-04-12", birthPlace: "سطاوالي", address: "حي 500 مسكن", phone: "0661234567", role: "أستاذ تعليم متوسط", subject: "اللغة العربية", ccp: "1234567-89" },
             { id: "1985002", surname: "قاسمي", name: "أحمد", birthDate: "1985-09-20", birthPlace: "زرالدة", address: "وسط المدينة", phone: "0552345678", role: "أستاذ تعليم متوسط", subject: "الرياضيات", ccp: "2345678-90" },
@@ -1240,10 +1233,21 @@
             { id: "1995012", surname: "رحماني", name: "أسماء", birthDate: "1995-05-25", birthPlace: "عين البنيان", address: "حي الشاطئ", phone: "0772345678", role: "أستاذ تعليم متوسط", subject: "علوم الطبيعة والحياة", ccp: "2233445-56" }
         ];
 
-        /* ===== لا بيانات وهمية للتلاميذ - فارغ تماماً ===== */
-        let studentsData = [];
+        /* Students Database for School Entry */
+        let studentsData = [
+            { id: "20110001", surname: "بن زيان", name: "أنيس", gender: "ذكر", birthDate: "2011-03-15", birthPlace: "سطاوالي", address: "حي الشاطئ", level: "السنة الرابعة متوسط", group: "1", status: "متمدرس" },
+            { id: "20110002", surname: "عباسي", name: "منى", gender: "أنثى", birthDate: "2011-08-22", birthPlace: "سطاوالي", address: "حي النصر", level: "السنة الرابعة متوسط", group: "2", status: "متمدرس" },
+            { id: "20120003", surname: "العربي", name: "يوسف", gender: "ذكر", birthDate: "2012-01-10", birthPlace: "زرالدة", address: "حي المجاهدين", level: "السنة الثالثة متوسط", group: "1", status: "متمدرس" },
+            { id: "20120004", surname: "مفتاح", name: "نسرين", gender: "أنثى", birthDate: "2012-11-05", birthPlace: "سطاوالي", address: "حي 500 مسكن", level: "السنة الثالثة متوسط", group: "2", status: "متمدرس" },
+            { id: "20130005", surname: "صالحي", name: "أيمن", gender: "ذكر", birthDate: "2013-05-18", birthPlace: "الشراقة", address: "وسط المدينة", level: "السنة الثانية متوسط", group: "1", status: "متمدرس" },
+            { id: "20130006", surname: "زروقي", name: "سارة", gender: "أنثى", birthDate: "2013-09-30", birthPlace: "سطاوالي", address: "حي السلام", level: "السنة الثانية متوسط", group: "3", status: "متمدرس" },
+            { id: "20140007", surname: "بوجمعة", name: "حمزة", gender: "ذكر", birthDate: "2014-04-12", birthPlace: "عين البنيان", address: "حي الزيتون", level: "السنة الأولى متوسط", group: "1", status: "متمدرس" },
+            { id: "20140008", surname: "قادري", name: "لينا", gender: "أنثى", birthDate: "2014-07-25", birthPlace: "سطاوالي", address: "حي الورود", level: "السنة الأولى متوسط", group: "2", status: "متمدرس" },
+            { id: "20140009", surname: "بن ناصر", name: "أمير", gender: "ذكر", birthDate: "2014-02-14", birthPlace: "زرالدة", address: "حي الأمل", level: "السنة الأولى متوسط", group: "4", status: "متمدرس" },
+            { id: "20110010", surname: "منصوري", name: "إيمان", gender: "أنثى", birthDate: "2011-12-01", birthPlace: "سطاوالي", address: "حي البحر", level: "السنة الرابعة متوسط", group: "3", status: "متمدرس" }
+        ];
 
-        /* أولياء */
+        /* Parents Accounts Data */
         let parentsData = [
             { id: "PAR-901", name: "بن زيان رشيد", student: "بن زيان أنيس", phone: "0661112233", active: true },
             { id: "PAR-902", name: "عباسي فاروق", student: "عباسي منى", phone: "0552223344", active: true },
@@ -1251,21 +1255,17 @@
             { id: "PAR-904", name: "صالحي عبد القادر", student: "صالحي أيمن", phone: "0664445566", active: true }
         ];
 
-        /* إضرابات */
-        let strikesData = [
-            { id: "strike-1", noticeDate: "2026-02-10", union: "النقابة الوطنية للتربية", startDate: "2026-02-15", endDate: "2026-02-16", rate: "4.2", status: "مغلق" }
-        ];
-
         let currentPage = 1;
         let studentsCurrentPage = 1;
         const pageSize = 10;
         let filteredUsers = [...usersData];
         let currentNinUserId = null;
-        let strikeToDeleteId = null;
 
+        // Trigger transition action with exactly 1-second delay
         function triggerAction(targetView, infoTitleText = '') {
             const overlay = document.getElementById('loadingOverlay');
             overlay.classList.remove('hidden');
+
             setTimeout(() => {
                 overlay.classList.add('hidden');
                 if (targetView === 'info') {
@@ -1277,29 +1277,44 @@
             }, 1000);
         }
 
+        // Navigation between views
         function navigateTo(viewId) {
             document.querySelectorAll('.view-page').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById('view-' + viewId);
-            if (target) target.classList.remove('hidden');
+            if (target) {
+                target.classList.remove('hidden');
+            }
 
-            if (viewId === 'users') renderUsersTable();
-            else if (viewId === 'nin') renderNINTable();
-            else if (viewId === 'entry') renderStudentsTable();
-            else if (viewId === 'october-status') renderOctoberStatusTable();
-            else if (viewId === 'assign-subjects') renderAssignSubjectsTable();
-            else if (viewId === 'grade-booking') switchGradeTab('booking');
-            else if (viewId === 'parents') renderParentsTable();
-            else if (viewId === 'absences') renderAbsencesSelect();
-            else if (viewId === 'strikes') renderStrikesTable();
+            if (viewId === 'users') {
+                renderUsersTable();
+            } else if (viewId === 'nin') {
+                renderNINTable();
+            } else if (viewId === 'entry') {
+                renderStudentsTable();
+            } else if (viewId === 'october-status') {
+                renderOctoberStatusTable();
+            } else if (viewId === 'assign-subjects') {
+                renderAssignSubjectsTable();
+            } else if (viewId === 'grade-booking') {
+                switchGradeTab('booking');
+            } else if (viewId === 'parents') {
+                renderParentsTable();
+            } else if (viewId === 'absences') {
+                renderAbsencesSelect();
+            }
         }
 
+        // Render Users Table with Pagination
         function renderUsersTable() {
             const tbody = document.getElementById('usersTableBody');
             tbody.innerHTML = '';
+
             const total = filteredUsers.length;
             const totalPages = Math.ceil(total / pageSize) || 1;
+            
             if (currentPage > totalPages) currentPage = totalPages;
             if (currentPage < 1) currentPage = 1;
+
             const startIndex = (currentPage - 1) * pageSize;
             const endIndex = Math.min(startIndex + pageSize, total);
             const pageUsers = filteredUsers.slice(startIndex, endIndex);
@@ -1325,128 +1340,98 @@
                             <button onclick="deleteUser('${u.id}')" class="square-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs" title="إلغاء/حذف">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
-                        </td>`;
+                        </td>
+                    `;
                     tbody.appendChild(tr);
                 });
             }
+
             document.getElementById('paginationInfo').textContent = `عرض ${total === 0 ? 0 : startIndex + 1} - ${endIndex} من أصل ${total} مستخدم`;
             document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages}`;
             document.getElementById('btnPrev').disabled = (currentPage === 1);
             document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
         }
 
+        // Render Students Table in School Entry
         function renderStudentsTable() {
             const tbody = document.getElementById('studentsTableBody');
             tbody.innerHTML = '';
+
             const total = studentsData.length;
             const totalPages = Math.ceil(total / pageSize) || 1;
+            
             if (studentsCurrentPage > totalPages) studentsCurrentPage = totalPages;
             if (studentsCurrentPage < 1) studentsCurrentPage = 1;
+
             const startIndex = (studentsCurrentPage - 1) * pageSize;
             const endIndex = Math.min(startIndex + pageSize, total);
             const pageStudents = studentsData.slice(startIndex, endIndex);
 
-            if (pageStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" class="text-center p-6 text-slate-500">
-                    <i class="fa-solid fa-file-excel text-3xl text-emerald-500 mb-2 block"></i>
-                    لا توجد بيانات تلاميذ. يرجى استيراد ملف Excel الخاص بك.
-                </td></tr>`;
-            } else {
-                pageStudents.forEach(s => {
-                    const tr = document.createElement('tr');
-                    tr.className = "border-b hover:bg-slate-50 transition";
-                    tr.innerHTML = `
-                        <td class="p-2 border border-slate-200 font-mono font-bold text-edu-blue">${s.id}</td>
-                        <td class="p-2 border border-slate-200 font-semibold">${s.surname}</td>
-                        <td class="p-2 border border-slate-200">${s.name}</td>
-                        <td class="p-2 border border-slate-200">${s.gender}</td>
-                        <td class="p-2 border border-slate-200 font-mono">${s.birthDate}</td>
-                        <td class="p-2 border border-slate-200">${s.birthPlace}</td>
-                        <td class="p-2 border border-slate-200">${s.address}</td>
-                        <td class="p-2 border border-slate-200 font-bold">${s.level}</td>
-                        <td class="p-2 border border-slate-200 font-mono text-center">${s.group || '-'}</td>
-                        <td class="p-2 border border-slate-200">${s.status}</td>
-                        <td class="p-2 border border-slate-200 text-center">
-                            <button onclick="openEditStudentModal('${s.id}')" class="text-blue-600 hover:underline text-xs font-bold">تعديل</button>
-                        </td>`;
-                    tbody.appendChild(tr);
-                });
-            }
-            document.getElementById('studentsPaginationInfo').textContent = `عرض ${total === 0 ? 0 : startIndex + 1} - ${endIndex} من أصل ${total} تلميذ`;
+            pageStudents.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-2 border border-slate-200 font-mono font-bold text-edu-blue">${s.id}</td>
+                    <td class="p-2 border border-slate-200 font-semibold">${s.surname}</td>
+                    <td class="p-2 border border-slate-200">${s.name}</td>
+                    <td class="p-2 border border-slate-200">${s.gender}</td>
+                    <td class="p-2 border border-slate-200 font-mono">${s.birthDate}</td>
+                    <td class="p-2 border border-slate-200">${s.birthPlace}</td>
+                    <td class="p-2 border border-slate-200">${s.address}</td>
+                    <td class="p-2 border border-slate-200 font-bold">${s.level}</td>
+                    <td class="p-2 border border-slate-200 font-mono text-center">${s.group}</td>
+                    <td class="p-2 border border-slate-200">${s.status}</td>
+                    <td class="p-2 border border-slate-200 text-center">
+                        <button onclick="showToast('تعديل التلميذ ${s.name}')" class="text-blue-600 hover:underline text-xs font-bold">تعديل</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('studentsPaginationInfo').textContent = `عرض ${startIndex + 1} - ${endIndex} من أصل ${total} تلميذ`;
             document.getElementById('studentsPageIndicator').textContent = `${studentsCurrentPage} / ${totalPages}`;
             document.getElementById('btnPrevStudents').disabled = (studentsCurrentPage === 1);
-            document.getElementById('btnNextStudents').disabled = (studentsCurrentPage === totalPages || totalPages === 0);
+            document.getElementById('btnNextStudents').disabled = (studentsCurrentPage === totalPages);
         }
 
-        /* ===== التفويج الآلي: توزيع متساوٍ ومتوازن ===== */
-        function autoGroupStudents() {
-            if (studentsData.length === 0) {
-                showToast("لا توجد بيانات تلاميذ للتفويج. استورد ملف Excel أولاً.");
-                return;
-            }
-
-            // تجميع حسب المستوى
-            const byLevel = {};
-            studentsData.forEach(s => {
-                if (!byLevel[s.level]) byLevel[s.level] = [];
-                byLevel[s.level].push(s);
-            });
-
-            // عدد الأفواج الافتراضي لكل مستوى (يمكن تعديله حسب الخريطة التربوية)
-            const defaultGroups = {
-                "السنة الأولى متوسط": 5,
-                "السنة الثانية متوسط": 4,
-                "السنة الثالثة متوسط": 4,
-                "السنة الرابعة متوسط": 4
-            };
-
-            Object.keys(byLevel).forEach(level => {
-                const list = byLevel[level];
-                const numGroups = defaultGroups[level] || 4;
-                // توزيع بالتساوي
-                list.forEach((student, idx) => {
-                    const groupNum = (idx % numGroups) + 1;
-                    student.group = String(groupNum);
-                });
-            });
-
-            renderStudentsTable();
-            showToast(`تم التفويج الآلي بنجاح لـ ${studentsData.length} تلميذ بالتساوي والتعادل`);
-        }
-
+        // Render October 1st Status Table (Sorted from 4AM down to 1AM)
         function renderOctoberStatusTable() {
             const tbody = document.getElementById('octoberTableBody');
             tbody.innerHTML = '';
-            if (studentsData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-slate-500">لا توجد بيانات تلاميذ (استورد من الدخول المدرسي)</td></tr>`;
-                return;
-            }
+
             const levelOrder = {
                 "السنة الرابعة متوسط": 1,
                 "السنة الثالثة متوسط": 2,
                 "السنة الثانية متوسط": 3,
                 "السنة الأولى متوسط": 4
             };
-            let sortedStudents = [...studentsData].sort((a, b) => (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99));
+
+            let sortedStudents = [...studentsData].sort((a, b) => {
+                return (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
+            });
+
             sortedStudents.forEach(s => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b hover:bg-slate-50 transition";
                 tr.innerHTML = `
                     <td class="p-2.5 border font-bold text-blue-900">${s.level}</td>
-                    <td class="p-2.5 border font-mono text-center font-bold">${s.group || '-'}</td>
+                    <td class="p-2.5 border font-mono text-center font-bold">${s.group}</td>
                     <td class="p-2.5 border font-mono text-slate-700">${s.id}</td>
                     <td class="p-2.5 border font-semibold">${s.surname}</td>
                     <td class="p-2.5 border">${s.name}</td>
                     <td class="p-2.5 border">${s.gender}</td>
                     <td class="p-2.5 border font-mono">${s.birthDate}</td>
-                    <td class="p-2.5 border"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold">${s.status}</span></td>`;
+                    <td class="p-2.5 border"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold">${s.status}</span></td>
+                `;
                 tbody.appendChild(tr);
             });
         }
 
+        // Render Assign Subjects
         function renderAssignSubjectsTable() {
             const tbody = document.getElementById('assignTableBody');
             tbody.innerHTML = '';
+            
             const teachers = usersData.filter(u => u.role.includes('أستاذ'));
             teachers.forEach(t => {
                 const tr = document.createElement('tr');
@@ -1456,65 +1441,38 @@
                     <td class="p-3 border font-semibold">${t.subject}</td>
                     <td class="p-3 border">جميع المستويات (1-4 متوسط)</td>
                     <td class="p-3 border font-mono">18 ساعة / أسبوعياً</td>
-                    <td class="p-3 border text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold">مُسند بنجاح</span></td>`;
+                    <td class="p-3 border text-center"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 text-xs font-bold">مُسند بنجاح</span></td>
+                `;
                 tbody.appendChild(tr);
             });
         }
 
+        // Grade Booking Tabs Logic
         function switchGradeTab(tabKey) {
             document.querySelectorAll('.joined-tabs button').forEach(b => b.classList.remove('active-tab'));
             const activeBtn = document.getElementById('tab-' + tabKey);
             if (activeBtn) activeBtn.classList.add('active-tab');
-            const container = document.getElementById('gradeTabContent');
 
+            const container = document.getElementById('gradeTabContent');
             if (tabKey === 'booking') {
-                // جلب البيانات من الدخول المدرسي
-                let studentsHtml = '';
-                if (studentsData.length === 0) {
-                    studentsHtml = `<p class="text-xs text-slate-500 text-center py-4">لا توجد بيانات تلاميذ. استورد من الدخول المدرسي أولاً.</p>`;
-                } else {
-                    studentsHtml = `<div class="overflow-x-auto"><table class="w-full text-right text-xs border-collapse">
-                        <thead><tr class="bg-slate-100">
-                            <th class="p-2 border">رقم التعريف</th><th class="p-2 border">اللقب</th><th class="p-2 border">الاسم</th>
-                            <th class="p-2 border">المستوى</th><th class="p-2 border">الفوج</th>
-                            <th class="p-2 border">التقويم</th><th class="p-2 border">الفرض</th><th class="p-2 border">الاختبار</th>
-                        </tr></thead><tbody>`;
-                    studentsData.slice(0, 15).forEach(s => {
-                        studentsHtml += `<tr>
-                            <td class="p-2 border font-mono">${s.id}</td>
-                            <td class="p-2 border">${s.surname}</td>
-                            <td class="p-2 border">${s.name}</td>
-                            <td class="p-2 border">${s.level}</td>
-                            <td class="p-2 border text-center">${s.group || '-'}</td>
-                            <td class="p-2 border"><input type="number" min="0" max="20" step="0.25" class="w-16 p-1 border text-center"></td>
-                            <td class="p-2 border"><input type="number" min="0" max="20" step="0.25" class="w-16 p-1 border text-center"></td>
-                            <td class="p-2 border"><input type="number" min="0" max="20" step="0.25" class="w-16 p-1 border text-center"></td>
-                        </tr>`;
-                    });
-                    studentsHtml += `</tbody></table></div>`;
-                }
                 container.innerHTML = `
-                    <h4 class="font-bold text-sm text-edu-blue mb-3">حجز النقاط حسب الفوج والمادة (بيانات من الدخول المدرسي)</h4>
+                    <h4 class="font-bold text-sm text-edu-blue mb-3">حجز النقاط حسب الفوج والمادة</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                         <div>
                             <label class="block text-xs font-bold mb-1">المستوى</label>
-                            <select class="w-full text-xs p-2 border bg-white">
-                                <option>السنة الرابعة متوسط</option>
-                                <option>السنة الثالثة متوسط</option>
-                                <option>السنة الثانية متوسط</option>
-                                <option>السنة الأولى متوسط</option>
-                            </select>
+                            <select class="w-full text-xs p-2 border bg-white"><option>السنة الرابعة متوسط</option></select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold mb-1">الفوج</label>
-                            <select class="w-full text-xs p-2 border bg-white"><option>الكل</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+                            <select class="w-full text-xs p-2 border bg-white"><option>الفوج 01</option></select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold mb-1">المادة</label>
-                            <select class="w-full text-xs p-2 border bg-white"><option>الرياضيات</option><option>اللغة العربية</option><option>اللغة الفرنسية</option></select>
+                            <select class="w-full text-xs p-2 border bg-white"><option>الرياضيات</option></select>
                         </div>
                     </div>
-                    ${studentsHtml}`;
+                    <div class="p-4 bg-white border text-xs text-center text-slate-600">جدول حجز العلامات (التقويم، الفرض، الاختبار) جاكّز للإدخال المباشر.</div>
+                `;
             } else if (tabKey === 'exemptions') {
                 container.innerHTML = `<h4 class="font-bold text-sm text-amber-800 mb-2">تبويب الإعفاءات التربوية والرياضية</h4><p class="text-xs text-slate-600">عرض وتسجيل معافيي التربية البدنية والمواد الفنية لجميع المستويات.</p>`;
             } else if (tabKey === 'councils') {
@@ -1526,6 +1484,7 @@
             }
         }
 
+        // Render Parents Portal
         function renderParentsTable() {
             const tbody = document.getElementById('parentsTableBody');
             tbody.innerHTML = '';
@@ -1546,7 +1505,8 @@
                         <button onclick="toggleParentStatus('${p.id}')" class="square-btn px-3 py-1 text-xs font-bold text-white ${p.active ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'}">
                             ${p.active ? 'تعطيل الحساب' : 'تفعيل الحساب'}
                         </button>
-                    </td>`;
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
         }
@@ -1560,6 +1520,7 @@
             }
         }
 
+        // User Absences Setup
         function renderAbsencesSelect() {
             const select = document.getElementById('absentUserSelect');
             if (!select) return;
@@ -1573,7 +1534,12 @@
             const select = document.getElementById('absentUserSelect');
             const date = document.getElementById('absentDate').value;
             const reason = document.getElementById('absentReason').value;
-            if (!date) { showToast("يرجى تحديد تاريخ الغياب"); return; }
+
+            if (!date) {
+                showToast("يرجى تحديد تاريخ الغياب");
+                return;
+            }
+
             const user = usersData.find(u => u.id === select.value);
             const tbody = document.getElementById('absencesTableBody');
             const tr = document.createElement('tr');
@@ -1583,176 +1549,59 @@
                 <td class="p-2.5 border">${user ? user.role : '-'}</td>
                 <td class="p-2.5 border font-mono">${date}</td>
                 <td class="p-2.5 border font-semibold text-slate-700">${reason || 'غير مبرر'}</td>
-                <td class="p-2.5 border text-center"><button onclick="this.closest('tr').remove()" class="text-red-600 hover:underline">إلغاء</button></td>`;
+                <td class="p-2.5 border text-center"><button onclick="this.closest('tr').remove()" class="text-red-600 hover:underline">إلغاء</button></td>
+            `;
             tbody.appendChild(tr);
             showToast("تم تسجيل الغياب بنجاح");
         }
 
-        /* استيراد الموظفين */
+        // Import Staff Excel/CSV
         function importStaffData(e) {
             const file = e.target.files[0];
             if (file) {
                 showToast(`جاري استيراد ملف الموظفين: (${file.name})`);
-                setTimeout(() => showToast("تم استيراد بيانات الموظفين وإضافتها للجدول بنجاح"), 1200);
+                setTimeout(() => {
+                    showToast("تم استيراد بيانات الموظفين وإضافتها للجدول بنجاح");
+                }, 1200);
             }
         }
 
-        /* استيراد التلاميذ - لا بيانات وهمية، يعتمد على الملف */
+        // Import Students Excel/CSV
         function importStudentsData(e) {
             const file = e.target.files[0];
-            if (!file) return;
-            showToast(`جاري جلب بيانات التلاميذ من الملف: (${file.name})`);
-
-            // محاكاة قراءة ملف Excel/CSV (في بيئة حقيقية استخدم SheetJS أو PapaParse)
-            // هنا نضيف بيانات تجريبية فقط بعد الاستيراد لتوضيح الوظيفة
-            setTimeout(() => {
-                // في النسخة الحقيقية: اقرأ الملف وأضف الصفوف
-                // الآن نضيف بيانات مستوردة وهمية فقط بعد الضغط على الاستيراد (ليست موجودة مسبقاً)
-                const imported = [
-                    { id: "IMP001", surname: "مستورد", name: "تلميذ1", gender: "ذكر", birthDate: "2011-05-10", birthPlace: "سطاوالي", address: "حي الشاطئ", level: "السنة الرابعة متوسط", group: "", status: "متمدرس" },
-                    { id: "IMP002", surname: "مستورد", name: "تلميذ2", gender: "أنثى", birthDate: "2011-08-15", birthPlace: "زرالدة", address: "حي النصر", level: "السنة الرابعة متوسط", group: "", status: "متمدرس" },
-                    { id: "IMP003", surname: "مستورد", name: "تلميذ3", gender: "ذكر", birthDate: "2012-03-20", birthPlace: "الشراقة", address: "حي المجاهدين", level: "السنة الثالثة متوسط", group: "", status: "متمدرس" },
-                    { id: "IMP004", surname: "مستورد", name: "تلميذ4", gender: "أنثى", birthDate: "2012-11-05", birthPlace: "سطاوالي", address: "حي 500 مسكن", level: "السنة الثالثة متوسط", group: "", status: "متمدرس" },
-                    { id: "IMP005", surname: "مستورد", name: "تلميذ5", gender: "ذكر", birthDate: "2013-01-12", birthPlace: "عين البنيان", address: "حي السلام", level: "السنة الثانية متوسط", group: "", status: "متمدرس" },
-                    { id: "IMP006", surname: "مستورد", name: "تلميذ6", gender: "أنثى", birthDate: "2013-07-22", birthPlace: "سطاوالي", address: "حي الورود", level: "السنة الثانية متوسط", group: "", status: "متمدرس" },
-                    { id: "IMP007", surname: "مستورد", name: "تلميذ7", gender: "ذكر", birthDate: "2014-04-18", birthPlace: "زرالدة", address: "حي الأمل", level: "السنة الأولى متوسط", group: "", status: "متمدرس" },
-                    { id: "IMP008", surname: "مستورد", name: "تلميذ8", gender: "أنثى", birthDate: "2014-09-30", birthPlace: "سطاوالي", address: "حي البحر", level: "السنة الأولى متوسط", group: "", status: "متمدرس" }
-                ];
-                studentsData = [...studentsData, ...imported];
-                studentsCurrentPage = 1;
-                renderStudentsTable();
-                showToast(`تم استيراد ${imported.length} تلميذ بنجاح من الملف`);
-            }, 1200);
+            if (file) {
+                showToast(`جاري جلب بيانات التلاميذ من الملف: (${file.name})`);
+                setTimeout(() => {
+                    showToast("تم جلب واستيراد بيانات التلاميذ بنجاح");
+                }, 1200);
+            }
         }
 
         function saveEntryData() {
-            showToast("تم حفظ جميع بيانات الدخول المدرسي بنجاح");
+            showToast("تم حفظ جميع بيانات الدخول المدرسي وقاعدة البيانات بنجاح");
         }
 
-        /* ===== تعديل تلميذ ===== */
-        function openEditStudentModal(studentId) {
-            const s = studentsData.find(x => x.id === studentId);
-            if (!s) return;
-            document.getElementById('editStudentId').value = s.id;
-            document.getElementById('editSurname').value = s.surname;
-            document.getElementById('editName').value = s.name;
-            document.getElementById('editGender').value = s.gender;
-            document.getElementById('editBirthDate').value = s.birthDate;
-            document.getElementById('editBirthPlace').value = s.birthPlace;
-            document.getElementById('editAddress').value = s.address;
-            document.getElementById('editLevel').value = s.level;
-            document.getElementById('editGroup').value = s.group || '';
-            document.getElementById('editStatus').value = s.status;
-            document.getElementById('editStudentModalOverlay').classList.remove('hidden');
+        // Educational Map Modal logic
+        function openEducationalMapModal() {
+            document.getElementById('educationalMapModalOverlay').classList.remove('hidden');
         }
-        function closeEditStudentModal() {
-            document.getElementById('editStudentModalOverlay').classList.add('hidden');
+        function closeEducationalMapModal() {
+            document.getElementById('educationalMapModalOverlay').classList.add('hidden');
         }
-        function saveEditedStudent() {
-            const id = document.getElementById('editStudentId').value;
-            const s = studentsData.find(x => x.id === id);
-            if (!s) return;
-            s.surname = document.getElementById('editSurname').value;
-            s.name = document.getElementById('editName').value;
-            s.gender = document.getElementById('editGender').value;
-            s.birthDate = document.getElementById('editBirthDate').value;
-            s.birthPlace = document.getElementById('editBirthPlace').value;
-            s.address = document.getElementById('editAddress').value;
-            s.level = document.getElementById('editLevel').value;
-            s.group = document.getElementById('editGroup').value;
-            s.status = document.getElementById('editStatus').value;
-            closeEditStudentModal();
-            renderStudentsTable();
-            showToast("تم تعديل معلومات التلميذ بنجاح");
-        }
-
-        /* ===== الإضرابات ===== */
-        function renderStrikesTable() {
-            const tbody = document.getElementById('strikesTableBody');
-            tbody.innerHTML = '';
-            strikesData.forEach(st => {
-                const statusClass = st.status === 'مغلق' ? 'bg-emerald-100 text-emerald-800' : 
-                                   st.status === 'جاري' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700';
-                const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-slate-50";
-                tr.setAttribute('data-id', st.id);
-                tr.innerHTML = `
-                    <td class="p-3 border font-mono">${st.noticeDate}</td>
-                    <td class="p-3 border font-bold">${st.union}</td>
-                    <td class="p-3 border">${st.startDate}</td>
-                    <td class="p-3 border">${st.endDate}</td>
-                    <td class="p-3 border font-bold text-blue-600">${st.rate} %</td>
-                    <td class="p-3 border"><span class="${statusClass} px-2 py-0.5 text-xs">${st.status}</span></td>
-                    <td class="p-3 border text-center">
-                        <button onclick="confirmDeleteStrike('${st.id}')" class="square-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>`;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function openAddStrikeModal() {
-            document.getElementById('strikeNoticeDate').value = '';
-            document.getElementById('strikeUnion').value = '';
-            document.getElementById('strikeStartDate').value = '';
-            document.getElementById('strikeEndDate').value = '';
-            document.getElementById('strikeRate').value = '';
-            document.getElementById('strikeStatus').value = 'جاري';
-            document.getElementById('addStrikeModalOverlay').classList.remove('hidden');
-        }
-        function closeAddStrikeModal() {
-            document.getElementById('addStrikeModalOverlay').classList.add('hidden');
-        }
-        function saveNewStrike() {
-            const noticeDate = document.getElementById('strikeNoticeDate').value;
-            const union = document.getElementById('strikeUnion').value.trim();
-            const startDate = document.getElementById('strikeStartDate').value;
-            const endDate = document.getElementById('strikeEndDate').value;
-            const rate = document.getElementById('strikeRate').value || '0';
-            const status = document.getElementById('strikeStatus').value;
-
-            if (!noticeDate || !union || !startDate) {
-                showToast("يرجى ملء الحقول الإلزامية (تاريخ الإشعار، التنظيم، تاريخ البداية)");
-                return;
-            }
-            const newId = 'strike-' + Date.now();
-            strikesData.push({ id: newId, noticeDate, union, startDate, endDate: endDate || startDate, rate, status });
-            closeAddStrikeModal();
-            renderStrikesTable();
-            showToast("تم تسجيل إشعار الإضراب بنجاح");
-        }
-
-        function confirmDeleteStrike(id) {
-            strikeToDeleteId = id;
-            document.getElementById('deleteStrikeConfirmOverlay').classList.remove('hidden');
-        }
-        function closeDeleteStrikeConfirm() {
-            strikeToDeleteId = null;
-            document.getElementById('deleteStrikeConfirmOverlay').classList.add('hidden');
-        }
-        function executeDeleteStrike() {
-            if (strikeToDeleteId) {
-                strikesData = strikesData.filter(s => s.id !== strikeToDeleteId);
-                renderStrikesTable();
-                showToast("تم حذف إشعار الإضراب بنجاح");
-            }
-            closeDeleteStrikeConfirm();
-        }
-
-        /* Educational Map */
-        function openEducationalMapModal() { document.getElementById('educationalMapModalOverlay').classList.remove('hidden'); }
-        function closeEducationalMapModal() { document.getElementById('educationalMapModalOverlay').classList.add('hidden'); }
         function saveEducationalMap() {
             showToast("تم حفظ بيانات الخريطة التربوية نهائياً في المنصة");
             closeEducationalMapModal();
         }
 
-        /* Structures */
-        function openStructuresModal() { document.getElementById('structuresModalOverlay').classList.remove('hidden'); }
-        function closeStructuresModal() { document.getElementById('structuresModalOverlay').classList.add('hidden'); }
+        // Structures Modal logic
+        function openStructuresModal() {
+            document.getElementById('structuresModalOverlay').classList.remove('hidden');
+        }
+        function closeStructuresModal() {
+            document.getElementById('structuresModalOverlay').classList.add('hidden');
+        }
 
-        /* NIN */
+        // Render NIN Table
         function renderNINTable() {
             const tbody = document.getElementById('ninTableBody');
             tbody.innerHTML = '';
@@ -1769,10 +1618,12 @@
                         <button onclick="openNINModal('${u.id}')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1 mx-auto">
                             <i class="fa-solid fa-pen-to-square"></i> تحيين رقم التعريف
                         </button>
-                    </td>`;
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
         }
+
         function openNINModal(userId) {
             currentNinUserId = userId;
             const user = usersData.find(u => u.id === userId);
@@ -1781,10 +1632,12 @@
             document.getElementById('ninModalInput').value = '';
             document.getElementById('ninModalOverlay').classList.remove('hidden');
         }
+
         function closeNINModal() {
             document.getElementById('ninModalOverlay').classList.add('hidden');
             currentNinUserId = null;
         }
+
         function confirmNINUpdate() {
             const nin = document.getElementById('ninModalInput').value.trim();
             if (!nin || nin.length < 10) {
@@ -1799,6 +1652,7 @@
             const role = document.getElementById('filterRole').value;
             const subject = document.getElementById('filterSubject').value;
             const search = document.getElementById('filterSearch').value.trim().toLowerCase();
+
             filteredUsers = usersData.filter(u => {
                 const matchRole = !role || u.role === role;
                 const matchSubject = !subject || u.subject === subject;
@@ -1808,6 +1662,7 @@
                     u.id.includes(search);
                 return matchRole && matchSubject && matchSearch;
             });
+
             currentPage = 1;
             renderUsersTable();
         }
@@ -1823,11 +1678,74 @@
             showToast("تم إلغاء الموظف بنجاح");
         }
 
+        function openAddStrikeModal() {
+            // تعيين تاريخ اليوم كقيمة افتراضية لتاريخ الإشعار
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('strikeNotifyDate').value = today;
+            document.getElementById('strikeStartDate').value = '';
+            document.getElementById('strikeEndDate').value = '';
+            document.getElementById('strikeUnion').value = '';
+            document.getElementById('strikeResponseRate').value = '';
+            document.getElementById('strikeStatus').value = 'مفتوح';
+            document.getElementById('strikeNotes').value = '';
+            document.getElementById('strikeModalOverlay').classList.remove('hidden');
+        }
+
+        function closeStrikeModal() {
+            document.getElementById('strikeModalOverlay').classList.add('hidden');
+        }
+
+        function saveStrikeNotification() {
+            const notifyDate = document.getElementById('strikeNotifyDate').value;
+            const union = document.getElementById('strikeUnion').value;
+            const startDate = document.getElementById('strikeStartDate').value;
+            const endDate = document.getElementById('strikeEndDate').value;
+            const responseRate = document.getElementById('strikeResponseRate').value;
+            const status = document.getElementById('strikeStatus').value;
+            const notes = document.getElementById('strikeNotes').value;
+
+            if (!notifyDate || !union || !startDate || !endDate) {
+                showToast("يرجى ملء الحقول الإلزامية: تاريخ الإشعار، التنظيم النقابي، تاريخ البداية والنهاية");
+                return;
+            }
+
+            // إضافة صف جديد في جدول الإضرابات
+            const tbody = document.getElementById('strikesTableBody');
+            const tr = document.createElement('tr');
+            tr.className = "border-b hover:bg-slate-50";
+            
+            let statusBadge = '';
+            if (status === 'مغلق') {
+                statusBadge = `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs">مغلق</span>`;
+            } else if (status === 'جاري') {
+                statusBadge = `<span class="bg-amber-100 text-amber-800 px-2 py-0.5 text-xs">جاري</span>`;
+            } else {
+                statusBadge = `<span class="bg-red-100 text-red-800 px-2 py-0.5 text-xs">مفتوح</span>`;
+            }
+
+            const rateDisplay = responseRate ? `${responseRate} %` : '-';
+
+            tr.innerHTML = `
+                <td class="p-3 border font-mono">${notifyDate}</td>
+                <td class="p-3 border font-bold">${union}</td>
+                <td class="p-3 border">${startDate}</td>
+                <td class="p-3 border">${endDate}</td>
+                <td class="p-3 border font-bold text-blue-600">${rateDisplay}</td>
+                <td class="p-3 border">${statusBadge}</td>
+            `;
+            tbody.appendChild(tr);
+
+            showToast("تم تسجيل إشعار الإضراب بنجاح وإضافته للقائمة");
+            closeStrikeModal();
+        }
+
         function showToast(text) {
             const toast = document.getElementById('toastMessage');
             document.getElementById('toastText').textContent = text;
             toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
         }
 
         window.onload = function() {
