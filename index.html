@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -50,7 +52,33 @@
         }
         .square-btn {
             border-radius: 0px !important;
+            border: none !important;
+            outline: none !important;
         }
+        button.square-btn {
+            border: none !important;
+        }
+        .modal-expanded {
+            width: 95vw;
+            max-width: 1100px;
+            max-height: 92vh;
+        }
+        .or-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #64748b;
+            flex-shrink: 0;
+        }
+        table { table-layout: fixed; }
+        tbody tr { contain: layout style; }
         @keyframes tripleShake {
             0% { transform: translateX(0); }
             10% { transform: translateX(-6px) rotate(-1deg); }
@@ -193,9 +221,12 @@
 
             <!-- 2. Home Page View -->
             <div id="view-home" class="view-page">
-                <!-- Faded Red Window - EMPTY as requested -->
-                <div class="bg-red-50 p-4 mb-6">
-                    <!-- فارغة تماماً بدون أي أزرار أو حدود إضافية -->
+                <!-- Faded Red Window - زر الخريطة التربوية -->
+                <div class="bg-red-50 p-4 mb-6 flex items-center justify-start gap-3">
+                    <button onclick="triggerAction('pedagogical-map')" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 text-sm font-bold shadow-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-map"></i>
+                        الخريطة التربوية
+                    </button>
                 </div>
 
                 <!-- Cards Grid -->
@@ -701,11 +732,27 @@
                         </table>
                     </div>
 
+                    <!-- ترقيم صفحات حالة أول أكتوبر - 15 تلميذ -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center mt-4 pt-3 border-t border-slate-200 gap-3">
+                        <span id="octoberPaginationInfo" class="text-xs font-semibold text-slate-600">
+                            عرض 0 - 0 من أصل 0 تلميذ
+                        </span>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <button id="btnPrevOctober" onclick="prevOctoberPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
+                                <i class="fa-solid fa-chevron-right ml-1"></i> السابق
+                            </button>
+                            <span id="octoberPageIndicator" class="text-xs font-bold bg-edu-blue text-white px-3 py-1.5">1 / 1</span>
+                            <button id="btnNextOctober" onclick="nextOctoberPage()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
+                                التالي <i class="fa-solid fa-chevron-left mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="mt-6 pt-4 border-t border-slate-200 flex justify-end gap-3">
                         <button onclick="printNominalList()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-print"></i> طباعة القوائم الاسمية
                         </button>
-                        <button onclick="showToast('تم اعتماد حالة أول أكتوبر بنجاح')" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
+                        <button onclick="showToast('تم اعتماد حالة أول أكتوبر بنجاح'); saveToDB();" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-floppy-disk"></i> حفظ
                         </button>
                         <button onclick="navigateTo('schooling')" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold flex items-center gap-2">
@@ -964,6 +1011,67 @@
                 </div>
             </div>
 
+            <!-- ========== الخريطة التربوية ========== -->
+            <div id="view-pedagogical-map" class="view-page hidden">
+                <div class="bg-white border border-slate-300 p-4 md:p-6">
+                    <div class="bg-white border border-slate-200 p-5">
+                        <div class="flex flex-col md:flex-row md:items-start gap-6">
+                            <div class="md:w-48 flex-shrink-0">
+                                <h2 class="text-lg font-extrabold text-edu-blue flex items-center gap-2">
+                                    <i class="fa-solid fa-map"></i>
+                                    الخريطة التربوية
+                                </h2>
+                                <p class="text-xs text-slate-500 mt-2">تسيير عدد الأفواج حسب المستوى</p>
+                            </div>
+                            <div class="flex-1 overflow-x-auto">
+                                <table class="w-full text-right text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100 border-b-2 border-slate-300">
+                                            <th class="p-3 border border-slate-200 font-extrabold">المستوى</th>
+                                            <th class="p-3 border border-slate-200 font-extrabold text-center">عدد الأفواج</th>
+                                            <th class="p-3 border border-slate-200 font-extrabold text-center">عمليات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pedMapTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-slate-200">
+                            <h3 class="text-sm font-bold text-slate-700 mb-4">حجز عدد الأفواج حسب المستوى</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <button onclick="openGroupsModal('أولى')" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-users"></i>
+                                    حجز عدد الأفواج لمستوى أولى متوسط
+                                </button>
+                                <button onclick="openGroupsModal('ثانية')" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-users"></i>
+                                    حجز عدد الأفواج للثانية متوسط
+                                </button>
+                                <button onclick="openGroupsModal('ثالثة')" class="square-btn bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-3 text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-users"></i>
+                                    حجز عدد الأفواج للثالثة متوسط
+                                </button>
+                                <button onclick="openGroupsModal('رابعة')" class="square-btn bg-sky-600 hover:bg-sky-700 text-white px-4 py-3 text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-users"></i>
+                                    حجز عدد الأفواج للرابعة متوسط
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button onclick="saveToDB(); showToast('تم حفظ الخريطة التربوية');" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> حفظ
+                            </button>
+                            <button onclick="navigateTo('home')" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-xmark"></i> إلغاء
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Generic Info View -->
             <div id="view-info" class="view-page hidden text-center py-12">
                 <i class="fa-solid fa-circle-info text-5xl text-edu-blue mb-4"></i>
@@ -990,7 +1098,7 @@
 
     <!-- Structures Modal -->
     <div id="structuresModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
-        <div class="modal-clean-box p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div class="modal-clean-box modal-expanded p-6 overflow-y-auto">
             <div class="bg-slate-100 p-3 mb-4 flex justify-between items-center">
                 <h3 class="text-lg font-extrabold text-amber-800 flex items-center gap-2">
                     <i class="fa-solid fa-building-circle-check"></i> تسيير الهياكل والمرافق المؤسساتية
@@ -1028,7 +1136,7 @@
 
     <!-- NIN Modal -->
     <div id="ninModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-4 no-print">
-        <div class="modal-clean-box p-5 max-w-lg w-full shadow-2xl">
+        <div class="modal-clean-box modal-expanded p-5 shadow-2xl">
             <div class="bg-slate-50 border border-slate-200 p-3 mb-4">
                 <h3 class="text-base font-bold text-edu-blue flex items-center gap-2">
                     <i class="fa-solid fa-id-card"></i>
@@ -1051,7 +1159,7 @@
 
     <!-- Add Strike Modal - Expanded White -->
     <div id="addStrikeModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
-        <div class="modal-clean-box p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div class="modal-clean-box modal-expanded p-6 overflow-y-auto">
             <div class="bg-slate-100 p-3 mb-4 flex justify-between items-center">
                 <h3 class="text-lg font-extrabold text-red-700 flex items-center gap-2">
                     <i class="fa-solid fa-bell"></i> تسجيل إشعار إضراب جديد
@@ -1121,7 +1229,7 @@
 
     <!-- Assign Subjects Modal - Expanded borders -->
     <div id="assignModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
-        <div class="modal-clean-box p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto border-4 border-slate-400">
+        <div class="modal-clean-box modal-expanded p-6 overflow-y-auto border-4 border-slate-400">
             <div class="bg-slate-100 p-3 mb-4 flex justify-between items-center">
                 <h3 class="text-lg font-extrabold text-edu-blue flex items-center gap-2">
                     <i class="fa-solid fa-book-open-reader"></i> إسناد مادة وأستاذ إلى فوج تربوي
@@ -1175,9 +1283,45 @@
         </div>
     </div>
 
+    <!-- ========== نافذة حجز عدد الأفواج - محسنة ========== -->
+    <div id="groupsModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
+        <div class="modal-clean-box modal-expanded p-0 overflow-hidden flex flex-col">
+            <div class="bg-slate-100 p-4 flex justify-between items-center border-b border-slate-200">
+                <h3 class="text-lg font-extrabold text-edu-blue flex items-center gap-2" id="groupsModalTitle">
+                    <i class="fa-solid fa-users"></i>
+                    حجز عدد الأفواج
+                </h3>
+                <button onclick="closeGroupsModal()" class="text-slate-500 hover:text-red-600 text-2xl font-bold px-2 leading-none">&times;</button>
+            </div>
+            <div class="bg-white p-8 flex-1 flex flex-col items-center justify-center">
+                <div class="w-full max-w-md">
+                    <label class="block text-sm font-bold text-slate-700 mb-3 text-center">عدد الأفواج للمستوى</label>
+                    <input type="number" id="groupsCountInput" min="1" max="20" value="1" 
+                           class="w-full text-center text-2xl font-bold p-4 border-2 border-slate-300 bg-white focus:outline-none focus:border-edu-blue mb-8"
+                           style="border-radius: 0;">
+                    <div class="flex items-center justify-center gap-4 w-full">
+                        <button onclick="confirmGroupsBooking()" 
+                                class="square-btn flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-4 text-sm font-extrabold tracking-wide shadow-md transition flex items-center justify-center gap-2"
+                                style="min-height: 52px;">
+                            <i class="fa-solid fa-check"></i>
+                            حجز
+                        </button>
+                        <div class="or-circle">or</div>
+                        <button onclick="closeGroupsModal()" 
+                                class="square-btn flex-1 bg-slate-700 hover:bg-slate-900 text-white py-4 text-sm font-extrabold tracking-wide shadow-md transition flex items-center justify-center gap-2"
+                                style="min-height: 52px;">
+                            <i class="fa-solid fa-xmark"></i>
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Installation Minutes Print Modal -->
     <div id="installationPrintModal" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
-        <div class="modal-clean-box p-6 w-full max-w-3xl max-h-[95vh] overflow-y-auto">
+        <div class="modal-clean-box modal-expanded p-6 overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-edu-blue">محضر التنصيب</h3>
                 <div class="flex gap-2">
@@ -1195,7 +1339,39 @@
     <div id="nominalPrintArea" class="hidden print-area"></div>
 
     <script>
-        // ========== DATA (Empty by default - Excel only) ==========
+        // ========== قاعدة البيانات المحلية (localStorage) ==========
+        const DB_KEY = 'edu_platform_db_v1';
+
+        function loadFromDB() {
+            try {
+                const raw = localStorage.getItem(DB_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (e) {
+                console.warn('DB load error', e);
+                return null;
+            }
+        }
+
+        function saveToDB() {
+            try {
+                const data = {
+                    usersData,
+                    studentsData,
+                    parentsData,
+                    strikesData,
+                    assignmentsData,
+                    absencesList,
+                    groupsPerLevel,
+                    savedAt: new Date().toISOString()
+                };
+                localStorage.setItem(DB_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.warn('DB save error', e);
+            }
+        }
+
+        // ========== DATA ==========
         let usersData = [];
         let studentsData = [];
         let parentsData = [
@@ -1209,12 +1385,17 @@
         ];
         let assignmentsData = [];
         let absencesList = [];
+        let groupsPerLevel = { 'أولى': 5, 'ثانية': 4, 'ثالثة': 4, 'رابعة': 4 };
+
         let currentPage = 1;
         let studentsCurrentPage = 1;
+        let octoberCurrentPage = 1;
         const pageSize = 10;
+        const octoberPageSize = 15;
         let filteredUsers = [];
         let currentNinUserId = null;
         let strikeToDeleteId = null;
+        let currentGroupsLevel = null;
 
         // Normalize level names
         function normalizeLevel(level) {
@@ -1239,7 +1420,7 @@
                 } else {
                     navigateTo(targetView);
                 }
-            }, 1000);
+            }, 400);
         }
 
         function navigateTo(viewId) {
@@ -1250,12 +1431,13 @@
             if (viewId === 'users') { filteredUsers = [...usersData]; currentPage = 1; renderUsersTable(); }
             else if (viewId === 'nin') renderNINTable();
             else if (viewId === 'entry') renderStudentsTable();
-            else if (viewId === 'october-status') renderOctoberStatusTable();
+            else if (viewId === 'october-status') { octoberCurrentPage = 1; renderOctoberStatusTable(); }
             else if (viewId === 'assign-subjects') renderAssignSubjectsTable();
             else if (viewId === 'parents') renderParentsTable();
             else if (viewId === 'absences') renderAbsencesSelect();
             else if (viewId === 'strikes') renderStrikesTable();
             else if (viewId === 'installation') renderInstallationTable();
+            else if (viewId === 'pedagogical-map') renderPedagogicalMap();
         }
 
         // ========== USERS TABLE ==========
@@ -1366,8 +1548,6 @@
                 if (!byLevel[lvl]) byLevel[lvl] = [];
                 byLevel[lvl].push(s);
             });
-            // Default groups per level (can be adjusted)
-            const groupsPerLevel = { 'أولى': 5, 'ثانية': 4, 'ثالثة': 4, 'رابعة': 4 };
             Object.keys(byLevel).forEach(lvl => {
                 const list = byLevel[lvl];
                 const nGroups = groupsPerLevel[lvl] || 4;
@@ -1377,32 +1557,122 @@
             });
             renderStudentsTable();
             showToast('تم التفويج الآلي لجميع التلاميذ بالتساوي والتعادل');
+            saveToDB();
         }
 
-        // ========== OCTOBER STATUS ==========
+        // ========== OCTOBER STATUS - 15 per page ==========
+        function getSortedOctoberStudents() {
+            const levelOrder = { "رابعة": 1, "ثالثة": 2, "ثانية": 3, "أولى": 4 };
+            return [...studentsData].sort((a, b) => (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99));
+        }
+
         function renderOctoberStatusTable() {
             const tbody = document.getElementById('octoberTableBody');
             tbody.innerHTML = '';
-            const levelOrder = { "رابعة": 1, "ثالثة": 2, "ثانية": 3, "أولى": 4 };
-            let sorted = [...studentsData].sort((a, b) => (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99));
-            if (sorted.length === 0) {
+            const sorted = getSortedOctoberStudents();
+            const total = sorted.length;
+            const totalPages = Math.ceil(total / octoberPageSize) || 1;
+            if (octoberCurrentPage > totalPages) octoberCurrentPage = totalPages;
+            if (octoberCurrentPage < 1) octoberCurrentPage = 1;
+            const startIndex = (octoberCurrentPage - 1) * octoberPageSize;
+            const endIndex = Math.min(startIndex + octoberPageSize, total);
+            const pageData = sorted.slice(startIndex, endIndex);
+
+            if (total === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-slate-500">لا توجد بيانات. استورد التلاميذ أولاً من الدخول المدرسي.</td></tr>`;
-                return;
+            } else {
+                const frag = document.createDocumentFragment();
+                pageData.forEach(s => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="p-2.5 border font-bold text-blue-900">${s.level || ''}</td>
+                        <td class="p-2.5 border font-mono text-center font-bold">${s.group || ''}</td>
+                        <td class="p-2.5 border font-mono text-slate-700">${s.id || ''}</td>
+                        <td class="p-2.5 border font-semibold">${s.surname || ''}</td>
+                        <td class="p-2.5 border">${s.name || ''}</td>
+                        <td class="p-2.5 border">${s.gender || ''}</td>
+                        <td class="p-2.5 border font-mono">${s.birthDate || ''}</td>
+                        <td class="p-2.5 border"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold">${s.status || 'خارجي'}</span></td>`;
+                    frag.appendChild(tr);
+                });
+                tbody.appendChild(frag);
             }
-            sorted.forEach(s => {
+            const infoEl = document.getElementById('octoberPaginationInfo');
+            const indEl = document.getElementById('octoberPageIndicator');
+            const prevEl = document.getElementById('btnPrevOctober');
+            const nextEl = document.getElementById('btnNextOctober');
+            if (infoEl) infoEl.textContent = `عرض ${total === 0 ? 0 : startIndex + 1} - ${endIndex} من أصل ${total} تلميذ`;
+            if (indEl) indEl.textContent = `${octoberCurrentPage} / ${totalPages}`;
+            if (prevEl) prevEl.disabled = (octoberCurrentPage === 1);
+            if (nextEl) nextEl.disabled = (octoberCurrentPage === totalPages || totalPages === 0);
+        }
+
+        function nextOctoberPage() { octoberCurrentPage++; renderOctoberStatusTable(); }
+        function prevOctoberPage() { octoberCurrentPage--; renderOctoberStatusTable(); }
+
+        // ========== الخريطة التربوية ==========
+        function renderPedagogicalMap() {
+            const tbody = document.getElementById('pedMapTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const levels = ['أولى', 'ثانية', 'ثالثة', 'رابعة'];
+            levels.forEach(lvl => {
+                const count = groupsPerLevel[lvl] || 0;
                 const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-slate-50 transition";
+                tr.className = "border-b hover:bg-slate-50";
                 tr.innerHTML = `
-                    <td class="p-2.5 border font-bold text-blue-900">${s.level || ''}</td>
-                    <td class="p-2.5 border font-mono text-center font-bold">${s.group || ''}</td>
-                    <td class="p-2.5 border font-mono text-slate-700">${s.id || ''}</td>
-                    <td class="p-2.5 border font-semibold">${s.surname || ''}</td>
-                    <td class="p-2.5 border">${s.name || ''}</td>
-                    <td class="p-2.5 border">${s.gender || ''}</td>
-                    <td class="p-2.5 border font-mono">${s.birthDate || ''}</td>
-                    <td class="p-2.5 border"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold">${s.status || 'خارجي'}</span></td>`;
+                    <td class="p-3 border border-slate-200 font-bold text-edu-blue">${lvl}</td>
+                    <td class="p-3 border border-slate-200 text-center font-mono font-bold text-lg">${count}</td>
+                    <td class="p-3 border border-slate-200 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <input type="number" min="1" max="20" value="${count}" 
+                                   class="w-16 text-center text-xs p-1.5 border border-slate-300 bg-white" 
+                                   id="input-groups-${lvl}"
+                                   onchange="updateGroupsInline('${lvl}', this.value)">
+                            <button onclick="openGroupsModal('${lvl}')" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 text-xs font-bold">
+                                حجز
+                            </button>
+                        </div>
+                    </td>`;
                 tbody.appendChild(tr);
             });
+        }
+
+        function updateGroupsInline(level, value) {
+            const n = parseInt(value, 10);
+            if (!isNaN(n) && n >= 1 && n <= 20) {
+                groupsPerLevel[level] = n;
+                saveToDB();
+                showToast(`تم تحديث عدد أفواج ${level} إلى ${n}`);
+            }
+        }
+
+        function openGroupsModal(level) {
+            currentGroupsLevel = level;
+            document.getElementById('groupsModalTitle').innerHTML = `<i class="fa-solid fa-users"></i> حجز عدد الأفواج لمستوى ${level} متوسط`;
+            document.getElementById('groupsCountInput').value = groupsPerLevel[level] || 1;
+            document.getElementById('groupsModalOverlay').classList.remove('hidden');
+        }
+
+        function closeGroupsModal() {
+            document.getElementById('groupsModalOverlay').classList.add('hidden');
+            currentGroupsLevel = null;
+        }
+
+        function confirmGroupsBooking() {
+            const val = parseInt(document.getElementById('groupsCountInput').value, 10);
+            if (isNaN(val) || val < 1 || val > 20) {
+                showToast('يرجى إدخال عدد صحيح بين 1 و 20');
+                return;
+            }
+            if (currentGroupsLevel) {
+                groupsPerLevel[currentGroupsLevel] = val;
+                saveToDB();
+                renderPedagogicalMap();
+                showToast(`تم حجز ${val} فوج(أفواج) لمستوى ${currentGroupsLevel}`);
+            }
+            closeGroupsModal();
         }
 
         function confirmRegistrationNumbers() {
@@ -1417,6 +1687,7 @@
                     s.finalReg = s.id; // or generate sequential
                 }
             });
+            saveToDB();
             showToast('تم تأكيد أرقام التسجيل النهائية لجميع التلاميذ');
             renderOctoberStatusTable();
         }
@@ -1454,6 +1725,15 @@
             if (usersData.length === 0) {
                 select.innerHTML += '<option value="" disabled>لا يوجد أساتذة - استورد بيانات الموظفين أولاً</option>';
             }
+            const groupSelect = document.getElementById('assignGroupSelect');
+            let opts = '<option value="">اختر المستوى والفوج</option>';
+            ['أولى', 'ثانية', 'ثالثة', 'رابعة'].forEach(lvl => {
+                const n = groupsPerLevel[lvl] || 4;
+                for (let i = 1; i <= n; i++) {
+                    opts += `<option value="${lvl}-${i}">${lvl} - فوج ${i}</option>`;
+                }
+            });
+            groupSelect.innerHTML = opts;
             document.getElementById('assignModalOverlay').classList.remove('hidden');
         }
         function closeAssignModal() {
@@ -1599,9 +1879,11 @@
                 <div class="text-center mb-6 kufi-font">
                     <p class="text-sm font-bold">الجمهورية الجزائرية الديمقراطية الشعبية</p>
                     <p class="text-xs">وزارة التربية الوطنية</p>
-                    <p class="text-xs">مديرية التربية للجزائر غرب</p>
-                    <p class="text-sm font-bold mt-2">متوسطة الشهيد خالد مكاوي - سطاوالي</p>
-                    <p class="text-xs mt-1">السنة الدراسية: 2026 / 2027</p>
+                    <div style="text-align:right; margin: 8px 0; font-size: 12px;">
+                        <p style="margin:2px; font-weight:bold;">مديرية التربية للجزائر غرب</p>
+                        <p style="margin:2px; font-weight:bold;">متوسطة الشهيد خالد مكاوي - سطاوالي</p>
+                        <p style="margin:2px;">السنة الدراسية: 2026 - 2027</p>
+                    </div>
                     <h2 class="text-xl font-extrabold mt-4 text-edu-blue border-b-2 border-edu-blue pb-2 inline-block">محضر تنصيب</h2>
                 </div>
                 <div class="text-sm leading-8 kufi-font mb-6">
@@ -1678,12 +1960,18 @@
             });
             const html = `
                 <div style="font-family:'Cairo',sans-serif;direction:rtl;padding:20px;font-size:12px">
-                    <div style="text-align:center;margin-bottom:15px">
-                        <p style="font-weight:bold;margin:2px">الجمهورية الجزائرية الديمقراطية الشعبية</p>
-                        <p style="margin:2px">مديرية التربية للجزائر غرب</p>
-                        <p style="font-weight:bold;margin:2px">متوسطة الشهيد خالد مكاوي - سطاوالي</p>
-                        <p style="margin:2px">السنة الدراسية: 2026 - 2027</p>
-                        <h3 style="margin-top:10px;border-bottom:2px solid #000;display:inline-block;padding-bottom:3px">القائمة الاسمية للتلاميذ</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+                        <div style="text-align:right; font-size:12px; line-height:1.6;">
+                            <p style="margin:2px; font-weight:bold;">مديرية التربية للجزائر غرب</p>
+                            <p style="margin:2px; font-weight:bold;">متوسطة الشهيد خالد مكاوي - سطاوالي</p>
+                            <p style="margin:2px;">السنة الدراسية: 2026 - 2027</p>
+                        </div>
+                        <div style="text-align:center;">
+                            <p style="font-weight:bold;margin:2px">الجمهورية الجزائرية الديمقراطية الشعبية</p>
+                            <p style="margin:2px">وزارة التربية الوطنية</p>
+                            <h3 style="margin-top:10px;border-bottom:2px solid #000;display:inline-block;padding-bottom:3px">القائمة الاسمية للتلاميذ</h3>
+                        </div>
+                        <div style="width:140px;"></div>
                     </div>
                     <table style="width:100%;border-collapse:collapse;font-size:11px">
                         <thead>
@@ -1751,6 +2039,7 @@
                     filteredUsers = [...usersData];
                     currentPage = 1;
                     renderUsersTable();
+                    saveToDB();
                     showToast(`تم استيراد ${usersData.length} موظف بنجاح`);
                 } catch (err) {
                     console.error(err);
@@ -1800,6 +2089,7 @@
                     }).filter(s => s.surname || s.name);
                     studentsCurrentPage = 1;
                     renderStudentsTable();
+                    saveToDB();
                     showToast(`تم استيراد ${studentsData.length} تلميذ بنجاح`);
                 } catch (err) {
                     console.error(err);
@@ -1835,6 +2125,7 @@
         function deleteUser(id) {
             usersData = usersData.filter(u => u.id !== id);
             filterUsers();
+            saveToDB();
             showToast("تم إلغاء الموظف بنجاح");
         }
 
@@ -1952,6 +2243,7 @@
         }
 
         function saveEntryData() {
+            saveToDB();
             showToast("تم حفظ جميع بيانات الدخول المدرسي بنجاح");
         }
 
@@ -1970,6 +2262,18 @@
         }
 
         window.onload = function() {
+            const saved = loadFromDB();
+            if (saved) {
+                if (Array.isArray(saved.usersData)) usersData = saved.usersData;
+                if (Array.isArray(saved.studentsData)) studentsData = saved.studentsData;
+                if (Array.isArray(saved.parentsData)) parentsData = saved.parentsData;
+                if (Array.isArray(saved.strikesData)) strikesData = saved.strikesData;
+                if (Array.isArray(saved.assignmentsData)) assignmentsData = saved.assignmentsData;
+                if (Array.isArray(saved.absencesList)) absencesList = saved.absencesList;
+                if (saved.groupsPerLevel && typeof saved.groupsPerLevel === 'object') {
+                    groupsPerLevel = { ...groupsPerLevel, ...saved.groupsPerLevel };
+                }
+            }
             navigateTo('home');
         };
     </script>
