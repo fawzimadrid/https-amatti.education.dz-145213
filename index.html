@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -77,8 +76,13 @@
             color: #64748b;
             flex-shrink: 0;
         }
-        table { table-layout: fixed; }
+        table { table-layout: auto; }
+        table th, table td { padding: 10px 8px !important; min-width: 70px; }
         tbody tr { contain: layout style; }
+        #studentsTableBody td, #usersTableBody td, #octoberTableBody td {
+            padding: 10px 8px !important;
+            white-space: nowrap;
+        }
         @keyframes tripleShake {
             0% { transform: translateX(0); }
             10% { transform: translateX(-6px) rotate(-1deg); }
@@ -93,7 +97,6 @@
             animation: tripleShake 1.2s ease-in-out 1;
         }
         #loadingOverlay {
-            backdrop-filter: blur(3px);
             background-color: rgba(15, 23, 42, 0.6);
         }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -130,13 +133,24 @@
             100% { transform: rotate(360deg) translateX(14px) rotate(-360deg); opacity: 1; }
         }
         .modal-clean-overlay {
-            backdrop-filter: blur(2px);
+            /* بدون تأثيرات داخل النوافذ المنبثقة حسب الطلب */
             background-color: rgba(15, 23, 42, 0.55);
         }
         .modal-clean-box {
             border: 1px solid #cbd5e1;
             background: #ffffff;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        /* توسيع خانات الجداول لظهور أوضح */
+        table th, table td {
+            min-width: 95px;
+            padding: 10px 8px !important;
+        }
+        table th:first-child, table td:first-child {
+            min-width: 120px;
+        }
+        #studentsTableBody td, #usersTableBody td, #octoberTableBody td {
+            font-size: 13px;
         }
         .joined-tabs button {
             border: 1px solid #cbd5e1;
@@ -163,9 +177,83 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-100 text-slate-800">
 
+    <!-- ========== نافذة معلومات الدخول (أول ما يظهر) ========== -->
+    <div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(15,23,42,0.75);">
+        <div class="bg-white border border-slate-300 shadow-2xl w-full max-w-lg p-0" style="border-radius:0;">
+            <div class="bg-white border border-slate-200 m-4 p-6">
+                <div class="text-center mb-6">
+                    <img src="https://www.education.gov.dz/wp-content/uploads/2023/07/mmmmmm.png" 
+                         alt="شعار وزارة التربية الوطنية" 
+                         class="h-16 mx-auto mb-3 object-contain"
+                         onerror="this.onerror=null; this.src='https://placehold.co/160x60/0066b2/ffffff?text=التربية+الوطنية';">
+                    <h2 class="text-lg font-extrabold text-edu-blue">وزارة التربية الوطنية</h2>
+                    <p class="text-xs text-slate-500 mt-1">الأرضية الرقمية — فضاء المؤسسة</p>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">اختر مديرية التربية</label>
+                        <select id="loginDirectorate" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue" style="border-radius:0;">
+                            <option value="">-- الرجاء اختيار المديرية --</option>
+                            <option value="مديرية التربية للجزائر غرب">مديرية التربية للجزائر غرب</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">اسم المستخدم</label>
+                        <input type="text" id="loginUser" value="admin" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue" style="border-radius:0;" autocomplete="username">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور</label>
+                        <input type="password" id="loginPass" value="admin" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue" style="border-radius:0;" autocomplete="current-password">
+                    </div>
+                    <p id="loginError" class="text-xs text-red-600 font-bold hidden text-center"></p>
+                    <button onclick="attemptLogin()" class="square-btn w-full bg-edu-blue hover:bg-edu-darkblue text-white py-3 text-sm font-bold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                    </button>
+                    <button type="button" onclick="openForgotPasswordModal()" class="square-btn w-full mt-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 text-xs font-bold flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-key"></i> نسيت كلمة المرور
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordOverlay" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4" style="background:rgba(15,23,42,0.75);">
+        <div class="bg-white border border-slate-300 shadow-2xl w-full max-w-lg p-0" style="border-radius:0;">
+            <div class="bg-white border border-slate-200 m-4 p-6">
+                <div class="bg-blue-50 border border-blue-200 p-5 mb-4">
+                    <h3 class="text-base font-extrabold text-edu-blue mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-key"></i> استرجاع وتغيير كلمة المرور
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور الجديدة</label>
+                            <input type="password" id="newPasswordInput" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue" style="border-radius:0;" placeholder="أدخل كلمة المرور الجديدة">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">تأكيد كلمة المرور الجديدة</label>
+                            <input type="password" id="confirmPasswordInput" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue" style="border-radius:0;" placeholder="أعد إدخال كلمة المرور">
+                        </div>
+                        <p id="forgotPassError" class="text-xs text-red-600 font-bold hidden"></p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-4">
+                    <button onclick="confirmPasswordChange()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i> تأكيد تغيير كلمة المرور
+                    </button>
+                    <div class="or-circle">or</div>
+                    <button onclick="closeForgotPasswordModal()" class="square-btn bg-slate-500 hover:bg-slate-600 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-xmark"></i> إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 1. Header Section -->
-    <header class="bg-edu-blue text-white shadow-md no-print">
+    <header id="mainHeader" class="bg-edu-blue text-white shadow-md no-print hidden">
         <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center text-sm md:text-base font-semibold">
+
             <div class="flex items-center space-x-3 space-x-reverse">
                 <img src="https://www.education.gov.dz/wp-content/uploads/2023/07/mmmmmm.png" 
                      alt="شعار وزارة التربية الوطنية" 
@@ -180,12 +268,16 @@
                 <span class="bg-edu-darkblue px-3 py-1.5 border border-blue-400/40 flex items-center gap-1.5">
                     <i class="fa-solid fa-user-gear text-yellow-300"></i> حساب المؤسسة
                 </span>
+                <button onclick="doLogout()" class="square-btn bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج
+                </button>
             </div>
         </div>
     </header>
 
     <!-- Main Outer White Window Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 no-print">
+    <main id="mainContent" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 no-print hidden">
+
         <div class="bg-white border border-slate-300 shadow-sm p-4 md:p-6 mb-6">
             
             <!-- Center Title -->
@@ -452,9 +544,19 @@
                                 <select id="filterSubject" onchange="filterUsers()" class="w-full text-xs p-2 border border-slate-300 square-card bg-white focus:outline-none focus:border-edu-blue">
                                     <option value="">جميع المواد</option>
                                     <option value="اللغة العربية">اللغة العربية</option>
-                                    <option value="الرياضيات">الرياضيات</option>
+                                    <option value="اللغة الأمازيغية">اللغة الأمازيغية</option>
                                     <option value="اللغة الفرنسية">اللغة الفرنسية</option>
+                                    <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                                    <option value="التربية الاسلامية">التربية الاسلامية</option>
+                                    <option value="التربية المدنية">التربية المدنية</option>
+                                    <option value="التاريخ والجغرافيا">التاريخ والجغرافيا</option>
+                                    <option value="الرياضيات">الرياضيات</option>
                                     <option value="علوم الطبيعة والحياة">علوم الطبيعة والحياة</option>
+                                    <option value="علوم فيزيائية وتكنولوجيا">علوم فيزيائية وتكنولوجيا</option>
+                                    <option value="الاعلام الالي">الاعلام الالي</option>
+                                    <option value="التربية التشكيلية">التربية التشكيلية</option>
+                                    <option value="التربية الموسيقية">التربية الموسيقية</option>
+                                    <option value="التربية البدنية والرياضية">التربية البدنية والرياضية</option>
                                     <option value="إدارة">إدارة</option>
                                 </select>
                             </div>
@@ -615,7 +717,7 @@
                                 </div>
                             </div>
                             <div class="mt-auto">
-                                <button onclick="triggerAction('info', 'الجداول الزمنية')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                <button onclick="triggerAction('timetable')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
                                     <i class="fa-solid fa-right-to-bracket"></i> الدخول
                                 </button>
                             </div>
@@ -625,10 +727,92 @@
                 </div>
             </div>
 
+            <!-- NEW: الجداول الزمنية View -->
+            <div id="view-timetable" class="view-page hidden">
+                <div class="bg-white border border-slate-300 p-4 md:p-6">
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-4 flex flex-wrap justify-between items-center gap-2">
+                        <h2 class="text-lg font-bold text-edu-blue flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days"></i> الجداول الزمنية - السنة الدراسية 2026-2027
+                        </h2>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="setTimetableMode('student')" id="btnTtStudent" class="square-btn bg-edu-blue text-white px-4 py-2 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-user-graduate"></i> جدول التلميذ
+                            </button>
+                            <button onclick="setTimetableMode('teacher')" id="btnTtTeacher" class="square-btn bg-slate-400 text-white px-4 py-2 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-chalkboard-user"></i> جدول الأستاذ
+                            </button>
+                            <button onclick="generateTimetable()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> توليد الجداول
+                            </button>
+                            <button onclick="printTimetable()" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-print"></i> طباعة
+                            </button>
+                            <button onclick="navigateTo('schooling')" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-4 py-2 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-xmark"></i> العودة
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 p-3 mb-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">المستوى</label>
+                            <select id="ttLevel" onchange="renderTimetableView()" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                                <option value="أولى">أولى</option>
+                                <option value="ثانية">ثانية</option>
+                                <option value="ثالثة">ثالثة</option>
+                                <option value="رابعة">رابعة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">رقم الفوج</label>
+                            <select id="ttGroup" onchange="renderTimetableView()" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                        <div id="ttTeacherSelectWrap" class="hidden">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الأستاذ</label>
+                            <select id="ttTeacherSelect" onchange="renderTimetableView()" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                                <option value="">-- اختر الأستاذ --</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <p class="text-xs text-slate-600">صباحي: 08:00–12:00 | مسائي: 13:30–16:30<br><span class="text-red-600 font-bold">الثلاثاء مساءً: بدون دراسة</span></p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200 mb-4">
+                        <table class="w-full text-center text-sm border-collapse" id="timetableTable">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="p-3 border font-extrabold min-w-[110px]">التوقيت</th>
+                                    <th class="p-3 border font-extrabold">الأحد</th>
+                                    <th class="p-3 border font-extrabold">الاثنين</th>
+                                    <th class="p-3 border font-extrabold">الثلاثاء</th>
+                                    <th class="p-3 border font-extrabold">الأربعاء</th>
+                                    <th class="p-3 border font-extrabold">الخميس</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timetableBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 p-3">
+                        <h4 class="text-xs font-bold text-slate-700 mb-2">ملخص الأساتذة المسندين (من إسناد المواد)</h4>
+                        <div id="ttTeachersSummary" class="text-xs text-slate-600 flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 7. الدخول المدرسي -->
             <div id="view-entry" class="view-page hidden">
                 <div class="bg-white border border-slate-300 p-4 md:p-6">
-                    <div class="bg-slate-50 border border-slate-200 p-3 mb-6 flex flex-wrap justify-between items-center gap-2">
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-4 flex flex-wrap justify-between items-center gap-2">
                         <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
                             <i class="fa-solid fa-door-open"></i> الدخول المدرسي - قائمة التلاميذ
                         </h2>
@@ -636,7 +820,7 @@
                             <button onclick="autoAssignGroups()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 text-xs font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-robot"></i> التفويج الآلي
                             </button>
-                            <button disabled class="square-btn bg-slate-300 text-slate-500 px-3 py-2 text-xs font-bold cursor-not-allowed opacity-60 flex items-center gap-1" title="معطل حالياً">
+                            <button onclick="showToast('استخدم زر «فوج» في عمود العمليات لكل تلميذ')" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 text-xs font-bold flex items-center gap-1" title="الإدراج عبر عمود العمليات">
                                 <i class="fa-solid fa-user-plus"></i> الإدراج في الفوج التربوي
                             </button>
                             <input type="file" id="studentsExcelInput" accept=".csv, .xlsx, .xls" class="hidden" onchange="importStudentsData(event)">
@@ -646,21 +830,54 @@
                         </div>
                     </div>
 
+                    <!-- قوائم التصفية الاختيارية -->
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">السنة الدراسية الحالية</label>
+                            <select id="filterSchoolYear" onchange="filterStudents()" class="w-full text-xs p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
+                                <option value="">-- الرجاء اختيار السنة الدراسية --</option>
+                                <option value="2026-2027" selected>2026-2027</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">المستوى</label>
+                            <select id="filterStudentLevel" onchange="filterStudents()" class="w-full text-xs p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
+                                <option value="">-- الرجاء اختيار المستوى --</option>
+                                <option value="أولى">أولى</option>
+                                <option value="ثانية">ثانية</option>
+                                <option value="ثالثة">ثالثة</option>
+                                <option value="رابعة">رابعة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">رقم الفوج</label>
+                            <select id="filterStudentGroup" onchange="filterStudents()" class="w-full text-xs p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
+                                <option value="">-- الرجاء اختيار الفوج التربوي --</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
-                        <table class="w-full text-right text-xs border-collapse">
+                        <table class="w-full text-right text-sm border-collapse">
                             <thead>
                                 <tr class="bg-slate-100 border-b-2 border-slate-300 text-slate-800">
-                                    <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">اللقب</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">الاسم</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">الجنس</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">تاريخ الميلاد</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">مكان الميلاد</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">العنوان</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">المستوى</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">رقم الفوج</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">الصفة</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold text-center">عمليات</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[100px]">رقم التعريف</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[90px]">اللقب</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[90px]">الاسم</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[60px]">الجنس</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[100px]">تاريخ الميلاد</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[100px]">مكان الميلاد</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[120px]">العنوان</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[70px]">المستوى</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[70px]">رقم الفوج</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[70px]">الصفة</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold text-center min-w-[70px]">عمليات</th>
                                 </tr>
                             </thead>
                             <tbody id="studentsTableBody">
@@ -684,7 +901,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-4 border-t border-slate-200 flex justify-end gap-3">
+                    <div class="mt-6 pt-4 border-t border-slate-200 flex justify-end gap-3 flex-wrap">
                         <button onclick="printNominalList()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-print"></i> طباعة القوائم الاسمية
                         </button>
@@ -693,6 +910,9 @@
                         </button>
                         <button onclick="navigateTo('schooling')" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-xmark"></i> إلغاء
+                        </button>
+                        <button onclick="navigateTo('home')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-house"></i> العودة إلى الصفحة الرئيسية
                         </button>
                     </div>
                 </div>
@@ -705,7 +925,10 @@
                         <h2 class="text-lg font-bold text-amber-900 flex items-center gap-2">
                             <i class="fa-solid fa-calendar-check text-amber-600"></i> حالة أول أكتوبر - من رابعة إلى أولى
                         </h2>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="exportOctoberData()" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-file-excel"></i> تصدير البيانات
+                            </button>
                             <button onclick="confirmRegistrationNumbers()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 text-xs font-bold flex items-center gap-1">
                                 <i class="fa-solid fa-check-double"></i> تأكيد رقم التسجيل
                             </button>
@@ -714,17 +937,17 @@
                     </div>
 
                     <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
-                        <table class="w-full text-right text-xs border-collapse">
+                        <table class="w-full text-right text-sm border-collapse">
                             <thead>
                                 <tr class="bg-slate-100 border-b-2 border-slate-300 text-slate-800">
-                                    <th class="p-2 border border-slate-200 font-extrabold">المستوى</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">رقم الفوج</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">اللقب</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">الاسم</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">الجنس</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">تاريخ الميلاد</th>
-                                    <th class="p-2 border border-slate-200 font-extrabold">الصفة</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[80px]">المستوى</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[70px]">رقم الفوج</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[100px]">رقم التعريف</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[90px]">اللقب</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[90px]">الاسم</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[60px]">الجنس</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[100px]">تاريخ الميلاد</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold min-w-[70px]">الصفة</th>
                                 </tr>
                             </thead>
                             <tbody id="octoberTableBody">
@@ -1319,6 +1542,127 @@
         </div>
     </div>
 
+    <!-- Edit Student Modal - Expanded, 4 fields per row -->
+    <div id="editStudentModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
+        <div class="modal-clean-box p-0 overflow-hidden flex flex-col" style="width:95vw;max-width:1100px;max-height:92vh">
+            <div class="bg-white border border-slate-200 m-4 p-5 flex-1 overflow-y-auto">
+                <div class="bg-slate-50 border border-slate-200 p-3 mb-5 flex justify-between items-center">
+                    <h3 class="text-lg font-extrabold text-edu-blue flex items-center gap-2">
+                        <i class="fa-solid fa-user-pen"></i> تعديل معلومات التلميذ
+                    </h3>
+                    <button onclick="closeEditStudentModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
+                </div>
+                <div class="bg-white border border-slate-300 p-5">
+                    <input type="hidden" id="editStudentIndex">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold mb-1">رقم التعريف</label>
+                            <input type="text" id="editStuId" class="w-full text-xs p-2.5 border border-slate-300 bg-white font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">اللقب</label>
+                            <input type="text" id="editStuSurname" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">الاسم</label>
+                            <input type="text" id="editStuName" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">الجنس</label>
+                            <select id="editStuGender" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                                <option value="ذكر">ذكر</option>
+                                <option value="أنثى">أنثى</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold mb-1">تاريخ الميلاد</label>
+                            <input type="text" id="editStuBirthDate" class="w-full text-xs p-2.5 border border-slate-300 bg-white font-mono" placeholder="YYYY-MM-DD">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">مكان الميلاد</label>
+                            <input type="text" id="editStuBirthPlace" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">العنوان</label>
+                            <input type="text" id="editStuAddress" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">الصفة</label>
+                            <select id="editStuStatus" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                                <option value="خارجي">خارجي</option>
+                                <option value="نصف داخلي">نصف داخلي</option>
+                                <option value="داخلي">داخلي</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold mb-1">المستوى</label>
+                            <select id="editStuLevel" class="w-full text-xs p-2.5 border border-slate-300 bg-white">
+                                <option value="أولى">أولى</option>
+                                <option value="ثانية">ثانية</option>
+                                <option value="ثالثة">ثالثة</option>
+                                <option value="رابعة">رابعة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">رقم الفوج</label>
+                            <input type="text" id="editStuGroup" class="w-full text-xs p-2.5 border border-slate-300 bg-white font-mono">
+                        </div>
+                        <div></div><div></div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                        <button onclick="saveEditStudent()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> حفظ
+                        </button>
+                        <button onclick="closeEditStudentModal()" class="square-btn bg-slate-500 hover:bg-slate-600 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-xmark"></i> إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insert Student to Group Modal -->
+    <div id="insertGroupModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
+        <div class="modal-clean-box p-0 overflow-hidden flex flex-col" style="width:95vw;max-width:700px;max-height:80vh">
+            <div class="bg-white border border-slate-200 m-4 p-5 flex-1">
+                <div class="bg-slate-50 border border-slate-200 p-3 mb-5 flex justify-between items-center">
+                    <h3 class="text-lg font-extrabold text-edu-blue flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> الإدراج في الفوج التربوي
+                    </h3>
+                    <button onclick="closeInsertGroupModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
+                </div>
+                <div class="bg-white border border-slate-300 p-5">
+                    <p class="text-sm text-slate-700 mb-4" id="insertGroupStudentInfo"></p>
+                    <input type="hidden" id="insertGroupStudentIndex">
+                    <label class="block text-xs font-bold mb-2">اختر الفوج التربوي</label>
+                    <select id="insertGroupSelect" class="w-full text-sm p-3 border border-slate-300 bg-white mb-6">
+                        <option value="">-- الرجاء اختيار الفوج التربوي --</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                    <div class="flex items-center justify-center gap-4">
+                        <button onclick="confirmInsertGroup()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-sm font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-check"></i> تأكيد الإدراج
+                        </button>
+                        <div class="or-circle">or</div>
+                        <button onclick="closeInsertGroupModal()" class="square-btn bg-slate-500 hover:bg-slate-600 text-white px-8 py-3 text-sm font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-xmark"></i> إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Installation Minutes Print Modal -->
     <div id="installationPrintModal" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
         <div class="modal-clean-box modal-expanded p-6 overflow-y-auto">
@@ -1330,7 +1674,6 @@
                 </div>
             </div>
             <div id="installationPrintContent" class="print-area bg-white p-6 border border-slate-300 kufi-font">
-                <!-- Content injected by JS -->
             </div>
         </div>
     </div>
@@ -1374,15 +1717,9 @@
         // ========== DATA ==========
         let usersData = [];
         let studentsData = [];
-        let parentsData = [
-            { id: "PAR-901", name: "بن زيان رشيد", student: "بن زيان أنيس", phone: "0661112233", active: true },
-            { id: "PAR-902", name: "عباسي فاروق", student: "عباسي منى", phone: "0552223344", active: true },
-            { id: "PAR-903", name: "العربي سفيان", student: "العربي يوسف", phone: "0773334455", active: false },
-            { id: "PAR-904", name: "صالحي عبد القادر", student: "صالحي أيمن", phone: "0664445566", active: true }
-        ];
-        let strikesData = [
-            { id: 1, notifyDate: "2026-02-10", union: "النقابة الوطنية للتربية", startDate: "2026-02-15", endDate: "2026-02-16", rate: "4.2", status: "مغلق" }
-        ];
+        let filteredStudents = [];
+        let parentsData = [];
+        let strikesData = [];
         let assignmentsData = [];
         let absencesList = [];
         let groupsPerLevel = { 'أولى': 5, 'ثانية': 4, 'ثالثة': 4, 'رابعة': 4 };
@@ -1420,17 +1757,18 @@
                 } else {
                     navigateTo(targetView);
                 }
-            }, 400);
+            }, 250);
         }
 
         function navigateTo(viewId) {
             document.querySelectorAll('.view-page').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById('view-' + viewId);
             if (target) target.classList.remove('hidden');
+            try { sessionStorage.setItem('edu_current_view', viewId); } catch(e) {}
 
             if (viewId === 'users') { filteredUsers = [...usersData]; currentPage = 1; renderUsersTable(); }
             else if (viewId === 'nin') renderNINTable();
-            else if (viewId === 'entry') renderStudentsTable();
+            else if (viewId === 'entry') { filteredStudents = [...studentsData]; studentsCurrentPage = 1; renderStudentsTable(); }
             else if (viewId === 'october-status') { octoberCurrentPage = 1; renderOctoberStatusTable(); }
             else if (viewId === 'assign-subjects') renderAssignSubjectsTable();
             else if (viewId === 'parents') renderParentsTable();
@@ -1438,6 +1776,7 @@
             else if (viewId === 'strikes') renderStrikesTable();
             else if (viewId === 'installation') renderInstallationTable();
             else if (viewId === 'pedagogical-map') renderPedagogicalMap();
+            else if (viewId === 'timetable') { setTimetableMode(timetableMode || 'student'); renderTimetableView(); }
         }
 
         // ========== USERS TABLE ==========
@@ -1483,56 +1822,148 @@
             document.getElementById('btnNext').disabled = (currentPage === totalPages || totalPages === 0);
         }
 
-        // ========== STUDENTS TABLE ==========
+        // ========== STUDENTS TABLE + FILTER ==========
+        function filterStudents() {
+            const yearEl = document.getElementById('filterSchoolYear');
+            const levelEl = document.getElementById('filterStudentLevel');
+            const groupEl = document.getElementById('filterStudentGroup');
+            const year = yearEl ? yearEl.value : '';
+            const level = levelEl ? levelEl.value : '';
+            const group = groupEl ? groupEl.value : '';
+
+            filteredStudents = studentsData.filter(s => {
+                const matchYear = !year || year === '2026-2027';
+                const matchLevel = !level || s.level === level;
+                const matchGroup = !group || String(s.group) === String(group);
+                return matchYear && matchLevel && matchGroup;
+            });
+            studentsCurrentPage = 1;
+            renderStudentsTable();
+        }
+
         function renderStudentsTable() {
             const tbody = document.getElementById('studentsTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
-            const total = studentsData.length;
+
+            const hasFilter = (document.getElementById('filterStudentLevel') && document.getElementById('filterStudentLevel').value) ||
+                              (document.getElementById('filterStudentGroup') && document.getElementById('filterStudentGroup').value);
+            const list = hasFilter ? filteredStudents : (filteredStudents.length && filteredStudents !== studentsData ? filteredStudents : studentsData);
+            // Prefer filteredStudents if filters applied, else all
+            const yearVal = document.getElementById('filterSchoolYear') ? document.getElementById('filterSchoolYear').value : '';
+            const levelVal = document.getElementById('filterStudentLevel') ? document.getElementById('filterStudentLevel').value : '';
+            const groupVal = document.getElementById('filterStudentGroup') ? document.getElementById('filterStudentGroup').value : '';
+            const useFiltered = yearVal || levelVal || groupVal;
+            const dataList = useFiltered ? filteredStudents : studentsData;
+
+            const total = dataList.length;
             const totalPages = Math.ceil(total / pageSize) || 1;
             if (studentsCurrentPage > totalPages) studentsCurrentPage = totalPages;
             if (studentsCurrentPage < 1) studentsCurrentPage = 1;
             const startIndex = (studentsCurrentPage - 1) * pageSize;
             const endIndex = Math.min(startIndex + pageSize, total);
-            const pageStudents = studentsData.slice(startIndex, endIndex);
+            const pageStudents = dataList.slice(startIndex, endIndex);
 
             if (pageStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" class="text-center p-6 text-slate-500">لا توجد بيانات تلاميذ. يرجى استيراد ملف Excel.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center p-6 text-slate-500">لا توجد بيانات تلاميذ. يرجى استيراد ملف Excel أو تعديل التصفية.</td></tr>`;
             } else {
-                pageStudents.forEach((s, idx) => {
+                const frag = document.createDocumentFragment();
+                pageStudents.forEach((s) => {
+                    const realIdx = studentsData.indexOf(s);
                     const tr = document.createElement('tr');
                     tr.className = "border-b hover:bg-slate-50 transition";
                     tr.innerHTML = `
-                        <td class="p-2 border border-slate-200 font-mono font-bold text-edu-blue">${s.id || ''}</td>
-                        <td class="p-2 border border-slate-200 font-semibold">${s.surname || ''}</td>
-                        <td class="p-2 border border-slate-200">${s.name || ''}</td>
-                        <td class="p-2 border border-slate-200">${s.gender || ''}</td>
-                        <td class="p-2 border border-slate-200 font-mono">${s.birthDate || ''}</td>
-                        <td class="p-2 border border-slate-200">${s.birthPlace || ''}</td>
-                        <td class="p-2 border border-slate-200">${s.address || ''}</td>
-                        <td class="p-2 border border-slate-200 font-bold">${s.level || ''}</td>
-                        <td class="p-2 border border-slate-200 font-mono text-center">${s.group || ''}</td>
-                        <td class="p-2 border border-slate-200">${s.status || 'خارجي'}</td>
-                        <td class="p-2 border border-slate-200 text-center">
-                            <button onclick="editStudent(${startIndex + idx})" class="text-blue-600 hover:underline text-xs font-bold">تعديل</button>
+                        <td class="p-3 border border-slate-200 font-mono font-bold text-edu-blue">${s.id || ''}</td>
+                        <td class="p-3 border border-slate-200 font-semibold">${s.surname || ''}</td>
+                        <td class="p-3 border border-slate-200">${s.name || ''}</td>
+                        <td class="p-3 border border-slate-200">${s.gender || ''}</td>
+                        <td class="p-3 border border-slate-200 font-mono">${s.birthDate || ''}</td>
+                        <td class="p-3 border border-slate-200">${s.birthPlace || ''}</td>
+                        <td class="p-3 border border-slate-200">${s.address || ''}</td>
+                        <td class="p-3 border border-slate-200 font-bold">${s.level || ''}</td>
+                        <td class="p-3 border border-slate-200 font-mono text-center">${s.group || ''}</td>
+                        <td class="p-3 border border-slate-200">${s.status || 'خارجي'}</td>
+                        <td class="p-3 border border-slate-200 text-center whitespace-nowrap">
+                            <button onclick="openEditStudentModal(${realIdx >= 0 ? realIdx : 0})" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-2 py-1 text-xs font-bold ml-1" title="تعديل معلومات التلميذ">تعديل</button>
+                            <button onclick="openInsertGroupModal(${realIdx >= 0 ? realIdx : 0})" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-2 py-1 text-xs font-bold" title="الإدراج في الفوج التربوي">فوج</button>
                         </td>`;
-                    tbody.appendChild(tr);
+                    frag.appendChild(tr);
                 });
+                tbody.appendChild(frag);
             }
-            document.getElementById('studentsPaginationInfo').textContent = `عرض ${total === 0 ? 0 : startIndex + 1} - ${endIndex} من أصل ${total} تلميذ`;
-            document.getElementById('studentsPageIndicator').textContent = `${studentsCurrentPage} / ${totalPages}`;
-            document.getElementById('btnPrevStudents').disabled = (studentsCurrentPage === 1);
-            document.getElementById('btnNextStudents').disabled = (studentsCurrentPage === totalPages || totalPages === 0);
+            const infoEl = document.getElementById('studentsPaginationInfo');
+            const indEl = document.getElementById('studentsPageIndicator');
+            const prevEl = document.getElementById('btnPrevStudents');
+            const nextEl = document.getElementById('btnNextStudents');
+            if (infoEl) infoEl.textContent = `عرض ${total === 0 ? 0 : startIndex + 1} - ${endIndex} من أصل ${total} تلميذ`;
+            if (indEl) indEl.textContent = `${studentsCurrentPage} / ${totalPages}`;
+            if (prevEl) prevEl.disabled = (studentsCurrentPage === 1);
+            if (nextEl) nextEl.disabled = (studentsCurrentPage === totalPages || totalPages === 0);
         }
 
-        function editStudent(index) {
+        function openEditStudentModal(index) {
             const s = studentsData[index];
             if (!s) return;
-            const newGroup = prompt(`تعديل رقم الفوج للتلميذ ${s.surname} ${s.name}\nالفوج الحالي: ${s.group}`, s.group);
-            if (newGroup !== null && newGroup.trim() !== '') {
-                s.group = newGroup.trim();
-                renderStudentsTable();
-                showToast('تم تعديل بيانات التلميذ');
+            document.getElementById('editStudentIndex').value = index;
+            document.getElementById('editStuId').value = s.id || '';
+            document.getElementById('editStuSurname').value = s.surname || '';
+            document.getElementById('editStuName').value = s.name || '';
+            document.getElementById('editStuGender').value = s.gender || 'ذكر';
+            document.getElementById('editStuBirthDate').value = s.birthDate || '';
+            document.getElementById('editStuBirthPlace').value = s.birthPlace || '';
+            document.getElementById('editStuAddress').value = s.address || '';
+            document.getElementById('editStuStatus').value = s.status || 'خارجي';
+            document.getElementById('editStuLevel').value = s.level || 'أولى';
+            document.getElementById('editStuGroup').value = s.group || '';
+            document.getElementById('editStudentModalOverlay').classList.remove('hidden');
+        }
+        function closeEditStudentModal() {
+            document.getElementById('editStudentModalOverlay').classList.add('hidden');
+        }
+        function saveEditStudent() {
+            const idx = parseInt(document.getElementById('editStudentIndex').value, 10);
+            if (isNaN(idx) || !studentsData[idx]) return;
+            const s = studentsData[idx];
+            s.id = document.getElementById('editStuId').value.trim() || s.id;
+            s.surname = document.getElementById('editStuSurname').value.trim();
+            s.name = document.getElementById('editStuName').value.trim();
+            s.gender = document.getElementById('editStuGender').value;
+            s.birthDate = document.getElementById('editStuBirthDate').value.trim();
+            s.birthPlace = document.getElementById('editStuBirthPlace').value.trim();
+            s.address = document.getElementById('editStuAddress').value.trim();
+            s.status = document.getElementById('editStuStatus').value;
+            s.level = document.getElementById('editStuLevel').value;
+            s.group = document.getElementById('editStuGroup').value.trim() || s.group;
+            saveToDB();
+            filterStudents();
+            closeEditStudentModal();
+            showToast('تم حفظ تعديلات التلميذ بنجاح');
+        }
+        function openInsertGroupModal(index) {
+            const s = studentsData[index];
+            if (!s) return;
+            document.getElementById('insertGroupStudentIndex').value = index;
+            document.getElementById('insertGroupStudentInfo').textContent =
+                'التلميذ: ' + (s.surname || '') + ' ' + (s.name || '') + ' — المستوى: ' + (s.level || '') + ' — الفوج الحالي: ' + (s.group || '-');
+            document.getElementById('insertGroupSelect').value = s.group || '';
+            document.getElementById('insertGroupModalOverlay').classList.remove('hidden');
+        }
+        function closeInsertGroupModal() {
+            document.getElementById('insertGroupModalOverlay').classList.add('hidden');
+        }
+        function confirmInsertGroup() {
+            const idx = parseInt(document.getElementById('insertGroupStudentIndex').value, 10);
+            const g = document.getElementById('insertGroupSelect').value;
+            if (isNaN(idx) || !studentsData[idx]) return;
+            if (!g) {
+                showToast('يرجى اختيار رقم الفوج');
+                return;
             }
+            studentsData[idx].group = g;
+            saveToDB();
+            filterStudents();
+            closeInsertGroupModal();
+            showToast('تم إدراج التلميذ في الفوج ' + g + ' بنجاح');
         }
 
         // ========== AUTO GROUPING (التفويج الآلي) ==========
@@ -1555,9 +1986,10 @@
                     s.group = String((i % nGroups) + 1);
                 });
             });
-            renderStudentsTable();
-            showToast('تم التفويج الآلي لجميع التلاميذ بالتساوي والتعادل');
             saveToDB();
+            filteredStudents = [...studentsData];
+            filterStudents();
+            showToast('تم التفويج الآلي لجميع التلاميذ بالتساوي والتعادل');
         }
 
         // ========== OCTOBER STATUS - 15 per page ==========
@@ -1586,14 +2018,14 @@
                     const tr = document.createElement('tr');
                     tr.className = "border-b hover:bg-slate-50 transition";
                     tr.innerHTML = `
-                        <td class="p-2.5 border font-bold text-blue-900">${s.level || ''}</td>
-                        <td class="p-2.5 border font-mono text-center font-bold">${s.group || ''}</td>
-                        <td class="p-2.5 border font-mono text-slate-700">${s.id || ''}</td>
-                        <td class="p-2.5 border font-semibold">${s.surname || ''}</td>
-                        <td class="p-2.5 border">${s.name || ''}</td>
-                        <td class="p-2.5 border">${s.gender || ''}</td>
-                        <td class="p-2.5 border font-mono">${s.birthDate || ''}</td>
-                        <td class="p-2.5 border"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold">${s.status || 'خارجي'}</span></td>`;
+                        <td class="p-3 border font-bold text-blue-900">${s.level || ''}</td>
+                        <td class="p-3 border font-mono text-center font-bold">${s.group || ''}</td>
+                        <td class="p-3 border font-mono text-slate-700">${s.id || ''}</td>
+                        <td class="p-3 border font-semibold">${s.surname || ''}</td>
+                        <td class="p-3 border">${s.name || ''}</td>
+                        <td class="p-3 border">${s.gender || ''}</td>
+                        <td class="p-3 border font-mono">${s.birthDate || ''}</td>
+                        <td class="p-3 border"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 text-xs font-bold">${s.status || 'خارجي'}</span></td>`;
                     frag.appendChild(tr);
                 });
                 tbody.appendChild(frag);
@@ -2088,8 +2520,9 @@
                         };
                     }).filter(s => s.surname || s.name);
                     studentsCurrentPage = 1;
-                    renderStudentsTable();
+                    filteredStudents = [...studentsData];
                     saveToDB();
+                    renderStudentsTable();
                     showToast(`تم استيراد ${studentsData.length} تلميذ بنجاح`);
                 } catch (err) {
                     console.error(err);
@@ -2254,6 +2687,354 @@
             document.getElementById('structuresModalOverlay').classList.add('hidden');
         }
 
+
+        function exportOctoberData() {
+            if (studentsData.length === 0) {
+                showToast('لا توجد بيانات لتصديرها');
+                return;
+            }
+            const levelOrder = { "رابعة": 1, "ثالثة": 2, "ثانية": 3, "أولى": 4 };
+            const sorted = [...studentsData].sort((a, b) => (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99));
+            const rows = sorted.map(s => ({
+                'المستوى': s.level || '',
+                'رقم الفوج': s.group || '',
+                'رقم التعريف': s.id || '',
+                'اللقب': s.surname || '',
+                'الاسم': s.name || '',
+                'الجنس': s.gender || '',
+                'تاريخ الميلاد': s.birthDate || '',
+                'الصفة': s.status || 'خارجي'
+            }));
+            const ws = XLSX.utils.json_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'حالة أول أكتوبر');
+            XLSX.writeFile(wb, 'حالة_أول_أكتوبر_2026-2027.xlsx');
+            showToast('تم تصدير البيانات بنجاح');
+        }
+
+        // ========== TIMETABLE (الجداول الزمنية) ==========
+        const TIME_SLOTS = [
+            { label: '08:00 - 09:00', period: 'صباحي' },
+            { label: '09:00 - 10:00', period: 'صباحي' },
+            { label: '10:00 - 11:00', period: 'صباحي' },
+            { label: '11:00 - 12:00', period: 'صباحي' },
+            { label: '13:30 - 14:30', period: 'مسائي' },
+            { label: '14:30 - 15:30', period: 'مسائي' },
+            { label: '15:30 - 16:30', period: 'مسائي' }
+        ];
+        const WEEK_DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+        // الحجم الساعي الأسبوعي الرسمي (بدون تكرار)
+        const SUBJECT_HOURS = {
+            'اللغة العربية': 5,
+            'اللغة الأمازيغية': 3,
+            'اللغة الفرنسية': 3,
+            'اللغة الإنجليزية': 3,
+            'التربية الاسلامية': 1,
+            'التربية المدنية': 1,
+            'التاريخ والجغرافيا': 3,
+            'الرياضيات': 4,
+            'علوم الطبيعة والحياة': 3,
+            'علوم فيزيائية وتكنولوجيا': 3,
+            'الاعلام الالي': 1,
+            'التربية التشكيلية': 1,
+            'التربية الموسيقية': 1,
+            'التربية البدنية والرياضية': 2
+        };
+        // تطبيع أسماء المواد
+        function normalizeSubject(s) {
+            if (!s) return '';
+            const t = String(s).trim();
+            if (t.includes('إسلام') || t.includes('اسلام')) return 'التربية الاسلامية';
+            if (t.includes('إعلام') || t.includes('اعلام') || t.includes('آلي') || t.includes('الي')) return 'الاعلام الالي';
+            if (t.includes('موسيق') || t.includes('مسويق')) return 'التربية الموسيقية';
+            if (t.includes('بدني') && t.includes('رياض')) return 'التربية البدنية والرياضية';
+            if (t.includes('تشكي')) return 'التربية التشكيلية';
+            if (t.includes('أمازيغ') || t.includes('امازيغ')) return 'اللغة الأمازيغية';
+            if (t.includes('فرنس')) return 'اللغة الفرنسية';
+            if (t.includes('إنجل') || t.includes('انجلي')) return 'اللغة الإنجليزية';
+            if (t.includes('عربي')) return 'اللغة العربية';
+            if (t.includes('رياضيات') || (t.includes('رياض') && !t.includes('بدني'))) return 'الرياضيات';
+            if (t.includes('طبيعة') || t.includes('حياة')) return 'علوم الطبيعة والحياة';
+            if (t.includes('فيزي') || t.includes('تكنو')) return 'علوم فيزيائية وتكنولوجيا';
+            if (t.includes('تاريخ') || t.includes('جغراف')) return 'التاريخ والجغرافيا';
+            if (t.includes('مدني')) return 'التربية المدنية';
+            if (t.includes('إسلام') || t.includes('اسلام')) return 'التربية الاسلامية';
+            return t;
+        }
+        let timetableData = {};
+        let timetableMode = 'student'; // student | teacher
+
+        function getTimetableKey(level, group) {
+            return level + '-' + group;
+        }
+
+        // الثلاثاء (di=2) مساءً (si>=4) بدون دراسة
+        function isBlockedSlot(si, di) {
+            return di === 2 && si >= 4;
+        }
+
+        function setTimetableMode(mode) {
+            timetableMode = mode;
+            const btnS = document.getElementById('btnTtStudent');
+            const btnT = document.getElementById('btnTtTeacher');
+            const wrap = document.getElementById('ttTeacherSelectWrap');
+            if (btnS) {
+                btnS.className = mode === 'student'
+                    ? 'square-btn bg-edu-blue text-white px-4 py-2 text-xs font-bold flex items-center gap-1'
+                    : 'square-btn bg-slate-400 text-white px-4 py-2 text-xs font-bold flex items-center gap-1';
+            }
+            if (btnT) {
+                btnT.className = mode === 'teacher'
+                    ? 'square-btn bg-edu-blue text-white px-4 py-2 text-xs font-bold flex items-center gap-1'
+                    : 'square-btn bg-slate-400 text-white px-4 py-2 text-xs font-bold flex items-center gap-1';
+            }
+            if (wrap) {
+                if (mode === 'teacher') {
+                    wrap.classList.remove('hidden');
+                    populateTeacherSelect();
+                } else {
+                    wrap.classList.add('hidden');
+                }
+            }
+            renderTimetableView();
+        }
+
+        function populateTeacherSelect() {
+            const sel = document.getElementById('ttTeacherSelect');
+            if (!sel) return;
+            const current = sel.value;
+            sel.innerHTML = '<option value="">-- اختر الأستاذ --</option>';
+            const names = new Set();
+            usersData.filter(u => u.role && u.role.includes('أستاذ')).forEach(u => {
+                const n = ((u.surname || '') + ' ' + (u.name || '')).trim();
+                if (n) names.add(n);
+            });
+            assignmentsData.forEach(a => { if (a.teacher) names.add(a.teacher); });
+            Array.from(names).sort().forEach(n => {
+                sel.innerHTML += `<option value="${n}">${n}</option>`;
+            });
+            if (current) sel.value = current;
+        }
+
+        function renderTimetableView() {
+            const level = document.getElementById('ttLevel') ? document.getElementById('ttLevel').value : 'أولى';
+            const group = document.getElementById('ttGroup') ? document.getElementById('ttGroup').value : '1';
+            const key = getTimetableKey(level, group);
+            const data = timetableData[key] || {};
+            const tbody = document.getElementById('timetableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const showTeacher = timetableMode === 'teacher';
+            const filterTeacher = showTeacher ? (document.getElementById('ttTeacherSelect') || {}).value : '';
+            const frag = document.createDocumentFragment();
+
+            TIME_SLOTS.forEach((slot, si) => {
+                const tr = document.createElement('tr');
+                tr.className = slot.period === 'مسائي' ? 'bg-amber-50' : '';
+                let cells = `<td class="p-3 border font-bold font-mono bg-slate-50 text-sm">${slot.label}<br><span class="text-[10px] text-slate-500 font-normal">${slot.period}</span></td>`;
+                WEEK_DAYS.forEach((day, di) => {
+                    if (isBlockedSlot(si, di)) {
+                        cells += `<td class="p-3 border bg-slate-200 text-slate-500 text-xs font-bold">بدون دراسة</td>`;
+                        return;
+                    }
+                    const cellKey = si + '-' + di;
+                    const cell = data[cellKey];
+                    if (showTeacher && filterTeacher) {
+                        // جدول الأستاذ: إظهار الحصة فقط إن كانت لهذا الأستاذ
+                        if (cell && cell.teacher === filterTeacher) {
+                            cells += `<td class="p-3 border"><div class="font-bold text-edu-blue text-sm">${cell.subject || ''}</div><div class="text-[10px] text-slate-500">${level} فوج ${group}</div></td>`;
+                        } else {
+                            cells += `<td class="p-3 border text-slate-300">—</td>`;
+                        }
+                    } else if (cell) {
+                        // جدول التلميذ: بدون اسم الأستاذ
+                        if (showTeacher) {
+                            cells += `<td class="p-3 border"><div class="font-bold text-edu-blue text-sm">${cell.subject || ''}</div><div class="text-[10px] text-slate-600">${cell.teacher || ''}</div></td>`;
+                        } else {
+                            cells += `<td class="p-3 border"><div class="font-bold text-edu-blue text-sm">${cell.subject || ''}</div></td>`;
+                        }
+                    } else {
+                        cells += `<td class="p-3 border text-slate-300">—</td>`;
+                    }
+                });
+                tr.innerHTML = cells;
+                frag.appendChild(tr);
+            });
+            tbody.appendChild(frag);
+
+            const summary = document.getElementById('ttTeachersSummary');
+            if (summary) {
+                const related = assignmentsData.filter(a => a.level === level && String(a.group) === String(group));
+                if (related.length === 0) {
+                    summary.innerHTML = '<span class="text-slate-400">لا توجد إسنادات لهذا الفوج. استخدم «إسناد المواد» أولاً ثم «توليد الجداول».</span>';
+                } else {
+                    summary.innerHTML = related.map(a =>
+                        `<span class="bg-white border border-slate-200 px-2 py-1">${a.subject}: <strong>${a.teacher}</strong></span>`
+                    ).join('');
+                }
+            }
+        }
+
+        function generateTimetable() {
+            const level = document.getElementById('ttLevel').value;
+            const group = document.getElementById('ttGroup').value;
+            // بناء خريطة المادة -> أستاذ من الإسنادات أو الموظفين
+            const teacherMap = {};
+            assignmentsData.filter(a => a.level === level && String(a.group) === String(group)).forEach(a => {
+                const subj = normalizeSubject(a.subject);
+                if (subj) teacherMap[subj] = a.teacher || '—';
+            });
+            usersData.filter(u => u.role && u.role.includes('أستاذ')).forEach(u => {
+                const subj = normalizeSubject(u.subject || '');
+                if (subj && !teacherMap[subj]) {
+                    teacherMap[subj] = ((u.surname || '') + ' ' + (u.name || '')).trim() || '—';
+                }
+            });
+            // جميع المواد الرسمية مع عدد الساعات
+            const allSubjects = Object.keys(SUBJECT_HOURS);
+            allSubjects.forEach(subj => {
+                if (!teacherMap[subj]) teacherMap[subj] = '—';
+            });
+
+            // المواد التي تحتاج ساعتين متتاليتين
+            const consecutiveSubjects = ['اللغة العربية', 'الرياضيات', 'اللغة الفرنسية', 'اللغة الإنجليزية'];
+
+            // بناء شبكة الفترات المتاحة (بدون الثلاثاء مساء)
+            const availableSlots = [];
+            TIME_SLOTS.forEach((slot, si) => {
+                WEEK_DAYS.forEach((day, di) => {
+                    if (!isBlockedSlot(si, di)) {
+                        availableSlots.push({ si, di, key: si + '-' + di });
+                    }
+                });
+            });
+
+            const data = {};
+            availableSlots.forEach(s => { data[s.key] = null; });
+            const usedKeys = new Set();
+
+            // 1) وضع ساعتين متتاليتين لكل مادة رئيسية في نفس اليوم إن أمكن
+            consecutiveSubjects.forEach(subj => {
+                const hoursNeeded = SUBJECT_HOURS[subj] || 2;
+                let placed = 0;
+                // البحث عن فترتين متتاليتين في نفس اليوم
+                for (let di = 0; di < WEEK_DAYS.length && placed < hoursNeeded; di++) {
+                    for (let si = 0; si < TIME_SLOTS.length - 1 && placed < hoursNeeded; si++) {
+                        if (isBlockedSlot(si, di) || isBlockedSlot(si + 1, di)) continue;
+                        const k1 = si + '-' + di;
+                        const k2 = (si + 1) + '-' + di;
+                        if (!usedKeys.has(k1) && !usedKeys.has(k2) && data[k1] === null && data[k2] === null) {
+                            data[k1] = { subject: subj, teacher: teacherMap[subj] };
+                            data[k2] = { subject: subj, teacher: teacherMap[subj] };
+                            usedKeys.add(k1);
+                            usedKeys.add(k2);
+                            placed += 2;
+                            // إذا بقيت ساعة واحدة (مثل العربية 5) نضع لاحقاً
+                            break;
+                        }
+                    }
+                }
+                // باقي الساعات فردية
+                while (placed < hoursNeeded) {
+                    let found = false;
+                    for (const s of availableSlots) {
+                        if (!usedKeys.has(s.key) && data[s.key] === null) {
+                            data[s.key] = { subject: subj, teacher: teacherMap[subj] };
+                            usedKeys.add(s.key);
+                            placed++;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) break;
+                }
+            });
+
+            // 2) باقي المواد
+            allSubjects.forEach(subj => {
+                if (consecutiveSubjects.includes(subj)) return;
+                const hours = SUBJECT_HOURS[subj] || 1;
+                let placed = 0;
+                for (const s of availableSlots) {
+                    if (placed >= hours) break;
+                    if (!usedKeys.has(s.key) && data[s.key] === null) {
+                        data[s.key] = { subject: subj, teacher: teacherMap[subj] };
+                        usedKeys.add(s.key);
+                        placed++;
+                    }
+                }
+            });
+
+            const key = getTimetableKey(level, group);
+            timetableData[key] = data;
+            try { localStorage.setItem('edu_timetable', JSON.stringify(timetableData)); } catch(e) {}
+            renderTimetableView();
+            showToast('تم توليد الجدول — المستوى ' + level + ' فوج ' + group + ' (ساعتان متتاليتان للعربية/رياضيات/فرنسية/إنجليزية — الثلاثاء مساءً بدون دراسة)');
+        }
+
+        function printTimetable() {
+            const level = document.getElementById('ttLevel').value;
+            const group = document.getElementById('ttGroup').value;
+            const key = getTimetableKey(level, group);
+            const data = timetableData[key] || {};
+            const showTeacher = timetableMode === 'teacher';
+            const filterTeacher = showTeacher ? ((document.getElementById('ttTeacherSelect') || {}).value || '') : '';
+            let rows = '';
+            TIME_SLOTS.forEach((slot, si) => {
+                rows += '<tr><td style="border:1px solid #000;padding:6px;font-weight:bold">' + slot.label + '</td>';
+                WEEK_DAYS.forEach((day, di) => {
+                    if (isBlockedSlot(si, di)) {
+                        rows += '<td style="border:1px solid #000;padding:6px;text-align:center;background:#e2e8f0">بدون دراسة</td>';
+                        return;
+                    }
+                    const cell = data[si + '-' + di];
+                    if (showTeacher && filterTeacher) {
+                        if (cell && cell.teacher === filterTeacher) {
+                            rows += '<td style="border:1px solid #000;padding:6px;text-align:center">' + (cell.subject || '') + '<br><small>' + level + ' فوج ' + group + '</small></td>';
+                        } else {
+                            rows += '<td style="border:1px solid #000;padding:6px;text-align:center">—</td>';
+                        }
+                    } else if (cell) {
+                        if (showTeacher) {
+                            rows += '<td style="border:1px solid #000;padding:6px;text-align:center">' + (cell.subject || '') + '<br><small>' + (cell.teacher || '') + '</small></td>';
+                        } else {
+                            rows += '<td style="border:1px solid #000;padding:6px;text-align:center">' + (cell.subject || '') + '</td>';
+                        }
+                    } else {
+                        rows += '<td style="border:1px solid #000;padding:6px;text-align:center">—</td>';
+                    }
+                });
+                rows += '</tr>';
+            });
+            const titleExtra = (showTeacher && filterTeacher) ? (' - الأستاذ: ' + filterTeacher) : (showTeacher ? ' (عرض الإدارة)' : ' - جدول التلميذ');
+            const html = `<div style="font-family:'Cairo',sans-serif;direction:rtl;padding:20px;font-size:12px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+                    <div style="text-align:right;line-height:1.5">
+                        <p style="font-weight:bold;margin:2px">مديرية التربية للجزائر غرب</p>
+                        <p style="font-weight:bold;margin:2px">متوسطة الشهيد خالد مكاوي - سطاوالي</p>
+                        <p style="margin:2px">السنة الدراسية: 2026 - 2027</p>
+                    </div>
+                    <div style="text-align:center"><p style="font-weight:bold">الجمهورية الجزائرية الديمقراطية الشعبية</p><p>وزارة التربية الوطنية</p></div>
+                </div>
+                <h3 style="text-align:center;border-bottom:2px solid #000;display:inline-block;padding-bottom:4px">الجدول الزمني - المستوى ${level} - الفوج ${group}${titleExtra}</h3>
+                <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:11px">
+                    <thead><tr style="background:#eee">
+                        <th style="border:1px solid #000;padding:5px">التوقيت</th>
+                        <th style="border:1px solid #000;padding:5px">الأحد</th>
+                        <th style="border:1px solid #000;padding:5px">الاثنين</th>
+                        <th style="border:1px solid #000;padding:5px">الثلاثاء</th>
+                        <th style="border:1px solid #000;padding:5px">الأربعاء</th>
+                        <th style="border:1px solid #000;padding:5px">الخميس</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+            const w = window.open('', '_blank');
+            w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>الجدول الزمني</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet"></head><body>' + html + '</body></html>');
+            w.document.close();
+            setTimeout(() => w.print(), 400);
+        }
+
         function showToast(text) {
             const toast = document.getElementById('toastMessage');
             document.getElementById('toastText').textContent = text;
@@ -2261,20 +3042,131 @@
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
-        window.onload = function() {
-            const saved = loadFromDB();
-            if (saved) {
-                if (Array.isArray(saved.usersData)) usersData = saved.usersData;
-                if (Array.isArray(saved.studentsData)) studentsData = saved.studentsData;
-                if (Array.isArray(saved.parentsData)) parentsData = saved.parentsData;
-                if (Array.isArray(saved.strikesData)) strikesData = saved.strikesData;
-                if (Array.isArray(saved.assignmentsData)) assignmentsData = saved.assignmentsData;
-                if (Array.isArray(saved.absencesList)) absencesList = saved.absencesList;
-                if (saved.groupsPerLevel && typeof saved.groupsPerLevel === 'object') {
-                    groupsPerLevel = { ...groupsPerLevel, ...saved.groupsPerLevel };
-                }
+        function getStoredPassword() {
+            try { return localStorage.getItem('edu_admin_pass') || 'admin'; } catch(e) { return 'admin'; }
+        }
+        function setStoredPassword(p) {
+            try { localStorage.setItem('edu_admin_pass', p); } catch(e) {}
+        }
+
+        function attemptLogin() {
+            const dir = document.getElementById('loginDirectorate').value;
+            const user = (document.getElementById('loginUser').value || '').trim();
+            const pass = (document.getElementById('loginPass').value || '').trim();
+            const err = document.getElementById('loginError');
+            if (!dir) {
+                err.textContent = 'يرجى اختيار مديرية التربية';
+                err.classList.remove('hidden');
+                return;
             }
-            navigateTo('home');
+            const storedPass = getStoredPassword();
+            if (user === 'admin' && pass === storedPass) {
+                err.classList.add('hidden');
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainHeader').classList.remove('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                try { sessionStorage.setItem('edu_logged_in', '1'); } catch(e) {}
+                const saved = loadFromDB();
+                if (saved) {
+                    if (Array.isArray(saved.usersData)) usersData = saved.usersData;
+                    if (Array.isArray(saved.studentsData)) studentsData = saved.studentsData;
+                    if (Array.isArray(saved.parentsData)) parentsData = saved.parentsData;
+                    if (Array.isArray(saved.strikesData)) strikesData = saved.strikesData;
+                    if (Array.isArray(saved.assignmentsData)) assignmentsData = saved.assignmentsData;
+                    if (Array.isArray(saved.absencesList)) absencesList = saved.absencesList;
+                    if (saved.groupsPerLevel && typeof saved.groupsPerLevel === 'object') {
+                        groupsPerLevel = { ...groupsPerLevel, ...saved.groupsPerLevel };
+                    }
+                }
+                try {
+                    const tt = localStorage.getItem('edu_timetable');
+                    if (tt) timetableData = JSON.parse(tt);
+                } catch(e) {}
+                navigateTo('home');
+                showToast('مرحباً — تم الدخول بنجاح إلى فضاء المؤسسة');
+            } else {
+                err.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة';
+                err.classList.remove('hidden');
+            }
+        }
+
+        function openForgotPasswordModal() {
+            document.getElementById('newPasswordInput').value = '';
+            document.getElementById('confirmPasswordInput').value = '';
+            document.getElementById('forgotPassError').classList.add('hidden');
+            document.getElementById('forgotPasswordOverlay').classList.remove('hidden');
+        }
+        function closeForgotPasswordModal() {
+            document.getElementById('forgotPasswordOverlay').classList.add('hidden');
+        }
+        function confirmPasswordChange() {
+            const np = (document.getElementById('newPasswordInput').value || '').trim();
+            const cp = (document.getElementById('confirmPasswordInput').value || '').trim();
+            const err = document.getElementById('forgotPassError');
+            if (!np || np.length < 4) {
+                err.textContent = 'كلمة المرور يجب أن تكون 4 أحرف على الأقل';
+                err.classList.remove('hidden');
+                return;
+            }
+            if (np !== cp) {
+                err.textContent = 'كلمتا المرور غير متطابقتين';
+                err.classList.remove('hidden');
+                return;
+            }
+            setStoredPassword(np);
+            closeForgotPasswordModal();
+            document.getElementById('loginPass').value = '';
+            showToast('تم تغيير كلمة المرور بنجاح — استخدم الكلمة الجديدة للدخول');
+        }
+
+        function doLogout() {
+            try {
+                sessionStorage.removeItem('edu_logged_in');
+                sessionStorage.removeItem('edu_current_view');
+            } catch(e) {}
+            document.getElementById('mainHeader').classList.add('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            document.getElementById('loginPass').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+            showToast('تم تسجيل الخروج بنجاح');
+        }
+
+        // Enter key on login
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('loginOverlay').classList.contains('hidden')) {
+                attemptLogin();
+            }
+        });
+
+        window.onload = function() {
+            // استعادة الجلسة والصفحة الحالية عند تحديث الصفحة
+            try {
+                const loggedIn = sessionStorage.getItem('edu_logged_in') === '1';
+                if (loggedIn) {
+                    document.getElementById('loginOverlay').classList.add('hidden');
+                    document.getElementById('mainHeader').classList.remove('hidden');
+                    document.getElementById('mainContent').classList.remove('hidden');
+                    const saved = loadFromDB();
+                    if (saved) {
+                        if (Array.isArray(saved.usersData)) usersData = saved.usersData;
+                        if (Array.isArray(saved.studentsData)) studentsData = saved.studentsData;
+                        if (Array.isArray(saved.parentsData)) parentsData = saved.parentsData;
+                        if (Array.isArray(saved.strikesData)) strikesData = saved.strikesData;
+                        if (Array.isArray(saved.assignmentsData)) assignmentsData = saved.assignmentsData;
+                        if (Array.isArray(saved.absencesList)) absencesList = saved.absencesList;
+                        if (saved.groupsPerLevel && typeof saved.groupsPerLevel === 'object') {
+                            groupsPerLevel = { ...groupsPerLevel, ...saved.groupsPerLevel };
+                        }
+                    }
+                    try {
+                        const tt = localStorage.getItem('edu_timetable');
+                        if (tt) timetableData = JSON.parse(tt);
+                    } catch(e) {}
+                    const lastView = sessionStorage.getItem('edu_current_view') || 'home';
+                    navigateTo(lastView);
+                }
+            } catch(e) {}
         };
     </script>
 </body>
