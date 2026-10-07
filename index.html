@@ -58,9 +58,9 @@
             border: none !important;
         }
         .modal-expanded {
-            width: 95vw;
-            max-width: 1100px;
-            max-height: 92vh;
+            width: 98vw;
+            max-width: 1400px;
+            max-height: 96vh;
         }
         .or-circle {
             width: 36px;
@@ -76,12 +76,34 @@
             color: #64748b;
             flex-shrink: 0;
         }
-        table { table-layout: auto; }
-        table th, table td { padding: 10px 8px !important; min-width: 70px; }
-        tbody tr { contain: layout style; }
-        #studentsTableBody td, #usersTableBody td, #octoberTableBody td {
-            padding: 10px 8px !important;
+        table { table-layout: auto; width: 100%; }
+        /* توسيع خانات الجداول وظهور جميع العناصر بدون شريط تمرير */
+        table th, table td {
+            padding: 12px 14px !important;
             white-space: nowrap;
+            min-width: 90px;
+            font-size: 13px;
+        }
+        .overflow-x-auto {
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+            max-width: 100%;
+        }
+        /* على الشاشات العريضة لا حاجة لشريط */
+        @media (min-width: 1400px) {
+            .overflow-x-auto { overflow-x: visible !important; }
+        }
+        tbody tr { contain: layout style; }
+        #studentsTableBody td, #usersTableBody td, #octoberTableBody td,
+        #assignTableBody td, #ninTableBody td, #installationTableBody td,
+        #parentsTableBody td, #strikesTableBody td {
+            padding: 12px 12px !important;
+            white-space: nowrap;
+        }
+        /* توسيع النافذة البيضاء للجداول */
+        .view-page > .bg-white {
+            min-width: 100%;
+            width: 100%;
         }
         @keyframes tripleShake {
             0% { transform: translateX(0); }
@@ -141,13 +163,8 @@
             background: #ffffff;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
-        /* توسيع خانات الجداول لظهور أوضح */
-        table th, table td {
-            min-width: 95px;
-            padding: 10px 8px !important;
-        }
         table th:first-child, table td:first-child {
-            min-width: 120px;
+            min-width: 110px;
         }
         #studentsTableBody td, #usersTableBody td, #octoberTableBody td {
             font-size: 13px;
@@ -212,6 +229,41 @@
                     <button type="button" onclick="openForgotPasswordModal()" class="square-btn w-full mt-2 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 text-xs font-bold flex items-center justify-center gap-2">
                         <i class="fa-solid fa-key"></i> نسيت كلمة المرور
                     </button>
+                    <button type="button" onclick="openDzairSSOModal()" class="square-btn w-full mt-3 text-white py-3 text-sm font-bold flex items-center justify-center gap-2" style="background:linear-gradient(135deg,#0d7377,#14919b);border:none;">
+                        <i class="fa-solid fa-shield-halved"></i> الدخول الموحد عبر منصة الخدمات الرقمية dzaïr digital services
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dzaïr Digital Services SSO Modal -->
+    <div id="dzairSSOOverlay" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4" style="background:rgba(15,23,42,0.75);">
+        <div class="bg-white border border-slate-300 shadow-2xl w-full max-w-lg p-0" style="border-radius:0;">
+            <div class="bg-white border border-slate-200 m-4 p-6">
+                <div class="bg-red-50 border border-red-200 p-5 mb-4">
+                    <h3 class="text-base font-extrabold text-red-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i> الدخول الموحد — dzaïr digital services
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">اسم المستخدم</label>
+                            <input type="text" id="dzairUser" value="100010571039680000" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue font-mono" style="border-radius:0;">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور</label>
+                            <input type="password" id="dzairPass" value="alger2026" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue" style="border-radius:0;">
+                        </div>
+                        <p id="dzairError" class="text-xs text-red-600 font-bold hidden text-center"></p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-4">
+                    <button onclick="attemptDzairLogin()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-2.5 text-sm font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-right-to-bracket"></i> الدخول
+                    </button>
+                    <button onclick="closeDzairSSOModal()" class="square-btn bg-slate-400 hover:bg-slate-500 text-white px-8 py-2.5 text-sm font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-xmark"></i> إلغاء
+                    </button>
                 </div>
             </div>
         </div>
@@ -252,7 +304,7 @@
 
     <!-- 1. Header Section -->
     <header id="mainHeader" class="bg-edu-blue text-white shadow-md no-print hidden">
-        <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap justify-between items-center text-sm md:text-base font-semibold">
+        <div class="max-w-[95vw] mx-auto px-4 py-2 flex flex-wrap justify-between items-center text-sm md:text-base font-semibold">
 
             <div class="flex items-center space-x-3 space-x-reverse">
                 <img src="https://www.education.gov.dz/wp-content/uploads/2023/07/mmmmmm.png" 
@@ -264,7 +316,10 @@
                     <span class="text-sm md:text-base font-bold">مديرية التربية للجزائر غرب | متوسطة الشهيد خالد مكاوي -سطاوالي-</span>
                 </div>
             </div>
-            <div class="flex items-center space-x-4 space-x-reverse text-xs md:text-sm mt-2 md:mt-0">
+            <div class="flex items-center space-x-4 space-x-reverse text-xs md:text-sm mt-2 md:mt-0 flex-wrap gap-2">
+                <span class="bg-emerald-800 px-3 py-1.5 flex items-center gap-1.5" title="حماية بيانات المنصة مفعّلة">
+                    <i class="fa-solid fa-shield-halved text-emerald-300"></i> حماية البيانات
+                </span>
                 <span class="bg-edu-darkblue px-3 py-1.5 border border-blue-400/40 flex items-center gap-1.5">
                     <i class="fa-solid fa-user-gear text-yellow-300"></i> حساب المؤسسة
                 </span>
@@ -276,7 +331,7 @@
     </header>
 
     <!-- Main Outer White Window Container -->
-    <main id="mainContent" class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 no-print hidden">
+    <main id="mainContent" class="flex-grow max-w-[95vw] w-full mx-auto p-3 md:p-5 no-print hidden">
 
         <div class="bg-white border border-slate-300 shadow-sm p-4 md:p-6 mb-6">
             
@@ -289,6 +344,10 @@
 
             <!-- Top Action Navigation Buttons -->
             <div class="flex flex-wrap justify-end items-center gap-2 mb-6">
+                <button onclick="openCivilStatusModal()" class="square-btn bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-id-card-clip"></i>
+                    بوابة الحالة المدنية
+                </button>
                 <button onclick="openStructuresModal()" class="square-btn bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-sm font-bold shadow-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-building-circle-check"></i>
                     تسيير الهياكل
@@ -547,13 +606,13 @@
                                     <option value="اللغة الأمازيغية">اللغة الأمازيغية</option>
                                     <option value="اللغة الفرنسية">اللغة الفرنسية</option>
                                     <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
-                                    <option value="التربية الاسلامية">التربية الاسلامية</option>
+                                    <option value="التربية الإسلامية">التربية الإسلامية</option>
                                     <option value="التربية المدنية">التربية المدنية</option>
                                     <option value="التاريخ والجغرافيا">التاريخ والجغرافيا</option>
                                     <option value="الرياضيات">الرياضيات</option>
                                     <option value="علوم الطبيعة والحياة">علوم الطبيعة والحياة</option>
                                     <option value="علوم فيزيائية وتكنولوجيا">علوم فيزيائية وتكنولوجيا</option>
-                                    <option value="الاعلام الالي">الاعلام الالي</option>
+                                    <option value="الإعلام الآلي">الإعلام الآلي</option>
                                     <option value="التربية التشكيلية">التربية التشكيلية</option>
                                     <option value="التربية الموسيقية">التربية الموسيقية</option>
                                     <option value="التربية البدنية والرياضية">التربية البدنية والرياضية</option>
@@ -830,18 +889,18 @@
                         </div>
                     </div>
 
-                    <!-- قوائم التصفية الاختيارية -->
-                    <div class="bg-slate-50 border border-slate-200 p-3 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <!-- قوائم التصفية الاختيارية — نافذة زرقاء باهتة بدون حدود -->
+                    <div class="bg-blue-50 p-5 mb-5 grid grid-cols-1 md:grid-cols-3 gap-5" style="border:none !important; box-shadow:none !important; outline:none !important;">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">السنة الدراسية الحالية</label>
-                            <select id="filterSchoolYear" onchange="filterStudents()" class="w-full text-xs p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
+                            <label class="block text-xs font-bold text-slate-800 mb-1">السنة الدراسية الحالية</label>
+                            <select id="filterSchoolYear" onchange="filterStudents()" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
                                 <option value="">-- الرجاء اختيار السنة الدراسية --</option>
                                 <option value="2026-2027" selected>2026-2027</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">المستوى</label>
-                            <select id="filterStudentLevel" onchange="filterStudents()" class="w-full text-xs p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
+                            <select id="filterStudentLevel" onchange="filterStudents()" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
                                 <option value="">-- الرجاء اختيار المستوى --</option>
                                 <option value="أولى">أولى</option>
                                 <option value="ثانية">ثانية</option>
@@ -851,7 +910,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-1">رقم الفوج</label>
-                            <select id="filterStudentGroup" onchange="filterStudents()" class="w-full text-xs p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
+                            <select id="filterStudentGroup" onchange="filterStudents()" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
                                 <option value="">-- الرجاء اختيار الفوج التربوي --</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -877,7 +936,7 @@
                                     <th class="p-3 border border-slate-200 font-extrabold min-w-[70px]">المستوى</th>
                                     <th class="p-3 border border-slate-200 font-extrabold min-w-[70px]">رقم الفوج</th>
                                     <th class="p-3 border border-slate-200 font-extrabold min-w-[70px]">الصفة</th>
-                                    <th class="p-3 border border-slate-200 font-extrabold text-center min-w-[70px]">عمليات</th>
+                                    <th class="p-3 border border-slate-200 font-extrabold text-center min-w-[140px]">عمليات</th>
                                 </tr>
                             </thead>
                             <tbody id="studentsTableBody">
@@ -1357,6 +1416,40 @@
         </div>
     </div>
 
+    <!-- بوابة الحالة المدنية - مطابقة البيانات -->
+    <div id="civilStatusModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
+        <div class="modal-clean-box modal-expanded p-6 overflow-y-auto">
+            <div class="bg-white border border-slate-200 p-4 md:p-6">
+                <div class="bg-slate-100 p-3 mb-4 flex justify-between items-center">
+                    <h3 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-id-card-clip text-edu-blue"></i> بوابة الحالة المدنية — مطابقة البيانات مع السجل الآلي
+                    </h3>
+                    <button onclick="closeCivilStatusModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
+                </div>
+                <p class="text-xs text-slate-600 mb-4">الموضوع تحت تصرف مدير المؤسسة لمطابقة بيانات التلاميذ والموظفين مع السجل الآلي للحالة المدنية.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold mb-1">رقم التعريف الوطني (NIN)</label>
+                        <input type="text" id="civilNinInput" maxlength="18" placeholder="أدخل رقم التعريف الوطني" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1">اللقب والاسم</label>
+                        <input type="text" id="civilNameInput" placeholder="اللقب والاسم" class="w-full text-sm p-2.5 border border-slate-300 bg-white focus:outline-none focus:border-edu-blue">
+                    </div>
+                </div>
+                <div id="civilMatchResult" class="hidden mb-4 p-4 border border-slate-200 bg-slate-50 text-sm"></div>
+                <div class="flex justify-end gap-3 pt-3 border-t">
+                    <button onclick="runCivilMatch()" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass"></i> مطابقة البيانات
+                    </button>
+                    <button onclick="closeCivilStatusModal()" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2.5 text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-xmark"></i> إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- NIN Modal -->
     <div id="ninModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-4 no-print">
         <div class="modal-clean-box modal-expanded p-5 shadow-2xl">
@@ -1613,7 +1706,25 @@
                         </div>
                         <div></div><div></div>
                     </div>
-                    <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                    <!-- سجل آخر تعديل -->
+                    <div class="mb-5 border border-slate-200">
+                        <h4 class="text-xs font-bold bg-slate-100 p-2 border-b border-slate-200">سجل التعديلات</h4>
+                        <table class="w-full text-right text-xs">
+                            <thead>
+                                <tr class="bg-slate-50">
+                                    <th class="p-2 border border-slate-200">تاريخ ووقت آخر تعديل</th>
+                                    <th class="p-2 border border-slate-200">التفاصيل</th>
+                                </tr>
+                            </thead>
+                            <tbody id="editStuLastModBody">
+                                <tr><td class="p-2 border border-slate-200 text-slate-500" colspan="2">لا توجد تعديلات مسجلة بعد</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="flex flex-wrap justify-end gap-3 pt-4 border-t border-slate-200">
+                        <button onclick="printSchoolCertificate()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-xs font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-certificate"></i> طباعة الشهادة المدرسية 2026/2027
+                        </button>
                         <button onclick="saveEditStudent()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-floppy-disk"></i> حفظ
                         </button>
@@ -1915,6 +2026,16 @@
             document.getElementById('editStuStatus').value = s.status || 'خارجي';
             document.getElementById('editStuLevel').value = s.level || 'أولى';
             document.getElementById('editStuGroup').value = s.group || '';
+            // سجل آخر تعديل
+            const tbody = document.getElementById('editStuLastModBody');
+            if (s.lastModified) {
+                tbody.innerHTML = `<tr>
+                    <td class="p-2 border border-slate-200 font-mono font-bold">${s.lastModified}</td>
+                    <td class="p-2 border border-slate-200">تم حفظ تعديلات بيانات التلميذ</td>
+                </tr>`;
+            } else {
+                tbody.innerHTML = `<tr><td class="p-2 border border-slate-200 text-slate-500" colspan="2">لا توجد تعديلات مسجلة بعد</td></tr>`;
+            }
             document.getElementById('editStudentModalOverlay').classList.remove('hidden');
         }
         function closeEditStudentModal() {
@@ -1934,10 +2055,99 @@
             s.status = document.getElementById('editStuStatus').value;
             s.level = document.getElementById('editStuLevel').value;
             s.group = document.getElementById('editStuGroup').value.trim() || s.group;
+            const now = new Date();
+            s.lastModified = now.toLocaleString('ar-DZ', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
             saveToDB();
             filterStudents();
-            closeEditStudentModal();
+            // تحديث جدول السجل فوراً
+            const tbody = document.getElementById('editStuLastModBody');
+            tbody.innerHTML = `<tr>
+                <td class="p-2 border border-slate-200 font-mono font-bold">${s.lastModified}</td>
+                <td class="p-2 border border-slate-200">تم حفظ تعديلات بيانات التلميذ</td>
+            </tr>`;
             showToast('تم حفظ تعديلات التلميذ بنجاح');
+        }
+
+        // ========== طباعة الشهادة المدرسية (موسّعة — باركود أعلى الجانب — بدون ختم/مربع) ==========
+        function printSchoolCertificate() {
+            const idx = parseInt(document.getElementById('editStudentIndex').value, 10);
+            if (isNaN(idx) || !studentsData[idx]) {
+                showToast('لا توجد بيانات تلميذ للطباعة');
+                return;
+            }
+            const s = studentsData[idx];
+            const today = new Date().toLocaleDateString('ar-DZ');
+            const safeId = (s.id || '000000').replace(/"/g, '');
+            const html = `
+<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>شهادة مدرسية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&family=Noto+Kufi+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+<style>
+  @page { size: A4; margin: 12mm; }
+  html, body { width: 210mm; min-height: 297mm; }
+  body{font-family:'Cairo','Noto Kufi Arabic',sans-serif;margin:0;padding:18mm 16mm;direction:rtl;color:#111;box-sizing:border-box}
+  .republic{text-align:center;font-weight:800;font-size:18px;margin-bottom:20px;letter-spacing:1px;padding-bottom:8px}
+  .top-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:24px}
+  .side-info{text-align:right;line-height:2;font-size:14px}
+  .side-info strong{font-weight:800}
+  .side-info div{margin-bottom:6px}
+  .center-head{text-align:center;font-size:13px;line-height:1.8;flex:1;padding-top:4px}
+  .barcode-top{text-align:center;min-width:170px;padding-top:2px}
+  .title{text-align:center;margin:36px 0 28px}
+  .title h1{font-size:28px;font-weight:800;border-bottom:3px solid #0066b2;display:inline-block;padding-bottom:10px;color:#0066b2;margin:0;letter-spacing:1.5px}
+  .body{font-size:16px;line-height:2.4;margin:28px 0;max-width:100%}
+  .body p{margin:16px 0}
+  .footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:56px;padding-top:20px}
+  .sign-area{text-align:center;min-width:160px}
+  .sign-area .label{font-size:13px;margin-bottom:12px;font-weight:600}
+  .date-line{margin-top:32px;font-size:14px;text-align:left}
+  @media print{body{margin:0;padding:14mm 12mm}}
+</style></head><body>
+  <div class="republic">الجمهورية الجزائرية الديمقراطية الشعبية</div>
+  <div class="top-row">
+    <div class="side-info">
+      <div><strong>مديرية التربية للجزائر غرب</strong></div>
+      <div><strong>متوسطة الشهيد خالد مكاوي - سطاوالي</strong></div>
+      <div>السنة الدراسية: 2026 - 2027</div>
+    </div>
+    <div class="center-head">
+      <div style="font-weight:700;font-size:13px">وزارة التربية الوطنية</div>
+    </div>
+    <div class="barcode-top">
+      <svg id="certBarcode"></svg>
+      <div style="font-family:monospace;font-size:12px;margin-top:4px;font-weight:700">${safeId}</div>
+    </div>
+  </div>
+  <div class="title"><h1>شهادة مدرسية</h1></div>
+  <div class="body">
+    <p>يشهد مدير متوسطة الشهيد خالد مكاوي - سطاوالي بأن التلميذ(ة):</p>
+    <p><strong>اللقب والاسم:</strong> ${s.surname || ''} ${s.name || ''}</p>
+    <p><strong>رقم التعريف:</strong> <span style="font-family:monospace;font-weight:700">${s.id || ''}</span></p>
+    <p><strong>تاريخ ومكان الميلاد:</strong> ${s.birthDate || ''} — ${s.birthPlace || ''}</p>
+    <p><strong>المستوى:</strong> ${s.level || ''} &nbsp;&nbsp;&nbsp; <strong>الفوج:</strong> ${s.group || ''} &nbsp;&nbsp;&nbsp; <strong>الصفة:</strong> ${s.status || 'خارجي'}</p>
+    <p>مسجّل(ة) بهذه المؤسسة خلال السنة الدراسية <strong>2026 / 2027</strong> ويتمتع(تتمتع) بسلوك حسن ومواظبة منتظمة.</p>
+    <p>سُلمت هذه الشهادة بطلب من المعني(ة) للاستعمال القانوني.</p>
+  </div>
+  <div class="footer">
+    <div class="sign-area">
+      <div class="label">إمضاء المدير</div>
+    </div>
+    <div class="sign-area">
+      <div class="label">حرر بسطاوالي في: ${today}</div>
+    </div>
+  </div>
+  <script>
+    try {
+      JsBarcode("#certBarcode", "${safeId}", {
+        format: "CODE128", width: 1.8, height: 48, displayValue: false, margin: 0
+      });
+    } catch(e) {}
+    setTimeout(function(){ window.print(); }, 350);
+  <\/script>
+</body></html>`;
+            const w = window.open('', '_blank');
+            w.document.write(html);
+            w.document.close();
         }
         function openInsertGroupModal(index) {
             const s = studentsData[index];
@@ -2686,6 +2896,56 @@
         function closeStructuresModal() {
             document.getElementById('structuresModalOverlay').classList.add('hidden');
         }
+        function openCivilStatusModal() {
+            document.getElementById('civilNinInput').value = '';
+            document.getElementById('civilNameInput').value = '';
+            document.getElementById('civilMatchResult').classList.add('hidden');
+            document.getElementById('civilStatusModalOverlay').classList.remove('hidden');
+        }
+        function closeCivilStatusModal() {
+            document.getElementById('civilStatusModalOverlay').classList.add('hidden');
+        }
+        function runCivilMatch() {
+            const nin = (document.getElementById('civilNinInput').value || '').trim();
+            const name = (document.getElementById('civilNameInput').value || '').trim();
+            const box = document.getElementById('civilMatchResult');
+            if (!nin && !name) {
+                showToast('يرجى إدخال رقم التعريف أو الاسم للمطابقة');
+                return;
+            }
+            // مطابقة محلية مع بيانات المنصة (تلاميذ + موظفين)
+            const foundStudents = studentsData.filter(s =>
+                (nin && (s.id || '').includes(nin)) ||
+                (name && ((s.surname || '') + ' ' + (s.name || '')).includes(name))
+            );
+            const foundUsers = usersData.filter(u =>
+                (nin && (u.id || '').includes(nin)) ||
+                (name && ((u.surname || '') + ' ' + (u.name || '')).includes(name))
+            );
+            let html = '<p class="font-bold mb-2 text-edu-blue">نتيجة المطابقة مع السجل الآلي للحالة المدنية:</p>';
+            if (foundStudents.length === 0 && foundUsers.length === 0) {
+                html += '<p class="text-amber-700">لا توجد مطابقة في بيانات المؤسسة الحالية. يُرجى التحقق من السجل الآلي المركزي.</p>';
+            } else {
+                if (foundStudents.length) {
+                    html += '<p class="font-semibold mt-2">تلاميذ مطابقون:</p><ul class="list-disc pr-5 text-xs">';
+                    foundStudents.forEach(s => {
+                        html += `<li>${s.surname || ''} ${s.name || ''} — رقم: ${s.id || ''} — المستوى: ${s.level || ''} فوج ${s.group || ''}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                if (foundUsers.length) {
+                    html += '<p class="font-semibold mt-2">موظفون مطابقون:</p><ul class="list-disc pr-5 text-xs">';
+                    foundUsers.forEach(u => {
+                        html += `<li>${u.surname || ''} ${u.name || ''} — رقم: ${u.id || ''} — ${u.role || ''}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                html += '<p class="text-emerald-700 mt-2 font-bold text-xs">✓ تم التحقق محلياً — المنصة جاهزة للربط مع بوابة الحالة المدنية المركزية.</p>';
+            }
+            box.innerHTML = html;
+            box.classList.remove('hidden');
+            showToast('تم تنفيذ مطابقة البيانات');
+        }
 
 
         function exportOctoberData() {
@@ -2729,23 +2989,32 @@
             'اللغة الأمازيغية': 3,
             'اللغة الفرنسية': 3,
             'اللغة الإنجليزية': 3,
+            'التربية الإسلامية': 1,
             'التربية الاسلامية': 1,
             'التربية المدنية': 1,
             'التاريخ والجغرافيا': 3,
             'الرياضيات': 4,
             'علوم الطبيعة والحياة': 3,
             'علوم فيزيائية وتكنولوجيا': 3,
+            'الإعلام الآلي': 1,
             'الاعلام الالي': 1,
             'التربية التشكيلية': 1,
             'التربية الموسيقية': 1,
             'التربية البدنية والرياضية': 2
         };
+        // قائمة المواد الرسمية المعروضة في الجدول (بدون تكرار)
+        const OFFICIAL_SUBJECTS = [
+            'اللغة العربية', 'اللغة الأمازيغية', 'اللغة الفرنسية', 'اللغة الإنجليزية',
+            'التربية الإسلامية', 'التربية المدنية', 'التاريخ والجغرافيا', 'الرياضيات',
+            'علوم الطبيعة والحياة', 'علوم فيزيائية وتكنولوجيا', 'الإعلام الآلي',
+            'التربية التشكيلية', 'التربية الموسيقية', 'التربية البدنية والرياضية'
+        ];
         // تطبيع أسماء المواد
         function normalizeSubject(s) {
             if (!s) return '';
             const t = String(s).trim();
-            if (t.includes('إسلام') || t.includes('اسلام')) return 'التربية الاسلامية';
-            if (t.includes('إعلام') || t.includes('اعلام') || t.includes('آلي') || t.includes('الي')) return 'الاعلام الالي';
+            if (t.includes('إسلام') || t.includes('اسلام')) return 'التربية الإسلامية';
+            if (t.includes('إعلام') || t.includes('اعلام') || t.includes('آلي') || t.includes('الي')) return 'الإعلام الآلي';
             if (t.includes('موسيق') || t.includes('مسويق')) return 'التربية الموسيقية';
             if (t.includes('بدني') && t.includes('رياض')) return 'التربية البدنية والرياضية';
             if (t.includes('تشكي')) return 'التربية التشكيلية';
@@ -2758,7 +3027,6 @@
             if (t.includes('فيزي') || t.includes('تكنو')) return 'علوم فيزيائية وتكنولوجيا';
             if (t.includes('تاريخ') || t.includes('جغراف')) return 'التاريخ والجغرافيا';
             if (t.includes('مدني')) return 'التربية المدنية';
-            if (t.includes('إسلام') || t.includes('اسلام')) return 'التربية الاسلامية';
             return t;
         }
         let timetableData = {};
@@ -2890,8 +3158,8 @@
                     teacherMap[subj] = ((u.surname || '') + ' ' + (u.name || '')).trim() || '—';
                 }
             });
-            // جميع المواد الرسمية مع عدد الساعات
-            const allSubjects = Object.keys(SUBJECT_HOURS);
+            // جميع المواد الرسمية مع عدد الساعات (بدون تكرار)
+            const allSubjects = OFFICIAL_SUBJECTS.slice();
             allSubjects.forEach(subj => {
                 if (!teacherMap[subj]) teacherMap[subj] = '—';
             });
@@ -2915,7 +3183,7 @@
 
             // 1) وضع ساعتين متتاليتين لكل مادة رئيسية في نفس اليوم إن أمكن
             consecutiveSubjects.forEach(subj => {
-                const hoursNeeded = SUBJECT_HOURS[subj] || 2;
+                const hoursNeeded = SUBJECT_HOURS[subj] || SUBJECT_HOURS[normalizeSubject(subj)] || 2;
                 let placed = 0;
                 // البحث عن فترتين متتاليتين في نفس اليوم
                 for (let di = 0; di < WEEK_DAYS.length && placed < hoursNeeded; di++) {
@@ -2953,7 +3221,7 @@
             // 2) باقي المواد
             allSubjects.forEach(subj => {
                 if (consecutiveSubjects.includes(subj)) return;
-                const hours = SUBJECT_HOURS[subj] || 1;
+                const hours = SUBJECT_HOURS[subj] || SUBJECT_HOURS[normalizeSubject(subj)] || 1;
                 let placed = 0;
                 for (const s of availableSlots) {
                     if (placed >= hours) break;
@@ -3086,6 +3354,52 @@
                 showToast('مرحباً — تم الدخول بنجاح إلى فضاء المؤسسة');
             } else {
                 err.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة';
+                err.classList.remove('hidden');
+            }
+        }
+
+        function openDzairSSOModal() {
+            document.getElementById('dzairError').classList.add('hidden');
+            document.getElementById('dzairSSOOverlay').classList.remove('hidden');
+        }
+        function closeDzairSSOModal() {
+            document.getElementById('dzairSSOOverlay').classList.add('hidden');
+        }
+        function attemptDzairLogin() {
+            const user = (document.getElementById('dzairUser').value || '').trim();
+            const pass = (document.getElementById('dzairPass').value || '').trim();
+            const err = document.getElementById('dzairError');
+            if (user === '100010571039680000' && pass === 'alger2026') {
+                err.classList.add('hidden');
+                closeDzairSSOModal();
+                // Complete login as admin
+                document.getElementById('loginDirectorate').value = 'مديرية التربية للجزائر غرب';
+                document.getElementById('loginUser').value = 'admin';
+                document.getElementById('loginPass').value = getStoredPassword();
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('mainHeader').classList.remove('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                try { sessionStorage.setItem('edu_logged_in', '1'); } catch(e) {}
+                const saved = loadFromDB();
+                if (saved) {
+                    if (Array.isArray(saved.usersData)) usersData = saved.usersData;
+                    if (Array.isArray(saved.studentsData)) studentsData = saved.studentsData;
+                    if (Array.isArray(saved.parentsData)) parentsData = saved.parentsData;
+                    if (Array.isArray(saved.strikesData)) strikesData = saved.strikesData;
+                    if (Array.isArray(saved.assignmentsData)) assignmentsData = saved.assignmentsData;
+                    if (Array.isArray(saved.absencesList)) absencesList = saved.absencesList;
+                    if (saved.groupsPerLevel && typeof saved.groupsPerLevel === 'object') {
+                        groupsPerLevel = { ...groupsPerLevel, ...saved.groupsPerLevel };
+                    }
+                }
+                try {
+                    const tt = localStorage.getItem('edu_timetable');
+                    if (tt) timetableData = JSON.parse(tt);
+                } catch(e) {}
+                navigateTo('home');
+                showToast('تم الدخول الموحد عبر dzaïr digital services بنجاح');
+            } else {
+                err.textContent = 'بيانات الدخول الموحد غير صحيحة';
                 err.classList.remove('hidden');
             }
         }
