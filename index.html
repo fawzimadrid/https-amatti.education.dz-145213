@@ -1192,8 +1192,12 @@
                             <button onclick="openAssignModal()" class="square-btn w-full bg-edu-blue hover:bg-edu-darkblue text-white px-3 py-2 text-xs font-bold flex items-center justify-center gap-1 mb-3">
                                 <i class="fa-solid fa-plus"></i> إسناد المواد
                             </button>
-                            <button onclick="addSubstituteFromSide()" class="square-btn w-full bg-white text-amber-800 px-3 py-2 text-xs font-bold flex items-center justify-center gap-1" style="border:2px solid #c2410c !important;">
+                            <button onclick="addSubstituteFromSide()" class="square-btn w-full bg-white text-amber-800 px-3 py-2 text-xs font-bold flex items-center justify-center gap-1 mb-3" style="border:2px solid #c2410c !important;">
                                 <i class="fa-solid fa-user-plus"></i> إضافة استخلاف / تكملة نصاب
+                            </button>
+                            <input type="file" id="assignTeachersExcelInput" accept=".csv,.xlsx,.xls" class="hidden" onchange="importAssignedTeachers(event)">
+                            <button onclick="document.getElementById('assignTeachersExcelInput').click()" class="square-btn w-full bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 text-xs font-bold flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-file-excel"></i> استيراد قائمة الأساتذة المسندة (Excel)
                             </button>
                         </div>
 
@@ -3195,6 +3199,88 @@
                     showToast('تم حذف الإسناد');
                 }
             }
+        }
+
+        // ========== استيراد قائمة الأساتذة المسندة من Excel ==========
+        function importAssignedTeachers(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            showToast(`جاري استيراد قائمة الأساتذة المسندة: ${file.name}`);
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+                    if (json.length === 0) {
+                        showToast('الملف فارغ أو غير صالح');
+                        return;
+                    }
+                    const yearEl = document.getElementById('assignSideYear');
+                    const defaultYear = (yearEl && yearEl.value) ? yearEl.value : '2026-2027';
+                    let added = 0;
+                    let skipped = 0;
+                    json.forEach((row) => {
+                        const get = (...keys) => {
+                            for (const k of keys) {
+                                if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return String(row[k]).trim();
+                            }
+                            return '';
+                        };
+                        const level = normalizeLevel(get('المستوى', 'level', 'Level', 'السنة'));
+                        const group = get('رقم الفوج', 'الفوج', 'group', 'Group', 'الفوج التربوي', 'رقم القسم') || '1';
+                        const subject = get('المادة', 'subject', 'Subject', 'المادة الدراسية');
+                        const teacher = get('الأستاذ', 'الأستاذ(ة)', 'teacher', 'Teacher', 'اسم الأستاذ', 'الأستاذ المسند');
+                        const responsible = get('مسؤول المادة', 'responsible', 'مسؤول') || teacher;
+                        const year = get('السنة الدراسية', 'year', 'Year') || defaultYear;
+                        if (!subject && !teacher) return;
+                        // منع التكرار: نفس المستوى + الفوج + المادة (+ الأستاذ إن وُجد)
+                        const exists = assignmentsData.some(a =>
+                            a.level === (level || 'أولى') &&
+                            String(a.group) === String(group) &&
+                            (a.subject || '') === (subject || '') &&
+                            (!teacher || (a.teacher || '') === teacher)
+                        );
+                        if (exists) {
+                            skipped++;
+                            return;
+                        }
+                        assignmentsData.push({
+                            level: level || 'أولى',
+                            group: String(group),
+                            subject: subject || '',
+                            teacher: teacher || '',
+                            responsible: responsible || teacher || '',
+                            teacherId: `IMP-ASG-${Date.now()}-${added}`,
+                            year
+                        });
+                        added++;
+                    });
+                    if (added === 0 && skipped === 0) {
+                        showToast('لم يتم العثور على صفوف صالحة في الملف');
+                        return;
+                    }
+                    if (added === 0 && skipped > 0) {
+                        showToast(`جميع الصفوف مكررة — لم يُضف أي إسناد جديد (${skipped} مكرر)`);
+                        return;
+                    }
+                    saveToDB();
+                    renderAssignSubjectsTable();
+                    const msg = skipped > 0
+                        ? `تم إضافة ${added} إسناد · تم تجاهل ${skipped} مكرر`
+                        : `تم استيراد ${added} إسناد من قائمة الأساتذة بنجاح`;
+                    showToast(msg);
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({ icon: 'success', title: 'تم الاستيراد', text: msg, timer: 2800, showConfirmButton: false });
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('حدث خطأ أثناء قراءة ملف الإسنادات');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            e.target.value = '';
         }
 
         // ========== STRIKES ==========
