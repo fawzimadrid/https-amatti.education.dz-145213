@@ -1237,7 +1237,7 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">الفوج التربوي</label>
                                 <select id="exemptGroup" onchange="renderExemptTable()" class="w-full text-xs p-2 border border-slate-300 bg-white" style="border-radius:0;">
-                                    <option value="">-- جميع الأفواج --</option>
+                                    <option value="">-- الرجاء اختيار الفوج التربوي --</option>
                                     <option value="أولى-1">أولى متوسط 1</option>
                                     <option value="أولى-2">أولى متوسط 2</option>
                                     <option value="أولى-3">أولى متوسط 3</option>
@@ -1260,7 +1260,7 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">المادة</label>
                                 <select id="exemptSubject" onchange="renderExemptTable()" class="w-full text-xs p-2 border border-slate-300 bg-white" style="border-radius:0;">
-                                    <option value="">-- جميع المواد --</option>
+                                    <option value="">-- الرجاء اختيار المادة --</option>
                                     <option value="اللغة العربية">اللغة العربية</option>
                                     <option value="اللغة الأمازيغية">اللغة الأمازيغية</option>
                                     <option value="اللغة الفرنسية">اللغة الفرنسية</option>
@@ -1277,9 +1277,12 @@
                                     <option value="التربية البدنية والرياضية">التربية البدنية والرياضية</option>
                                 </select>
                             </div>
-                            <div class="flex items-end">
-                                <button onclick="applyFullExemption()" class="square-btn w-full bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-xs font-bold flex items-center justify-center gap-2">
+                            <div class="flex items-end gap-2 flex-wrap">
+                                <button onclick="applyFullExemption()" class="square-btn flex-1 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-xs font-bold flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-ban"></i> اعفاء كلي
+                                </button>
+                                <button onclick="cancelFullExemption()" class="square-btn flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-xs font-bold flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-rotate-left"></i> إلغاء الإعفاء الكلي
                                 </button>
                             </div>
                         </div>
@@ -1296,6 +1299,7 @@
                                         <th class="p-2.5 border">الاختبار</th>
                                         <th class="p-2.5 border">المعدل</th>
                                         <th class="p-2.5 border">التقديرات</th>
+                                        <th class="p-2.5 border text-center">عمليات</th>
                                     </tr>
                                 </thead>
                                 <tbody id="exemptTableBody"></tbody>
@@ -2921,22 +2925,32 @@
             if (!tbody) return;
             tbody.innerHTML = '';
             const groupFilter = (document.getElementById('exemptGroup') || {}).value || '';
-            let list = studentsData.slice();
-            if (groupFilter) {
-                const [lvl, grp] = groupFilter.split('-');
-                list = list.filter(s => s.level === lvl && String(s.group) === String(grp));
+            const subjectFilter = (document.getElementById('exemptSubject') || {}).value || '';
+            // لا تظهر القوائم إلا بعد اختيار الفوج التربوي والمادة المحددة
+            if (!groupFilter) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-6 text-slate-500">يرجى اختيار الفوج التربوي أولاً لعرض قائمة التلاميذ والإعفاءات.</td></tr>`;
+                return;
             }
+            if (!subjectFilter) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-6 text-slate-500">يرجى اختيار المادة من القائمة لعرض الإعفاءات الخاصة بها فقط — لا تُعرض جميع المواد دفعة واحدة.</td></tr>`;
+                return;
+            }
+            const [lvl, grp] = groupFilter.split('-');
+            let list = studentsData.filter(s => s.level === lvl && String(s.group) === String(grp));
             if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="text-center p-6 text-slate-500">لا توجد تلاميذ. استورد البيانات أو اختر فوجاً آخر.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center p-6 text-slate-500">لا توجد تلاميذ في هذا الفوج. استورد البيانات أو اختر فوجاً آخر.</td></tr>`;
                 return;
             }
             const frag = document.createDocumentFragment();
             list.forEach(s => {
-                const key = s.id || (s.surname + s.name);
+                const sid = s.id || (s.surname + s.name);
+                const key = sid + '|' + subjectFilter;
                 const ex = (window._exemptions && window._exemptions[key]) || {};
+                const isExempt = ex.continuous === 'معفى';
                 const tr = document.createElement('tr');
                 tr.className = 'border-b hover:bg-slate-50';
                 const cell = (v) => (v === 'معفى' ? '<span class="bg-amber-100 text-amber-800 px-2 py-0.5 text-xs font-bold">معفى</span>' : (v || '—'));
+                const safeId = String(sid).replace(/'/g, "\\'");
                 tr.innerHTML = `
                     <td class="p-2.5 border font-mono font-bold text-edu-blue">${s.id || ''}</td>
                     <td class="p-2.5 border font-semibold">${s.surname || ''}</td>
@@ -2946,40 +2960,125 @@
                     <td class="p-2.5 border text-center">${cell(ex.tests)}</td>
                     <td class="p-2.5 border text-center">${cell(ex.exam)}</td>
                     <td class="p-2.5 border text-center">${cell(ex.average)}</td>
-                    <td class="p-2.5 border text-center">${cell(ex.appreciation)}</td>`;
+                    <td class="p-2.5 border text-center">${cell(ex.appreciation)}</td>
+                    <td class="p-2.5 border text-center">
+                        ${isExempt
+                            ? `<button onclick="cancelManualExemption('${safeId}')" class="square-btn bg-slate-500 hover:bg-slate-600 text-white px-2 py-1 text-xs font-bold" title="إلغاء الإعفاء"><i class="fa-solid fa-rotate-left"></i> إلغاء</button>`
+                            : `<button onclick="applyManualExemption('${safeId}')" class="square-btn bg-amber-600 hover:bg-amber-700 text-white px-2 py-1 text-xs font-bold" title="إعفاء يدوي"><i class="fa-solid fa-ban"></i> إعفاء يدوي</button>`
+                        }
+                    </td>`;
                 frag.appendChild(tr);
             });
             tbody.appendChild(frag);
         }
 
+        function applyManualExemption(studentId) {
+            if (!window._exemptions) window._exemptions = {};
+            const subjectFilter = (document.getElementById('exemptSubject') || {}).value || '';
+            if (!subjectFilter) {
+                showToast('يرجى اختيار المادة أولاً');
+                return;
+            }
+            const key = studentId + '|' + subjectFilter;
+            window._exemptions[key] = {
+                continuous: 'معفى', tests: 'معفى', exam: 'معفى', average: 'معفى', appreciation: 'معفى'
+            };
+            try { localStorage.setItem('edu_exemptions', JSON.stringify(window._exemptions)); } catch(e) {}
+            saveToDB();
+            renderExemptTable();
+            showToast('تم تطبيق الإعفاء اليدوي للتلميذ في المادة المختارة');
+        }
+
+        function cancelManualExemption(studentId) {
+            if (!window._exemptions) window._exemptions = {};
+            const subjectFilter = (document.getElementById('exemptSubject') || {}).value || '';
+            if (!subjectFilter) return;
+            const key = studentId + '|' + subjectFilter;
+            delete window._exemptions[key];
+            try { localStorage.setItem('edu_exemptions', JSON.stringify(window._exemptions)); } catch(e) {}
+            saveToDB();
+            renderExemptTable();
+            showToast('تم إلغاء الإعفاء اليدوي للتلميذ');
+        }
+
+        function cancelFullExemption() {
+            if (!window._exemptions) window._exemptions = {};
+            const groupFilter = (document.getElementById('exemptGroup') || {}).value || '';
+            const subjectFilter = (document.getElementById('exemptSubject') || {}).value || '';
+            if (!groupFilter) {
+                showToast('يرجى اختيار الفوج التربوي أولاً');
+                return;
+            }
+            if (!subjectFilter) {
+                showToast('يرجى اختيار المادة أولاً');
+                return;
+            }
+            const [lvl, grp] = groupFilter.split('-');
+            let list = studentsData.filter(s => s.level === lvl && String(s.group) === String(grp));
+            if (list.length === 0) {
+                showToast('لا يوجد تلاميذ في هذا الفوج');
+                return;
+            }
+            const doCancel = () => {
+                list.forEach(s => {
+                    const key = (s.id || (s.surname + s.name)) + '|' + subjectFilter;
+                    delete window._exemptions[key];
+                });
+                try { localStorage.setItem('edu_exemptions', JSON.stringify(window._exemptions)); } catch(e) {}
+                saveToDB();
+                renderExemptTable();
+                showToast(`تم إلغاء الإعفاء الكلي عن ${list.length} تلميذ في مادة: ${subjectFilter}`);
+            };
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'إلغاء الإعفاء الكلي',
+                    html: `هل تريد إلغاء الإعفاء الكلي عن <strong>${list.length}</strong> تلميذ<br>في مادة: <strong>${subjectFilter}</strong>؟`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم، إلغاء',
+                    cancelButtonText: 'تراجع',
+                    confirmButtonColor: '#dc2626'
+                }).then(r => { if (r.isConfirmed) doCancel(); });
+            } else {
+                if (confirm(`هل تريد إلغاء الإعفاء الكلي عن ${list.length} تلميذ في مادة ${subjectFilter}؟`)) doCancel();
+            }
+        }
+
         function applyFullExemption() {
             if (!window._exemptions) window._exemptions = {};
             const groupFilter = (document.getElementById('exemptGroup') || {}).value || '';
-            let list = studentsData.slice();
-            if (groupFilter) {
-                const [lvl, grp] = groupFilter.split('-');
-                list = list.filter(s => s.level === lvl && String(s.group) === String(grp));
+            const subjectFilter = (document.getElementById('exemptSubject') || {}).value || '';
+            if (!groupFilter) {
+                showToast('يرجى اختيار الفوج التربوي أولاً قبل تطبيق الإعفاء');
+                return;
             }
+            if (!subjectFilter) {
+                showToast('يرجى اختيار المادة أولاً — الإعفاء يُطبَّق على المادة المختارة فقط');
+                return;
+            }
+            const [lvl, grp] = groupFilter.split('-');
+            let list = studentsData.filter(s => s.level === lvl && String(s.group) === String(grp));
             if (list.length === 0) {
-                showToast('لا يوجد تلاميذ لتطبيق الإعفاء');
+                showToast('لا يوجد تلاميذ في هذا الفوج لتطبيق الإعفاء');
                 return;
             }
             const doExempt = () => {
                 list.forEach(s => {
-                    const key = s.id || (s.surname + s.name);
+                    const key = (s.id || (s.surname + s.name)) + '|' + subjectFilter;
                     window._exemptions[key] = {
                         continuous: 'معفى', tests: 'معفى', exam: 'معفى',
-                        average: 'معفى', appreciation: 'معفى'
+                        average: 'معفى', appreciation: 'معفى',
+                        subject: subjectFilter
                     };
                 });
                 try { localStorage.setItem('edu_exemptions', JSON.stringify(window._exemptions)); } catch(e) {}
                 renderExemptTable();
-                showToast(`تم تطبيق الإعفاء الكلي على ${list.length} تلميذ`);
+                showToast(`تم تطبيق الإعفاء الكلي على ${list.length} تلميذ في مادة: ${subjectFilter}`);
             };
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: 'اعفاء كلي',
-                    text: `هل تريد تطبيق الإعفاء الكلي على ${list.length} تلميذ؟`,
+                    html: `هل تريد تطبيق الإعفاء الكلي على <strong>${list.length}</strong> تلميذ<br>في مادة: <strong>${subjectFilter}</strong>؟`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'نعم، اعفاء كلي',
@@ -2987,7 +3086,7 @@
                     confirmButtonColor: '#d97706'
                 }).then(r => { if (r.isConfirmed) doExempt(); });
             } else {
-                if (confirm(`هل تريد تطبيق الإعفاء الكلي على ${list.length} تلميذ؟`)) doExempt();
+                if (confirm(`هل تريد تطبيق الإعفاء الكلي على ${list.length} تلميذ في مادة ${subjectFilter}؟`)) doExempt();
             }
         }
 
@@ -3266,59 +3365,102 @@
                 showToast('لا توجد بيانات تلاميذ للطباعة');
                 return;
             }
+            // التصفية حسب المستوى والفوج من قوائم الدخول المدرسي — إن لم يُختر شيء تظهر جميع القوائم
+            const levelEl = document.getElementById('filterStudentLevel');
+            const groupEl = document.getElementById('filterStudentGroup');
+            const yearEl = document.getElementById('filterSchoolYear');
+            const levelFilter = levelEl ? levelEl.value : '';
+            const groupFilter = groupEl ? groupEl.value : '';
+            const yearLabel = (yearEl && yearEl.value) ? yearEl.value : '2026-2027';
+
+            let list = studentsData.slice();
+            if (levelFilter) list = list.filter(s => s.level === levelFilter);
+            if (groupFilter) list = list.filter(s => String(s.group) === String(groupFilter));
+
+            if (list.length === 0) {
+                showToast('لا توجد تلاميذ مطابقون للتصفية المختارة');
+                return;
+            }
+
             const levelOrder = { "رابعة": 1, "ثالثة": 2, "ثانية": 3, "أولى": 4 };
-            const sorted = [...studentsData].sort((a, b) => (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99));
-            let rows = '';
-            sorted.forEach((s, i) => {
-                rows += `<tr>
-                    <td style="border:1px solid #000;padding:4px;text-align:center">${i+1}</td>
-                    <td style="border:1px solid #000;padding:4px">${s.id||''}</td>
-                    <td style="border:1px solid #000;padding:4px">${s.surname||''}</td>
-                    <td style="border:1px solid #000;padding:4px">${s.name||''}</td>
-                    <td style="border:1px solid #000;padding:4px;text-align:center">${s.gender||''}</td>
-                    <td style="border:1px solid #000;padding:4px">${s.birthDate||''}</td>
-                    <td style="border:1px solid #000;padding:4px">${s.level||''}</td>
-                    <td style="border:1px solid #000;padding:4px;text-align:center">${s.group||''}</td>
-                    <td style="border:1px solid #000;padding:4px">${s.status||'خارجي'}</td>
-                </tr>`;
+            list.sort((a, b) => {
+                const lo = (levelOrder[a.level] || 99) - (levelOrder[b.level] || 99);
+                if (lo !== 0) return lo;
+                return (parseInt(a.group, 10) || 0) - (parseInt(b.group, 10) || 0);
             });
-            const html = `
-                <div style="font-family:'Cairo',sans-serif;direction:rtl;padding:20px;font-size:12px">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
-                        <div style="text-align:right; font-size:12px; line-height:1.6;">
-                            <p style="margin:2px; font-weight:bold;">مديرية التربية للجزائر غرب</p>
-                            <p style="margin:2px; font-weight:bold;">متوسطة الشهيد خالد مكاوي - سطاوالي</p>
-                            <p style="margin:2px;">السنة الدراسية: 2026 - 2027</p>
+
+            // تجميع حسب المستوى ثم الفوج لطباعة قوائم منفصلة
+            const groups = {};
+            list.forEach(s => {
+                const key = (s.level || 'أولى') + '|' + (s.group || '1');
+                if (!groups[key]) groups[key] = [];
+                groups[key].push(s);
+            });
+
+            let bodyHtml = '';
+            Object.keys(groups).sort((a, b) => {
+                const [la, ga] = a.split('|');
+                const [lb, gb] = b.split('|');
+                const lo = (levelOrder[la] || 99) - (levelOrder[lb] || 99);
+                if (lo !== 0) return lo;
+                return (parseInt(ga, 10) || 0) - (parseInt(gb, 10) || 0);
+            }).forEach(key => {
+                const [lvl, grp] = key.split('|');
+                const arr = groups[key];
+                let rows = '';
+                arr.forEach((s, i) => {
+                    rows += `<tr>
+                        <td style="border:1px solid #000;padding:4px;text-align:center">${i+1}</td>
+                        <td style="border:1px solid #000;padding:4px">${s.id||''}</td>
+                        <td style="border:1px solid #000;padding:4px">${s.surname||''}</td>
+                        <td style="border:1px solid #000;padding:4px">${s.name||''}</td>
+                        <td style="border:1px solid #000;padding:4px;text-align:center">${s.gender||''}</td>
+                        <td style="border:1px solid #000;padding:4px">${s.birthDate||''}</td>
+                        <td style="border:1px solid #000;padding:4px">${s.level||''}</td>
+                        <td style="border:1px solid #000;padding:4px;text-align:center">${s.group||''}</td>
+                        <td style="border:1px solid #000;padding:4px">${s.status||'خارجي'}</td>
+                    </tr>`;
+                });
+                bodyHtml += `
+                    <div style="page-break-after:always; margin-bottom:24px;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                            <div style="text-align:right; font-size:12px; line-height:1.6;">
+                                <p style="margin:2px; font-weight:bold;">مديرية التربية للجزائر غرب</p>
+                                <p style="margin:2px; font-weight:bold;">متوسطة الشهيد خالد مكاوي - سطاوالي</p>
+                                <p style="margin:2px;">السنة الدراسية: ${yearLabel}</p>
+                            </div>
+                            <div style="text-align:center;">
+                                <p style="font-weight:bold;margin:2px">الجمهورية الجزائرية الديمقراطية الشعبية</p>
+                                <p style="margin:2px">وزارة التربية الوطنية</p>
+                                <h3 style="margin-top:8px;border-bottom:2px solid #000;display:inline-block;padding-bottom:3px">القائمة الاسمية — المستوى: ${lvl} · الفوج: ${grp}</h3>
+                            </div>
+                            <div style="width:120px;"></div>
                         </div>
-                        <div style="text-align:center;">
-                            <p style="font-weight:bold;margin:2px">الجمهورية الجزائرية الديمقراطية الشعبية</p>
-                            <p style="margin:2px">وزارة التربية الوطنية</p>
-                            <h3 style="margin-top:10px;border-bottom:2px solid #000;display:inline-block;padding-bottom:3px">القائمة الاسمية للتلاميذ</h3>
-                        </div>
-                        <div style="width:140px;"></div>
-                    </div>
-                    <table style="width:100%;border-collapse:collapse;font-size:11px">
-                        <thead>
-                            <tr style="background:#eee">
-                                <th style="border:1px solid #000;padding:5px">ر.ت</th>
-                                <th style="border:1px solid #000;padding:5px">رقم التعريف</th>
-                                <th style="border:1px solid #000;padding:5px">اللقب</th>
-                                <th style="border:1px solid #000;padding:5px">الاسم</th>
-                                <th style="border:1px solid #000;padding:5px">الجنس</th>
-                                <th style="border:1px solid #000;padding:5px">تاريخ الميلاد</th>
-                                <th style="border:1px solid #000;padding:5px">المستوى</th>
-                                <th style="border:1px solid #000;padding:5px">الفوج</th>
-                                <th style="border:1px solid #000;padding:5px">الصفة</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                    <p style="margin-top:20px;text-align:left">حرر بسطاوالي في: ${new Date().toLocaleDateString('ar-DZ')}</p>
-                </div>`;
+                        <table style="width:100%;border-collapse:collapse;font-size:11px">
+                            <thead>
+                                <tr style="background:#eee">
+                                    <th style="border:1px solid #000;padding:5px">ر.ت</th>
+                                    <th style="border:1px solid #000;padding:5px">رقم التعريف</th>
+                                    <th style="border:1px solid #000;padding:5px">اللقب</th>
+                                    <th style="border:1px solid #000;padding:5px">الاسم</th>
+                                    <th style="border:1px solid #000;padding:5px">الجنس</th>
+                                    <th style="border:1px solid #000;padding:5px">تاريخ الميلاد</th>
+                                    <th style="border:1px solid #000;padding:5px">المستوى</th>
+                                    <th style="border:1px solid #000;padding:5px">الفوج</th>
+                                    <th style="border:1px solid #000;padding:5px">الصفة</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                        <p style="margin-top:12px;text-align:left;font-size:11px">عدد التلاميذ: ${arr.length} — حرر بسطاوالي في: ${new Date().toLocaleDateString('ar-DZ')}</p>
+                    </div>`;
+            });
+
+            const html = `<div style="font-family:'Cairo',sans-serif;direction:rtl;padding:16px;font-size:12px">${bodyHtml}</div>`;
             const printWin = window.open('', '_blank');
             printWin.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>القوائم الاسمية</title>
                 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-                <style>body{margin:0;padding:0} @media print{body{margin:10mm}}</style></head><body>${html}</body></html>`);
+                <style>body{margin:0;padding:0} @media print{body{margin:8mm} .page-break-after{page-break-after:always}}</style></head><body>${html}</body></html>`);
             printWin.document.close();
             setTimeout(() => { printWin.print(); }, 400);
         }
