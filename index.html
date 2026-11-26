@@ -284,6 +284,36 @@
             .no-print { display: none !important; }
         }
         .kufi-font { font-family: 'Noto Kufi Arabic', 'Cairo', sans-serif; }
+
+        /* ===== ضبط الأحجام: عرض منطقي ومتوسط ===== */
+        table th, table td { padding: 8px 10px !important; font-size: 12.5px !important; min-width: 0 !important; }
+        table th:first-child, table td:first-child { min-width: 0 !important; }
+        #studentsTableBody td, #usersTableBody td, #octoberTableBody td,
+        #assignTableBody td, #ninTableBody td, #installationTableBody td,
+        #parentsTableBody td, #strikesTableBody td, #examsTableBody td {
+            padding: 7px 10px !important; font-size: 12.5px !important; white-space: nowrap;
+        }
+        .view-page .square-card.h-44 { height: 9rem; }
+        .modal-expanded { width: 94vw; max-width: 1200px; max-height: 90vh; }
+        /* ===== الإشعارات: حجم متوسط عادي في نفس المكان (أسفل الشاشة) ===== */
+        .swal2-container .swal2-popup.swal2-toast {
+            font-size: 13px !important; padding: .45em .9em !important; width: auto !important;
+            max-width: min(360px, 90vw) !important; min-height: 0 !important; border-radius: 0 !important;
+            box-shadow: 0 4px 14px rgba(0,0,0,.18) !important;
+        }
+        .swal2-popup.swal2-toast .swal2-title { font-size: 1em !important; margin: 0 .6em !important; font-weight: 600; line-height: 1.5; }
+        .swal2-popup.swal2-toast .swal2-icon { zoom: .65; margin: 0 0 0 .3em !important; }
+        .swal2-popup.swal2-toast .swal2-timer-progress-bar { height: 2px; }
+        .swal2-container .swal2-popup:not(.swal2-toast) { font-size: 13px !important; width: 27em !important; padding: 1.1em 1em !important; border-radius: 0 !important; }
+        .swal2-container .swal2-popup:not(.swal2-toast) .swal2-title { font-size: 1.15em !important; padding: .3em 0 0; }
+        .swal2-container .swal2-popup:not(.swal2-toast) .swal2-html-container { font-size: 1em !important; }
+        .swal2-container .swal2-popup:not(.swal2-toast) .swal2-icon { zoom: .7; margin: .5em auto; }
+        .swal2-container .swal2-styled { font-size: .95em !important; padding: .5em 1.3em !important; border-radius: 0 !important; }
+        #toastMessage { padding: 8px 14px !important; font-size: 12px !important; }
+        /* ===== حالة التسجيل في الامتحانات الرسمية ===== */
+        .reg-badge { display: inline-block; padding: 3px 14px; font-size: 12px; font-weight: 700; color: #fff; border: none !important; outline: none; }
+        .reg-no  { background: #991b1b; }
+        .reg-yes { background: #047857; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-100 text-slate-800" oncontextmenu="return false;">
@@ -988,7 +1018,7 @@
                                 </div>
                             </div>
                             <div class="mt-auto">
-                                <button onclick="showToast('الامتحانات الرسمية — قيد التفعيل قريباً')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                <button onclick="triggerAction('official-exams')" class="square-btn w-auto px-6 py-1.5 bg-edu-blue hover:bg-edu-darkblue text-white font-bold text-xs shadow transition flex items-center gap-1">
                                     <i class="fa-solid fa-right-to-bracket"></i> الدخول
                                 </button>
                             </div>
@@ -1196,7 +1226,7 @@
                             <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
                                 <i class="fa-solid fa-door-open"></i> الدخول المدرسي - قائمة التلاميذ
                             </h2>
-                            <p class="text-xs text-slate-500 mt-1 border-t border-slate-200 pt-1">استيراد التلاميذ · التصفية حسب المستوى والفوج · التفويج الآلي · تعديل البيانات · الإدراج في الفوج · طباعة القوائم والشهادات</p>
+                            <p class="text-xs text-slate-500 mt-1 border-t border-slate-200 pt-1">استيراد التلاميذ (حفظ نهائي تلقائي) · التصفية حسب المستوى والفوج · التفويج الآلي · تعديل البيانات · الإدراج في الفوج · طباعة القوائم والشهادات</p>
                         </div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <button onclick="autoAssignGroups()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 text-xs font-bold flex items-center gap-1">
@@ -1204,6 +1234,9 @@
                             </button>
                             <button onclick="showToast('استخدم زر «فوج» في عمود العمليات لكل تلميذ')" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 text-xs font-bold flex items-center gap-1" title="الإدراج عبر عمود العمليات">
                                 <i class="fa-solid fa-user-plus"></i> الإدراج في الفوج التربوي
+                            </button>
+                            <button onclick="deleteAllStudents()" class="square-btn bg-red-700 hover:bg-red-800 text-white px-3 py-2 text-xs font-bold flex items-center gap-1" title="حذف جميع التلاميذ من القائمة">
+                                <i class="fa-solid fa-trash-can"></i> حذف كل التلاميذ
                             </button>
                             <input type="file" id="studentsExcelInput" accept=".csv, .xlsx, .xls" class="hidden" onchange="importStudentsData(event)">
                             <button onclick="document.getElementById('studentsExcelInput').click()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold transition flex items-center gap-1">
@@ -1213,17 +1246,17 @@
                     </div>
 
                     <!-- قوائم التصفية الاختيارية — نافذة زرقاء باهتة بدون حدود — موسّعة وواضحة -->
-                    <div class="bg-blue-50 p-6 mb-6 grid grid-cols-1 md:grid-cols-3 gap-6" style="border:none !important; box-shadow:none !important; outline:none !important;">
+                    <div class="bg-blue-50 p-4 mb-4 grid grid-cols-1 md:grid-cols-3 gap-4" style="border:none !important; box-shadow:none !important; outline:none !important;">
                         <div>
-                            <label class="block text-sm font-bold text-slate-800 mb-2">السنة الدراسية الحالية</label>
-                            <select id="filterSchoolYear" onchange="filterStudents()" class="w-full text-sm p-3 bg-white focus:outline-none focus:border-edu-blue" style="border:1px solid #cbd5e1; border-radius:0;">
+                            <label class="block text-xs font-bold text-slate-800 mb-1">السنة الدراسية الحالية</label>
+                            <select id="filterSchoolYear" onchange="filterStudents()" class="w-full text-xs p-2 bg-white focus:outline-none focus:border-edu-blue" style="border:1px solid #cbd5e1; border-radius:0;">
                                 <option value="">-- الرجاء اختيار السنة الدراسية --</option>
                                 <option value="2026-2027" selected>2026-2027</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-slate-800 mb-2">المستوى</label>
-                            <select id="filterStudentLevel" onchange="filterStudents()" class="w-full text-sm p-3 bg-white focus:outline-none focus:border-edu-blue" style="border:1px solid #cbd5e1; border-radius:0;">
+                            <label class="block text-xs font-bold text-slate-800 mb-1">المستوى</label>
+                            <select id="filterStudentLevel" onchange="filterStudents()" class="w-full text-xs p-2 bg-white focus:outline-none focus:border-edu-blue" style="border:1px solid #cbd5e1; border-radius:0;">
                                 <option value="">-- الرجاء اختيار المستوى --</option>
                                 <option value="أولى">أولى</option>
                                 <option value="ثانية">ثانية</option>
@@ -1232,8 +1265,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-slate-800 mb-2">رقم الفوج</label>
-                            <select id="filterStudentGroup" onchange="filterStudents()" class="w-full text-sm p-3 bg-white focus:outline-none focus:border-edu-blue" style="border:1px solid #cbd5e1; border-radius:0;">
+                            <label class="block text-xs font-bold text-slate-800 mb-1">رقم الفوج</label>
+                            <select id="filterStudentGroup" onchange="filterStudents()" class="w-full text-xs p-2 bg-white focus:outline-none focus:border-edu-blue" style="border:1px solid #cbd5e1; border-radius:0;">
                                 <option value="">-- الرجاء اختيار الفوج التربوي --</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
@@ -1287,11 +1320,100 @@
                         <button onclick="printNominalList()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-print"></i> طباعة القوائم الاسمية
                         </button>
-                        <button onclick="saveEntryData()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-floppy-disk"></i> حفظ
-                        </button>
+                        <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1 ml-auto"><i class="fa-solid fa-circle-check"></i> الحفظ تلقائي ونهائي بمجرد الاستيراد وعند كل تعديل</span>
                         <button onclick="navigateTo('schooling')" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-xmark"></i> إلغاء
+                            <i class="fa-solid fa-arrow-right"></i> رجوع
+                        </button>
+                        <button onclick="navigateTo('home')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-house"></i> العودة إلى الصفحة الرئيسية
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الامتحانات الرسمية — قوائم السنة الرابعة متوسط -->
+            <div id="view-official-exams" class="view-page hidden">
+                <div class="bg-white border border-slate-300 p-4 md:p-6">
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-4 flex flex-wrap justify-between items-center gap-2">
+                        <div>
+                            <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
+                                <i class="fa-solid fa-file-pen"></i> الامتحانات الرسمية — شهادة التعليم المتوسط
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1 border-t border-slate-200 pt-1">قوائم السنة الرابعة متوسط فقط · تسجيل المترشحين · طباعة القائمة الاسمية · تصدير Excel</p>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button onclick="printCandidatesList()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-print"></i> طباعة القائمة الاسمية للمترشحين
+                            </button>
+                            <button onclick="exportCandidatesExcel()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-file-excel"></i> تصدير Excel
+                            </button>
+                            <button onclick="registerAllCandidates()" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 text-xs font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-user-check"></i> تسجيل الكل
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="examStats" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+
+                    <div class="bg-blue-50 p-4 mb-4 grid grid-cols-1 md:grid-cols-3 gap-4" style="border:none !important;">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 mb-1">بحث</label>
+                            <input type="text" id="examSearch" onkeyup="examsPage=1;renderOfficialExams()" placeholder="اللقب أو الاسم أو رقم التعريف..." class="w-full text-xs p-2 bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 mb-1">رقم الفوج</label>
+                            <select id="examGroupFilter" onchange="examsPage=1;renderOfficialExams()" class="w-full text-xs p-2 bg-white">
+                                <option value="">-- جميع الأفواج --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-800 mb-1">حالة التسجيل</label>
+                            <select id="examStatusFilter" onchange="examsPage=1;renderOfficialExams()" class="w-full text-xs p-2 bg-white">
+                                <option value="">-- الكل --</option>
+                                <option value="مسجل">مسجل</option>
+                                <option value="غير مسجل">غير مسجل</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 p-2 overflow-x-auto">
+                        <table class="w-full text-right text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 border-b-2 border-slate-300 text-slate-800">
+                                    <th class="p-2 border border-slate-200 font-extrabold">ر.ت</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">رقم التعريف</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">اللقب</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">الاسم</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">الجنس</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">تاريخ الميلاد</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">مكان الميلاد</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold text-center">رقم الفوج</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold">الصفة</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold text-center">حالة التسجيل</th>
+                                    <th class="p-2 border border-slate-200 font-extrabold text-center">عمليات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="examsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-between items-center mt-4 pt-3 border-t border-slate-200 gap-3">
+                        <span id="examsPaginationInfo" class="text-xs font-semibold text-slate-600">عرض 0 - 0 من أصل 0 مترشح</span>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <button id="btnPrevExams" onclick="examsPage--;renderOfficialExams()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
+                                <i class="fa-solid fa-chevron-right ml-1"></i> السابق
+                            </button>
+                            <span id="examsPageIndicator" class="text-xs font-bold bg-edu-blue text-white px-3 py-1.5">1 / 1</span>
+                            <button id="btnNextExams" onclick="examsPage++;renderOfficialExams()" class="square-btn px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition disabled:opacity-50">
+                                التالي <i class="fa-solid fa-chevron-left mr-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-slate-200 flex justify-end gap-3 flex-wrap">
+                        <button onclick="navigateTo('schooling')" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-right"></i> رجوع
                         </button>
                         <button onclick="navigateTo('home')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-6 py-2 text-xs font-bold flex items-center gap-2">
                             <i class="fa-solid fa-house"></i> العودة إلى الصفحة الرئيسية
@@ -1642,7 +1764,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold mb-1">القاعة / الفوج</label>
-                                <input type="text" id="egRoom" placeholder="مثال: قاعة 3 / فوج 2" class="w-full p-2 border border-slate-300" style="border-radius:0;">
+                                <input type="text" id="egRoom" placeholder="مثال: قاعة 3 / 2" class="w-full p-2 border border-slate-300" style="border-radius:0;">
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="block text-xs font-bold mb-1">الملاحظة</label>
@@ -2587,6 +2709,37 @@
         </div>
     </div>
 
+    <!-- نافذة تسجيل المترشح (بيضاء) -->
+    <div id="examRegModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
+        <div class="modal-clean-box p-0 overflow-hidden flex flex-col" style="width:95vw;max-width:760px;max-height:92vh;background:#ffffff;">
+            <div class="bg-white m-4 p-5 flex-1 overflow-y-auto">
+                <div class="flex justify-between items-center pb-3 mb-4 border-b border-slate-200">
+                    <h3 class="text-base font-extrabold text-edu-blue flex items-center gap-2">
+                        <i class="fa-solid fa-user-check"></i> تسجيل المترشح — شهادة التعليم المتوسط
+                    </h3>
+                    <button onclick="closeExamRegModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
+                </div>
+                <input type="hidden" id="examRegIndex">
+                <div id="examRegInfo" class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 mb-5"></div>
+                <div class="pt-3 border-t border-slate-200">
+                    <label class="block text-xs font-bold text-slate-800 mb-1">حالة التسجيل</label>
+                    <select id="examRegSelect" class="w-full text-sm p-2 bg-white">
+                        <option value="مسجل">مسجل</option>
+                        <option value="غير مسجل">غير مسجل</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-center gap-3 mt-5">
+                    <button onclick="saveExamReg()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-2 text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ
+                    </button>
+                    <button onclick="closeExamRegModal()" class="square-btn bg-slate-500 hover:bg-slate-600 text-white px-8 py-2 text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-xmark"></i> إلغاء
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden Print Area for Nominal Lists -->
     <div id="nominalPrintArea" class="hidden print-area"></div>
 
@@ -2619,6 +2772,7 @@
                     structuresData,
                     timetableData: typeof timetableData !== 'undefined' ? timetableData : {},
                     exemptions: typeof window._exemptions !== 'undefined' ? window._exemptions : {},
+                    examGuardData: typeof examGuardData !== 'undefined' ? examGuardData : [],
                     savedAt: new Date().toISOString()
                 };
                 localStorage.setItem(DB_KEY, JSON.stringify(data));
@@ -2699,6 +2853,7 @@
             else if (viewId === 'pedagogical-map') renderPedagogicalMap();
             else if (viewId === 'timetable') { setTimetableMode(timetableMode || 'student'); renderTimetableView(); }
             else if (viewId === 'numbers') renderNumbersView();
+            else if (viewId === 'official-exams') { examsPage = 1; renderOfficialExams(); }
         }
 
         // ========== USERS TABLE ==========
@@ -3086,7 +3241,7 @@
             saveToDB();
             filterStudents();
             closeInsertGroupModal();
-            showToast('تم إدراج التلميذ في الفوج ' + g + ' بنجاح');
+            showToast('تم إدراج التلميذ بنجاح — ' + g);
         }
 
         // ========== AUTO GROUPING (التفويج الآلي) ==========
@@ -3225,7 +3380,7 @@
                 groupsPerLevel[currentGroupsLevel] = val;
                 saveToDB();
                 renderPedagogicalMap();
-                showToast(`تم حجز ${val} فوج(أفواج) لمستوى ${currentGroupsLevel}`);
+                showToast(`تم حجز ${val} لمستوى ${currentGroupsLevel}`);
             }
             closeGroupsModal();
         }
@@ -4027,7 +4182,7 @@
                             <div style="text-align:center;">
                                 <p style="font-weight:bold;margin:2px">الجمهورية الجزائرية الديمقراطية الشعبية</p>
                                 <p style="margin:2px">وزارة التربية الوطنية</p>
-                                <h3 style="margin-top:8px;border-bottom:2px solid #000;display:inline-block;padding-bottom:3px">القائمة الاسمية — المستوى: ${lvl} · الفوج: ${grp}</h3>
+                                <h3 style="margin-top:8px;border-bottom:2px solid #000;display:inline-block;padding-bottom:3px">القائمة الاسمية — ${lvl} متوسط ${grp}</h3>
                             </div>
                             <div style="width:120px;"></div>
                         </div>
@@ -4058,6 +4213,253 @@
                 <style>body{margin:0;padding:0} @media print{body{margin:8mm} .page-break-after{page-break-after:always}}</style></head><body>${html}</body></html>`);
             printWin.document.close();
             setTimeout(() => { printWin.print(); }, 400);
+        }
+
+        // ========== استعادة بقية الحالة المحفوظة + حفظ تلقائي ==========
+        function loadExtraState() {
+            try {
+                const saved = loadFromDB();
+                if (saved) {
+                    if (saved.structuresData && typeof saved.structuresData === 'object') structuresData = { ...structuresData, ...saved.structuresData };
+                    if (Array.isArray(saved.examGuardData)) examGuardData = saved.examGuardData;
+                    if (saved.exemptions && typeof saved.exemptions === 'object') window._exemptions = saved.exemptions;
+                }
+            } catch (e) {}
+            try {
+                const eg = localStorage.getItem('edu_exam_guard');
+                if (eg && !examGuardData.length) { const a = JSON.parse(eg); if (Array.isArray(a)) examGuardData = a; }
+            } catch (e) {}
+            try { const ex = localStorage.getItem('edu_exemptions'); if (ex) window._exemptions = JSON.parse(ex); } catch (e) {}
+            studentsData.forEach(s => { if (!s.examReg) s.examReg = 'غير مسجل'; });
+            window._dbLoaded = true;
+        }
+        window.addEventListener('beforeunload', function () { if (window._dbLoaded) saveToDB(); });
+        document.addEventListener('visibilitychange', function () { if (document.hidden && window._dbLoaded) saveToDB(); });
+
+        function deleteExamGuardRow(i) {
+            examGuardData.splice(i, 1);
+            try { localStorage.setItem('edu_exam_guard', JSON.stringify(examGuardData)); } catch (e) {}
+            saveToDB();
+            renderExamGuardTable();
+        }
+
+        // ========== حذف كل التلاميذ ==========
+        function deleteAllStudents() {
+            if (!studentsData.length) { showToast('لا يوجد تلاميذ لحذفهم'); return; }
+            const n = studentsData.length;
+            const doDelete = () => {
+                studentsData = [];
+                filteredStudents = [];
+                studentsCurrentPage = 1;
+                saveToDB();
+                filterStudents();
+                showToast(`تم حذف ${n} تلميذ من القائمة`);
+            };
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'حذف كل التلاميذ',
+                    html: `سيتم حذف <strong>${n}</strong> تلميذ نهائياً من القائمة.<br>لا يمكن التراجع عن هذه العملية.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'نعم، حذف الكل',
+                    cancelButtonText: 'إلغاء',
+                    confirmButtonColor: '#b91c1c',
+                    cancelButtonColor: '#64748b',
+                    reverseButtons: true
+                }).then(r => { if (r.isConfirmed) doDelete(); });
+            } else if (confirm(`حذف ${n} تلميذ نهائياً؟`)) doDelete();
+        }
+
+        // ========== الامتحانات الرسمية — السنة الرابعة متوسط ==========
+        let examsPage = 1;
+        const examsPageSize = 15;
+        function esc(v) {
+            return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        function getExamCandidates() {
+            return studentsData.filter(s => normalizeLevel(s.level) === 'رابعة');
+        }
+        function examRegStatus(s) { return s.examReg === 'مسجل' ? 'مسجل' : 'غير مسجل'; }
+        function regBadge(s) {
+            return examRegStatus(s) === 'مسجل'
+                ? '<span class="reg-badge reg-yes">مسجل</span>'
+                : '<span class="reg-badge reg-no">غير مسجل</span>';
+        }
+        function getFilteredCandidates() {
+            const q = ((document.getElementById('examSearch') || {}).value || '').trim().toLowerCase();
+            const g = (document.getElementById('examGroupFilter') || {}).value || '';
+            const st = (document.getElementById('examStatusFilter') || {}).value || '';
+            return getExamCandidates().filter(s => {
+                if (g && String(s.group) !== String(g)) return false;
+                if (st && examRegStatus(s) !== st) return false;
+                if (q && !(`${s.id || ''} ${s.surname || ''} ${s.name || ''}`.toLowerCase().includes(q))) return false;
+                return true;
+            }).sort((a, b) => (parseInt(a.group, 10) || 0) - (parseInt(b.group, 10) || 0)
+                || String(a.surname || '').localeCompare(String(b.surname || ''), 'ar'));
+        }
+        function renderOfficialExams() {
+            const tbody = document.getElementById('examsTableBody');
+            if (!tbody) return;
+            const all = getExamCandidates();
+            // قائمة الأفواج
+            const gSel = document.getElementById('examGroupFilter');
+            if (gSel) {
+                const cur = gSel.value;
+                let max = Math.max(groupsPerLevel['رابعة'] || 0, ...all.map(s => parseInt(s.group, 10) || 0));
+                let opts = '<option value="">-- جميع الأفواج --</option>';
+                for (let i = 1; i <= max; i++) opts += `<option value="${i}">${i}</option>`;
+                gSel.innerHTML = opts;
+                gSel.value = cur;
+            }
+            // إحصائيات
+            const reg = all.filter(s => examRegStatus(s) === 'مسجل').length;
+            const stats = document.getElementById('examStats');
+            if (stats) {
+                const pct = all.length ? Math.round(reg * 100 / all.length) : 0;
+                const card = (label, val, color) => `<div class="square-card bg-white p-3 border border-slate-200"><div class="text-xs text-slate-500 mb-1">${label}</div><div class="text-xl font-extrabold ${color}">${val}</div></div>`;
+                stats.innerHTML = card('إجمالي مترشحي الرابعة متوسط', all.length, 'text-edu-blue')
+                    + card('المسجلون', reg, 'text-emerald-700')
+                    + card('غير المسجلين', all.length - reg, 'text-red-800')
+                    + card('نسبة التسجيل', pct + '%', 'text-indigo-600');
+            }
+            const list = getFilteredCandidates();
+            const total = list.length;
+            const totalPages = Math.ceil(total / examsPageSize) || 1;
+            if (examsPage > totalPages) examsPage = totalPages;
+            if (examsPage < 1) examsPage = 1;
+            const start = (examsPage - 1) * examsPageSize;
+            const end = Math.min(start + examsPageSize, total);
+            if (!total) {
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center p-6 text-slate-500">${all.length ? 'لا توجد نتائج مطابقة للتصفية.' : 'لا توجد قوائم للسنة الرابعة متوسط. استورد بيانات التلاميذ من «الدخول المدرسي» أولاً.'}</td></tr>`;
+            } else {
+                tbody.innerHTML = list.slice(start, end).map((s, i) => {
+                    const idx = studentsData.indexOf(s);
+                    return `<tr class="border-b hover:bg-slate-50 transition">
+                        <td class="border border-slate-200 font-mono text-center">${start + i + 1}</td>
+                        <td class="border border-slate-200 font-mono font-bold text-edu-blue">${esc(s.id)}</td>
+                        <td class="border border-slate-200 font-semibold">${esc(s.surname)}</td>
+                        <td class="border border-slate-200">${esc(s.name)}</td>
+                        <td class="border border-slate-200">${esc(s.gender)}</td>
+                        <td class="border border-slate-200 font-mono">${esc(s.birthDate)}</td>
+                        <td class="border border-slate-200">${esc(s.birthPlace)}</td>
+                        <td class="border border-slate-200 font-mono text-center font-bold">${esc(s.group)}</td>
+                        <td class="border border-slate-200">${esc(s.status || 'خارجي')}</td>
+                        <td class="border border-slate-200 text-center">${regBadge(s)}</td>
+                        <td class="border border-slate-200 text-center">
+                            <button onclick="openExamRegModal(${idx})" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-3 py-1 text-xs font-bold"><i class="fa-solid fa-user-check"></i> تسجيل</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+            const info = document.getElementById('examsPaginationInfo');
+            if (info) info.textContent = `عرض ${total === 0 ? 0 : start + 1} - ${end} من أصل ${total} مترشح`;
+            const ind = document.getElementById('examsPageIndicator');
+            if (ind) ind.textContent = `${examsPage} / ${totalPages}`;
+            const pv = document.getElementById('btnPrevExams'); if (pv) pv.disabled = examsPage === 1;
+            const nx = document.getElementById('btnNextExams'); if (nx) nx.disabled = examsPage === totalPages;
+        }
+        function openExamRegModal(idx) {
+            const s = studentsData[idx];
+            if (!s) return;
+            document.getElementById('examRegIndex').value = idx;
+            const item = (l, v) => `<div class="border-b border-slate-100 py-1.5"><span class="block text-[11px] text-slate-500">${l}</span><span class="block text-sm font-bold text-slate-800">${esc(v) || '—'}</span></div>`;
+            document.getElementById('examRegInfo').innerHTML =
+                item('رقم التعريف', s.id) + item('اللقب', s.surname) + item('الاسم', s.name) +
+                item('الجنس', s.gender) + item('تاريخ الميلاد', s.birthDate) + item('مكان الميلاد', s.birthPlace) +
+                item('العنوان', s.address) + item('المستوى', s.level) + item('رقم الفوج', s.group) +
+                item('الصفة', s.status || 'خارجي') + item('تاريخ آخر تسجيل', s.examRegDate);
+            document.getElementById('examRegSelect').value = examRegStatus(s);
+            document.getElementById('examRegModalOverlay').classList.remove('hidden');
+        }
+        function closeExamRegModal() {
+            document.getElementById('examRegModalOverlay').classList.add('hidden');
+        }
+        function saveExamReg() {
+            const idx = parseInt(document.getElementById('examRegIndex').value, 10);
+            const s = studentsData[idx];
+            if (isNaN(idx) || !s) return;
+            s.examReg = document.getElementById('examRegSelect').value === 'مسجل' ? 'مسجل' : 'غير مسجل';
+            s.examRegDate = s.examReg === 'مسجل' ? new Date().toLocaleDateString('ar-DZ') : '';
+            saveToDB();
+            closeExamRegModal();
+            renderOfficialExams();
+            showToast(`${(s.surname || '') + ' ' + (s.name || '')}: ${s.examReg}`);
+        }
+        function registerAllCandidates() {
+            const list = getFilteredCandidates().filter(s => examRegStatus(s) !== 'مسجل');
+            if (!list.length) { showToast('لا يوجد مترشحون غير مسجلين ضمن القائمة الحالية'); return; }
+            showConfirm('تسجيل الكل', `سيتم تسجيل ${list.length} مترشح ضمن القائمة المعروضة.`, () => {
+                const d = new Date().toLocaleDateString('ar-DZ');
+                list.forEach(s => { s.examReg = 'مسجل'; s.examRegDate = d; });
+                saveToDB();
+                renderOfficialExams();
+                showToast(`تم تسجيل ${list.length} مترشح`);
+            });
+        }
+        function exportCandidatesExcel() {
+            const list = getFilteredCandidates();
+            if (!list.length) { showToast('لا توجد بيانات للتصدير'); return; }
+            const rows = [['ر.ت', 'رقم التعريف', 'اللقب', 'الاسم', 'الجنس', 'تاريخ الميلاد', 'مكان الميلاد', 'رقم الفوج', 'الصفة', 'حالة التسجيل']];
+            list.forEach((s, i) => rows.push([i + 1, s.id || '', s.surname || '', s.name || '', s.gender || '', s.birthDate || '', s.birthPlace || '', s.group || '', s.status || 'خارجي', examRegStatus(s)]));
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            wb.Workbook = { Views: [{ RTL: true }] };
+            XLSX.utils.book_append_sheet(wb, ws, 'مترشحو الرابعة متوسط');
+            XLSX.writeFile(wb, 'قائمة_مترشحي_الرابعة_متوسط.xlsx');
+            showToast('تم تصدير قائمة المترشحين');
+        }
+        function printCandidatesList() {
+            const list = getFilteredCandidates();
+            if (!list.length) { showToast('لا توجد قائمة للطباعة'); return; }
+            const groups = {};
+            list.forEach(s => { const k = s.group || '1'; (groups[k] = groups[k] || []).push(s); });
+            const keys = Object.keys(groups).sort((a, b) => (parseInt(a, 10) || 0) - (parseInt(b, 10) || 0));
+            const td = 'border:1px solid #000;padding:4px';
+            const body = keys.map(k => {
+                const rows = groups[k].map((s, i) => `<tr>
+                    <td style="${td};text-align:center">${i + 1}</td>
+                    <td style="${td}">${esc(s.id)}</td>
+                    <td style="${td}">${esc(s.surname)}</td>
+                    <td style="${td}">${esc(s.name)}</td>
+                    <td style="${td};text-align:center">${esc(s.gender)}</td>
+                    <td style="${td}">${esc(s.birthDate)}</td>
+                    <td style="${td}">${esc(s.birthPlace)}</td>
+                    <td style="${td};text-align:center">${esc(s.status || 'خارجي')}</td>
+                    <td style="${td};text-align:center">${examRegStatus(s)}</td>
+                    <td style="${td};width:90px"></td></tr>`).join('');
+                return `<div style="page-break-after:always;margin-bottom:24px">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+                        <div style="text-align:right;font-size:12px;line-height:1.6">
+                            <p style="margin:2px;font-weight:bold">مديرية التربية للجزائر غرب</p>
+                            <p style="margin:2px;font-weight:bold">متوسطة الشهيد خالد مكاوي - سطاوالي</p>
+                            <p style="margin:2px">السنة الدراسية: 2026-2027</p>
+                        </div>
+                        <div style="text-align:center">
+                            <p style="font-weight:bold;margin:2px">الجمهورية الجزائرية الديمقراطية الشعبية</p>
+                            <p style="margin:2px">وزارة التربية الوطنية</p>
+                            <h3 style="margin-top:8px;border-bottom:2px solid #000;display:inline-block;padding-bottom:3px">القائمة الاسمية للمترشحين — شهادة التعليم المتوسط — الرابعة متوسط ${esc(k)}</h3>
+                        </div>
+                        <div style="width:120px"></div>
+                    </div>
+                    <table style="width:100%;border-collapse:collapse;font-size:11px">
+                        <thead><tr style="background:#eee">
+                            <th style="${td}">ر.ت</th><th style="${td}">رقم التعريف</th><th style="${td}">اللقب</th><th style="${td}">الاسم</th>
+                            <th style="${td}">الجنس</th><th style="${td}">تاريخ الميلاد</th><th style="${td}">مكان الميلاد</th>
+                            <th style="${td}">الصفة</th><th style="${td}">التسجيل</th><th style="${td}">ملاحظات</th>
+                        </tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <p style="margin-top:12px;text-align:left;font-size:11px">عدد المترشحين: ${groups[k].length} — حرر بسطاوالي في: ${new Date().toLocaleDateString('ar-DZ')}</p>
+                    <p style="margin-top:20px;text-align:left;font-size:12px;font-weight:bold">مدير المؤسسة</p>
+                </div>`;
+            }).join('');
+            const w = window.open('', '_blank');
+            if (!w) { showToast('يرجى السماح بالنوافذ المنبثقة لإتمام الطباعة'); return; }
+            w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>القائمة الاسمية للمترشحين</title>
+                <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+                <style>body{margin:0;font-family:'Cairo',sans-serif;direction:rtl;padding:16px;font-size:12px} @media print{body{margin:8mm}}</style></head><body>${body}</body></html>`);
+            w.document.close();
+            setTimeout(() => { w.print(); }, 500);
         }
 
         // ========== IMPORT STAFF (SheetJS) ==========
@@ -4127,6 +4529,8 @@
                         showToast('الملف فارغ أو غير صالح');
                         return;
                     }
+                    const prevReg = {};
+                    studentsData.forEach(s => { if (s.examReg === 'مسجل') prevReg[s.id] = s; });
                     studentsData = json.map((row, idx) => {
                         const get = (...keys) => {
                             for (const k of keys) {
@@ -4145,14 +4549,16 @@
                             address: get('العنوان', 'address'),
                             level: normalizeLevel(rawLevel),
                             group: get('رقم الفوج', 'الفوج', 'group', 'Group', 'رقم القسم') || '1',
-                            status: get('الصفة', 'status', 'Status') || 'خارجي'
+                            status: get('الصفة', 'status', 'Status') || 'خارجي',
+                            examReg: 'غير مسجل'
                         };
                     }).filter(s => s.surname || s.name);
+                    studentsData.forEach(s => { const p = prevReg[s.id]; if (p) { s.examReg = 'مسجل'; s.examRegDate = p.examRegDate || ''; } });
                     studentsCurrentPage = 1;
                     filteredStudents = [...studentsData];
                     saveToDB();
                     renderStudentsTable();
-                    showToast(`تم استيراد ${studentsData.length} تلميذ بنجاح`);
+                    showToast(`تم استيراد ${studentsData.length} تلميذ وحفظهم نهائياً تلقائياً`);
                 } catch (err) {
                     console.error(err);
                     showToast('حدث خطأ أثناء قراءة ملف التلاميذ');
@@ -4336,7 +4742,7 @@
                 page.forEach(p => {
                     const tr = document.createElement('tr');
                     tr.className = "border-b hover:bg-slate-50";
-                    const lg = (p.level || p.group) ? `${p.level || ''} ${p.group ? 'فوج ' + p.group : ''}`.trim() : '—';
+                    const lg = (p.level || p.group) ? `${p.level || ''} ${p.group || ''}`.trim() : '—';
                     tr.innerHTML = `
                         <td class="p-2.5 border font-mono font-bold">${p.id}</td>
                         <td class="p-2.5 border font-semibold">${p.name || ''}</td>
@@ -4376,7 +4782,7 @@
             document.getElementById('paId').textContent = p.id || '';
             document.getElementById('paParentName').textContent = p.name || '';
             document.getElementById('paStudentName').textContent = p.student || '';
-            document.getElementById('paLevelGroup').textContent = `${p.level || ''} ${p.group ? 'فوج ' + p.group : ''}`.trim() || '—';
+            document.getElementById('paLevelGroup').textContent = `${p.level || ''} ${p.group || ''}`.trim() || '—';
             document.getElementById('paPhone').textContent = p.phone || '';
             document.getElementById('paCurrentStatus').textContent = p.active ? 'مفعل' : 'معطل';
             document.getElementById('paCurrentStatus').className = p.active ? 'text-emerald-700' : 'text-red-700';
@@ -4517,7 +4923,7 @@
                     <div class="square-card bg-white p-4 border border-slate-200 shadow-sm">
                         <div class="text-xs text-slate-500 mb-1">${lvl}</div>
                         <div class="text-2xl font-extrabold text-edu-blue">${list.length}</div>
-                        <div class="text-xs text-slate-600 mt-1">${groups} فوج — متوسط ${avg}</div>
+                        <div class="text-xs text-slate-600 mt-1">${groups} — متوسط ${avg}</div>
                     </div>`;
                 tbody.innerHTML += `<tr class="border-b">
                     <td class="p-3 border font-bold">${lvl}</td>
@@ -4588,7 +4994,7 @@
                 if (foundStudents.length) {
                     html += '<p class="font-semibold mt-2">تلاميذ مطابقون:</p><ul class="list-disc pr-5 text-xs">';
                     foundStudents.forEach(s => {
-                        html += `<li>${s.surname || ''} ${s.name || ''} — رقم: ${s.id || ''} — المستوى: ${s.level || ''} فوج ${s.group || ''}</li>`;
+                        html += `<li>${s.surname || ''} ${s.name || ''} — رقم: ${s.id || ''} — المستوى: ${s.level || ''} ${s.group || ''}</li>`;
                     });
                     html += '</ul>';
                 }
@@ -4769,7 +5175,7 @@
                     if (showTeacher && filterTeacher) {
                         // جدول الأستاذ: إظهار الحصة فقط إن كانت لهذا الأستاذ
                         if (cell && cell.teacher === filterTeacher) {
-                            cells += `<td class="p-3 border"><div class="font-bold text-edu-blue text-sm">${cell.subject || ''}</div><div class="text-[10px] text-slate-500">${level} فوج ${group}</div></td>`;
+                            cells += `<td class="p-3 border"><div class="font-bold text-edu-blue text-sm">${cell.subject || ''}</div><div class="text-[10px] text-slate-500">${level} ${group}</div></td>`;
                         } else {
                             cells += `<td class="p-3 border text-slate-300">—</td>`;
                         }
@@ -4896,7 +5302,7 @@
             timetableData[key] = data;
             try { localStorage.setItem('edu_timetable', JSON.stringify(timetableData)); } catch(e) {}
             renderTimetableView();
-            showToast('تم توليد الجدول — المستوى ' + level + ' فوج ' + group + ' (ساعتان متتاليتان للعربية/رياضيات/فرنسية/إنجليزية — الثلاثاء مساءً بدون دراسة)');
+            showToast('تم توليد الجدول — المستوى ' + level + ' ' + group + ' (ساعتان متتاليتان للعربية/رياضيات/فرنسية/إنجليزية — الثلاثاء مساءً بدون دراسة)');
         }
 
         function printTimetable() {
@@ -4917,7 +5323,7 @@
                     const cell = data[si + '-' + di];
                     if (showTeacher && filterTeacher) {
                         if (cell && cell.teacher === filterTeacher) {
-                            rows += '<td style="border:1px solid #000;padding:6px;text-align:center">' + (cell.subject || '') + '<br><small>' + level + ' فوج ' + group + '</small></td>';
+                            rows += '<td style="border:1px solid #000;padding:6px;text-align:center">' + (cell.subject || '') + '<br><small>' + level + ' ' + group + '</small></td>';
                         } else {
                             rows += '<td style="border:1px solid #000;padding:6px;text-align:center">—</td>';
                         }
@@ -4943,7 +5349,7 @@
                     </div>
                     <div style="text-align:center"><p style="font-weight:bold">الجمهورية الجزائرية الديمقراطية الشعبية</p><p>وزارة التربية الوطنية</p></div>
                 </div>
-                <h3 style="text-align:center;border-bottom:2px solid #000;display:inline-block;padding-bottom:4px">الجدول الزمني - المستوى ${level} - الفوج ${group}${titleExtra}</h3>
+                <h3 style="text-align:center;border-bottom:2px solid #000;display:inline-block;padding-bottom:4px">الجدول الزمني - ${level} متوسط ${group}${titleExtra}</h3>
                 <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:11px">
                     <thead><tr style="background:#eee">
                         <th style="border:1px solid #000;padding:5px">التوقيت</th>
@@ -5006,6 +5412,7 @@
                 signature: ''
             });
             try { localStorage.setItem('edu_exam_guard', JSON.stringify(examGuardData)); } catch(e) {}
+            saveToDB();
             renderExamGuardTable();
             closeExamGuardModal();
             showToast('تم حجز الحراسة بنجاح');
@@ -5029,7 +5436,7 @@
                     <td class="p-2.5 border text-center">—</td>
                     <td class="p-2.5 border">${r.note||''}</td>
                     <td class="p-2.5 border text-center">
-                        <button onclick="examGuardData.splice(${i},1); renderExamGuardTable();" class="text-red-600 text-xs font-bold">حذف</button>
+                        <button onclick="deleteExamGuardRow(${i})" class="text-red-600 text-xs font-bold">حذف</button>
                     </td>
                 </tr>`).join('');
         }
@@ -5095,7 +5502,7 @@
                     <p>نحن الممضي أسفله مدير المؤسسة، نُعلم ولي أمر التلميذ(ة):</p>
                     <p><strong>اللقب والاسم:</strong> ${student.surname || ''} ${student.name || ''}</p>
                     <p><strong>رقم التعريف:</strong> ${student.id || ''}</p>
-                    <p><strong>المستوى / الفوج:</strong> ${student.level || ''} — فوج ${student.group || ''}</p>
+                    <p><strong>المستوى / الفوج:</strong> ${student.level || ''} — ${student.group || ''}</p>
                     <p><strong>تاريخ الميلاد:</strong> ${student.birthDate || '—'}</p>
                     <p style="margin-top:12px">أن ابنكم(ابنتكم) معرّض(ة) للشطب من قوائم المؤسسة بسبب الغياب غير المبرر،
                     طبقاً للتنظيم الجاري به العمل. يُرجى الاتصال بالإدارة فور استلام هذا الإشعار.</p>
@@ -5236,6 +5643,7 @@
                     const tt = localStorage.getItem('edu_timetable');
                     if (tt) timetableData = JSON.parse(tt);
                 } catch(e) {}
+                loadExtraState();
                 navigateTo('home');
                 showToast('مرحباً — تم الدخول بنجاح إلى فضاء المؤسسة');
             } else {
@@ -5403,6 +5811,7 @@
                         const ex = localStorage.getItem('edu_exemptions');
                         if (ex) window._exemptions = JSON.parse(ex);
                     } catch(e) {}
+                    loadExtraState();
                     const lastView = sessionStorage.getItem('edu_current_view') || 'home';
                     navigateTo(lastView);
                     if (typeof renderExamGuardTable === 'function') renderExamGuardTable();
@@ -5422,7 +5831,7 @@
                 const payload = {
                     version: 1,
                     exportedAt: new Date().toISOString(),
-                    usersData, studentsData, parentsData, strikesData, assignmentsData, absencesList,
+                    usersData, studentsData, struckStudents, examGuardData, parentsData, strikesData, assignmentsData, absencesList,
                     groupsPerLevel: typeof groupsPerLevel !== 'undefined' ? groupsPerLevel : {},
                     structuresData: typeof structuresData !== 'undefined' ? structuresData : {},
                     pedagogicalMap: typeof pedagogicalMap !== 'undefined' ? pedagogicalMap : {},
@@ -5455,7 +5864,7 @@
                     if (Array.isArray(data.absencesList)) absencesList = data.absencesList;
                     if (data.groupsPerLevel) groupsPerLevel = { ...groupsPerLevel, ...data.groupsPerLevel };
                     if (data.structuresData) structuresData = { ...structuresData, ...data.structuresData };
-                    if (data.pedagogicalMap) pedagogicalMap = { ...pedagogicalMap, ...data.pedagogicalMap };
+                    if (Array.isArray(data.examGuardData)) examGuardData = data.examGuardData;
                     if (data.timetableData) {
                         timetableData = data.timetableData;
                         try { localStorage.setItem('edu_timetable', JSON.stringify(timetableData)); } catch(x) {}
