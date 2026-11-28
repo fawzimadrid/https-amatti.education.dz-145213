@@ -13,6 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- SheetJS for Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- ExcelJS (تصدير منظّم بإطارات وحماية الخلايا) + JSZip -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- JsBarcode -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <!-- QRCode -->
@@ -38,133 +41,7 @@
                 }
             }
         }
-    
-// ================= إضافات: الموظفون / فلترة الإسناد / قوائم الحجز / حجز النقاط =================
-const _esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const _confirm = (title, text, ok) => Swal.fire({ title, html: text, icon: 'warning', showCancelButton: true, confirmButtonText: 'نعم', cancelButtonText: 'إلغاء', confirmButtonColor: '#dc2626' }).then(r => { if (r.isConfirmed) ok(); });
-function _refreshUsers() { filteredUsers = [...usersData]; currentPage = 1; saveToDB(); renderUsersTable(); }
-
-function deleteAllTeachers() {
-  const n = usersData.filter(u => (u.role || '').includes('أستاذ')).length;
-  if (!n) { showToast('لا يوجد أساتذة للحذف'); return; }
-  _confirm('حذف جميع الأساتذة', `سيتم حذف <b>${n}</b> أستاذ نهائيًا.`, () => {
-    usersData = usersData.filter(u => !(u.role || '').includes('أستاذ'));
-    _refreshUsers(); showToast('تم حذف جميع الأساتذة');
-  });
-}
-function exportStaffExcel() {
-  if (!usersData.length) { showToast('لا توجد بيانات موظفين للتصدير'); return; }
-  const rows = usersData.map(u => ({ 'رقم التعريف': u.id, 'اللقب': u.surname, 'الاسم': u.name, 'تاريخ الميلاد': u.birthDate, 'مكان الميلاد': u.birthPlace, 'العنوان': u.address, 'رقم الهاتف': u.phone, 'الصفة': u.role, 'المادة': u.subject, 'رقم الحساب البريدي': u.ccp }));
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'الموظفون');
-  XLSX.writeFile(wb, 'بيانات_الموظفين.xlsx');
-}
-function editUser(id) {
-  const u = usersData.find(x => String(x.id) === String(id)); if (!u) return;
-  const f = [['surname','اللقب'],['name','الاسم'],['birthDate','تاريخ الميلاد'],['birthPlace','مكان الميلاد'],['address','العنوان'],['phone','رقم الهاتف'],['role','الصفة'],['subject','المادة'],['ccp','رقم الحساب البريدي']];
-  Swal.fire({
-    title: 'تعديل بيانات الموظف', showCancelButton: true, confirmButtonText: 'حفظ', cancelButtonText: 'إلغاء', width: 560,
-    html: '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:right">' + f.map(([k, l]) => `<label style="font-size:12px">${l}<input id="eu_${k}" value="${_esc(u[k])}" class="swal2-input" style="margin:2px 0;width:100%;height:34px;font-size:12px"></label>`).join('') + '</div>',
-    preConfirm: () => { f.forEach(([k]) => { u[k] = document.getElementById('eu_' + k).value.trim(); }); }
-  }).then(r => { if (r.isConfirmed) { saveToDB(); renderUsersTable(); showToast('تم حفظ التعديلات'); } });
-}
-
-// ---- فلترة المستوى ← الفوج في الإسناد ----
-function fillAssignGroupOptions() {
-  const lv = (document.getElementById('assignSideLevel') || {}).value || '';
-  const sel = document.getElementById('assignSideGroup'); if (!sel) return;
-  const cur = sel.value; let o = '<option value="">-- اختر الفوج التربوي --</option>';
-  Object.keys(groupsPerLevel).filter(l => !lv || l === lv).forEach(l => { for (let i = 1; i <= groupsPerLevel[l]; i++) o += `<option value="${l}-${i}">${l} متوسط ${i}</option>`; });
-  sel.innerHTML = o; if ([...sel.options].some(x => x.value === cur)) sel.value = cur;
-  renderAssignSubjectsTable();
-}
-function gbFillGroups() {
-  const lv = document.getElementById('gbLevel').value, sel = document.getElementById('gbGroup');
-  let o = '<option value="">-- الفوج التربوي --</option>';
-  if (lv) for (let i = 1; i <= (groupsPerLevel[lv] || 0); i++) o += `<option value="${i}">${i}</option>`;
-  sel.innerHTML = o;
-}
-
-// ---- قوائم الحجز (Excel لكل أستاذ) ----
-const _estimate = a => a === '' || a == null ? '' : a >= 16 ? 'ممتاز' : a >= 14 ? 'جيد جداً' : a >= 12 ? 'جيد' : a >= 10 ? 'مقبول' : a >= 8 ? 'ضعيف' : 'ضعيف جداً';
-function _teachersList() {
-  const m = {};
-  assignmentsData.forEach(a => { const k = a.teacherId || a.teacher; (m[k] = m[k] || { name: a.teacher, items: [] }).items.push(a); });
-  return Object.entries(m);
-}
-function _studentsOf(level, group) { return studentsData.filter(s => normalizeLevel(s.level) === level && String(s.group) === String(group)); }
-function _buildTeacherWb(t, term) {
-  const wb = XLSX.utils.book_new(), used = {};
-  t.items.forEach(a => {
-    const sts = _studentsOf(a.level, a.group), n = sts.length, r0 = 9;
-    const aoa = [['الجمهورية الجزائرية الديمقراطية الشعبية'], ['وزارة التربية الوطنية'], ['مديرية التربية للجزائر غرب', '', '', 'متوسطة الشهيد خالد مكاوي (سطاوالي)'], [], ['حجز نقاط التلاميذ'],
-      ['الفوج التربوي: ' + a.level + ' متوسط ' + a.group, '', 'الفصل: ' + term, '', 'المادة: ' + a.subject, '', 'السنة الدراسية: ' + (a.year || '2026-2027')], [],
-      ['رقم التعريف', 'اللقب', 'الاسم', 'تاريخ الميلاد', 'التقييم المستمر /20', 'معدل الفروض /20', 'الاختبار /20', 'المعدل', 'التقديرات']];
-    sts.forEach(s => aoa.push([s.id, s.surname, s.name, s.birthDate, '', '', '', '', '']));
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
-    for (let i = 0; i < n; i++) { const r = r0 + i;
-      ws['H' + r] = { t: 's', f: `IF(COUNT(E${r}:G${r})<3,"",ROUND((E${r}+F${r}+2*G${r})/4,2))` };
-      ws['I' + r] = { t: 's', f: `IF(H${r}="","",IF(H${r}>=16,"ممتاز",IF(H${r}>=14,"جيد جداً",IF(H${r}>=12,"جيد",IF(H${r}>=10,"مقبول",IF(H${r}>=8,"ضعيف","ضعيف جداً"))))))` }; }
-    ws['!merges'] = [0,1,4].map(r => ({ s: { r, c: 0 }, e: { r, c: 8 } })).concat([{ s: { r: 2, c: 0 }, e: { r: 2, c: 3 } }, { s: { r: 2, c: 4 }, e: { r: 2, c: 8 } }]);
-    ws['!cols'] = [14, 16, 16, 14, 16, 16, 14, 10, 14].map(w => ({ wch: w }));
-    let nm = (a.level + ' ' + a.group + ' ' + a.subject).replace(/[\[\]:*?\/\\]/g, '').slice(0, 28), k = nm, c = 1;
-    while (used[k]) k = nm.slice(0, 26) + '_' + (++c); used[k] = 1;
-    XLSX.utils.book_append_sheet(wb, ws, k);
-  });
-  wb.Workbook = { Views: [{ RTL: true }] };
-  return wb;
-}
-function downloadTeacherReservation(key) {
-  const t = _teachersList().find(([k]) => k === key); if (!t) return;
-  const term = document.getElementById('resTerm').value;
-  XLSX.writeFile(_buildTeacherWb(t[1], term), 'حجز_النقاط_' + (t[1].name || 'أستاذ').replace(/[\/\\:*?"<>|]/g, '') + '.xlsx');
-}
-async function downloadAllReservations() {
-  const list = _teachersList(), term = document.getElementById('resTerm').value;
-  if (!window.JSZip) await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); }).catch(() => {});
-  if (!window.JSZip) { list.forEach(([k], i) => setTimeout(() => downloadTeacherReservation(k), i * 400)); return; }
-  const z = new JSZip();
-  list.forEach(([k, t], i) => z.file(`${i + 1}_${(t.name || 'أستاذ').replace(/[\/\\:*?"<>|]/g, '')}.xlsx`, XLSX.write(_buildTeacherWb(t, term), { type: 'array', bookType: 'xlsx' })));
-  const blob = await z.generateAsync({ type: 'blob' }), a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'قوائم_الحجز_جميع_الأساتذة.zip'; a.click();
-}
-function openReservationDownload() {
-  const list = _teachersList();
-  if (!list.length) { showToast('لا توجد إسنادات — أسند المواد للأساتذة أولاً'); return; }
-  Swal.fire({
-    title: 'تحميل قوائم الحجز', showConfirmButton: false, showCloseButton: true, width: 520,
-    html: `<select id="resTerm" class="swal2-select" style="width:100%;margin:4px 0 10px;font-size:13px"><option>الفصل الأول</option><option>الفصل الثاني</option><option>الفصل الثالث</option></select>
-    <button onclick="downloadAllReservations()" class="square-btn" style="background:#4f46e5;color:#fff;padding:8px;width:100%;font-weight:700;font-size:13px;margin-bottom:8px">تحميل الكل (ملف ZIP)</button>
-    <div style="max-height:260px;overflow:auto;text-align:right">` + list.map(([k, t]) => `<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding:6px 2px;font-size:13px"><span>${_esc(t.name)} <small style="color:#64748b">(${t.items.length} إسناد)</small></span><button onclick="downloadTeacherReservation('${_esc(k).replace(/'/g, '')}')" class="square-btn" style="background:#059669;color:#fff;padding:4px 10px;font-size:12px"><i class="fa-solid fa-file-excel"></i> Excel</button></div>`).join('') + '</div>'
-  });
-}
-
-// ---- حجز النقاط داخل المنصة (المعلومات الشخصية للقراءة فقط) ----
-let gradesData = {}; try { gradesData = JSON.parse(localStorage.getItem('edu_grades') || '{}'); } catch (e) {}
-const _gbKey = id => [gbv('gbTerm'), gbv('gbLevel'), gbv('gbGroup'), gbv('gbSubject'), id].join('|');
-function gbv(i) { return document.getElementById(i).value; }
-function renderGradeBooking() {
-  const lv = gbv('gbLevel'), g = gbv('gbGroup'), sbj = document.getElementById('gbSubject'), body = document.getElementById('gbBody');
-  const subs = [...new Set(assignmentsData.filter(a => (!lv || a.level === lv) && (!g || String(a.group) === g)).map(a => a.subject))];
-  const cur = sbj.value; sbj.innerHTML = '<option value="">-- المادة --</option>' + subs.map(s => `<option>${_esc(s)}</option>`).join(''); if (subs.includes(cur)) sbj.value = cur;
-  if (!lv || !g || !sbj.value) { body.innerHTML = '<tr><td colspan="9" class="p-6 text-slate-500">اختر المستوى والفوج والمادة لعرض القائمة.</td></tr>'; return; }
-  const sts = _studentsOf(lv, g);
-  body.innerHTML = sts.length ? sts.map(s => { const d = gradesData[_gbKey(s.id)] || {}, id = _esc(s.id);
-    const inp = f => `<input type="number" min="0" max="20" step="0.25" value="${d[f] ?? ''}" oninput="gbCalc('${id}')" data-f="${f}" class="w-16 text-center p-1 border border-slate-300">`;
-    return `<tr data-id="${id}" class="border-b"><td class="p-1 border bg-slate-50 font-mono">${id}</td><td class="p-1 border bg-slate-50">${_esc(s.surname)}</td><td class="p-1 border bg-slate-50">${_esc(s.name)}</td><td class="p-1 border bg-slate-50">${_esc(s.birthDate)}</td><td class="p-1 border">${inp('cc')}</td><td class="p-1 border">${inp('hw')}</td><td class="p-1 border">${inp('ex')}</td><td class="p-1 border font-bold" data-avg></td><td class="p-1 border"><input type="text" data-f="est" value="${_esc(d.est || '')}" class="w-24 text-center p-1 border border-slate-300"></td></tr>`; }).join('') : '<tr><td colspan="9" class="p-6 text-slate-500">لا يوجد تلاميذ في هذا الفوج.</td></tr>';
-  sts.forEach(s => gbCalc(String(s.id), true));
-}
-function gbCalc(id, silent) {
-  const tr = [...document.querySelectorAll('#gbBody tr')].find(r => r.dataset.id === id); if (!tr) return;
-  const v = f => tr.querySelector(`[data-f="${f}"]`).value, [c, w, e] = ['cc', 'hw', 'ex'].map(f => v(f));
-  const avg = (c !== '' && w !== '' && e !== '') ? Math.round(((+c + +w + 2 * +e) / 4) * 100) / 100 : '';
-  tr.querySelector('[data-avg]').textContent = avg;
-  if (!silent || !v('est')) tr.querySelector('[data-f="est"]').value = _estimate(avg);
-}
-function saveGradeBooking() {
-  document.querySelectorAll('#gbBody tr[data-id]').forEach(tr => { const o = {}; tr.querySelectorAll('[data-f]').forEach(i => o[i.dataset.f] = i.value); gradesData[_gbKey(tr.dataset.id)] = o; });
-  try { localStorage.setItem('edu_grades', JSON.stringify(gradesData)); showToast('تم حفظ النقاط'); } catch (e) { showToast('تعذّر الحفظ'); }
-}
-</script>
+    </script>
 
     <style>
         body {
@@ -954,15 +831,18 @@ function saveGradeBooking() {
                         <h2 class="text-lg md:text-xl font-bold text-edu-blue flex items-center gap-2">
                             <i class="fa-solid fa-folder-open"></i> ملفات المستخدمين
                         </h2>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 flex-wrap">
                             <input type="file" id="staffExcelInput" accept=".csv, .xlsx, .xls" class="hidden" onchange="importStaffData(event)">
-                            <button onclick="document.getElementById('staffExcelInput').click()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold transition flex items-center gap-2 shadow-sm">
-                                <i class="fa-solid fa-file-excel"></i> استيراد بيانات الموظفين (Excel)
-</button>
-<button onclick="exportStaffExcel()" class="square-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-file-export"></i> تصدير بيانات الموظفين</button>
-<button onclick="deleteAllTeachers()" class="square-btn bg-red-700 hover:bg-red-800 text-white px-4 py-2 text-xs font-bold flex items-center gap-1"><i class="fa-solid fa-user-slash"></i> حذف جميع الأساتذة</button>
+                            <button onclick="openStaffModal()" class="square-btn text-white px-3 py-2 text-xs font-bold transition flex items-center gap-2 bg-edu-blue hover:bg-edu-darkblue"><i class="fa-solid fa-user-plus"></i> إضافة موظف</button>
+                            <button onclick="document.getElementById('staffExcelInput').click()" class="square-btn text-white px-3 py-2 text-xs font-bold transition flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"><i class="fa-solid fa-file-import"></i> استيراد بيانات الموظفين (Excel)</button>
+                            <button onclick="exportStaffExcel()" class="square-btn text-white px-3 py-2 text-xs font-bold transition flex items-center gap-2 bg-teal-600 hover:bg-teal-700"><i class="fa-solid fa-file-export"></i> تصدير بيانات الموظفين</button>
+                            <button onclick="downloadStaffTemplate()" class="square-btn text-white px-3 py-2 text-xs font-bold transition flex items-center gap-2 bg-slate-600 hover:bg-slate-700"><i class="fa-solid fa-file-arrow-down"></i> نموذج الاستيراد</button>
+                            <button onclick="deleteAllTeachers()" class="square-btn text-white px-3 py-2 text-xs font-bold transition flex items-center gap-2 bg-red-600 hover:bg-red-700"><i class="fa-solid fa-user-minus"></i> حذف جميع الأساتذة</button>
+                            <button onclick="deleteAllStaff()" class="square-btn text-white px-3 py-2 text-xs font-bold transition flex items-center gap-2 bg-red-800 hover:bg-red-900"><i class="fa-solid fa-trash-can"></i> حذف كل الموظفين</button>
                         </div>
                     </div>
+
+                    <div id="staffStats" class="flex flex-wrap gap-2 mb-4 text-xs"></div>
 
                     <div class="bg-red-50 border border-red-200 p-4 mb-6 square-card">
                         <h4 class="text-xs font-bold text-red-800 mb-3 uppercase tracking-wider flex items-center gap-1">
@@ -1674,13 +1554,8 @@ function saveGradeBooking() {
                                 <option value="2026-2027" selected>2026-2027</option>
                                 <option value="2025-2026">2025-2026</option>
                             </select>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">المستوى</label>
-<select id="assignSideLevel" onchange="fillAssignGroupOptions()" class="w-full text-xs p-2 border border-slate-300 bg-white mb-3 focus:outline-none focus:border-edu-blue">
-<option value="">-- جميع المستويات --</option>
-<option value="أولى">أولى متوسط</option><option value="ثانية">ثانية متوسط</option><option value="ثالثة">ثالثة متوسط</option><option value="رابعة">رابعة متوسط</option>
-</select>
-<label class="block text-xs font-bold text-slate-700 mb-1">الفوج التربوي</label>
-<select id="assignSideGroup" onchange="renderAssignSubjectsTable()" class="w-full text-xs p-2 border border-slate-300 bg-white mb-4 focus:outline-none focus:border-edu-blue" style="border-radius:0;">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">الفوج التربوي</label>
+                            <select id="assignSideGroup" onchange="renderAssignSubjectsTable()" class="w-full text-xs p-2 border border-slate-300 bg-white mb-4 focus:outline-none focus:border-edu-blue" style="border-radius:0;">
                                 <option value="">-- اختر الفوج التربوي --</option>
                                 <option value="أولى-1">أولى متوسط 1</option>
                                 <option value="أولى-2">أولى متوسط 2</option>
@@ -1712,13 +1587,10 @@ function saveGradeBooking() {
                             </button>
                             <button onclick="clearAllAssignments()" class="square-btn w-full bg-red-600 hover:bg-red-700 text-white px-3 py-2 text-xs font-bold flex items-center justify-center gap-1">
                                 <i class="fa-solid fa-trash-can"></i> إلغاء الإسناد الكلي للأساتذة
-</button>
-<button onclick="openReservationDownload()" class="square-btn w-full bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 text-xs font-bold flex items-center justify-center gap-1 mt-2">
-<i class="fa-solid fa-download"></i> تحميل قوائم الحجز (Excel)
-</button>
-<button onclick="navigateTo('grade-booking')" class="square-btn w-full bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 text-xs font-bold flex items-center justify-center gap-1 mt-2">
-<i class="fa-solid fa-pen-to-square"></i> حجز نقاط التلاميذ
-</button>
+                            </button>
+                            <button onclick="openBookingModal()" class="square-btn w-full bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 text-xs font-bold flex items-center justify-center gap-1 mt-2">
+                                <i class="fa-solid fa-file-excel"></i> تحميل قوائم الحجز (Excel)
+                            </button>
                         </div>
 
                         <!-- الجدول الرئيسي — بدون أعمدة المستوى والفوج المنفصلة + محرك بحث -->
@@ -1950,23 +1822,18 @@ function saveGradeBooking() {
 
             <!-- 10. حجز النقاط (معطلة) -->
             <div id="view-grade-booking" class="view-page hidden">
-<div class="bg-white border border-slate-300 p-4 md:p-6">
-<div class="bg-slate-50 border border-slate-200 p-3 mb-4 flex flex-wrap justify-between items-center gap-2">
-<h2 class="text-lg font-bold text-edu-blue flex items-center gap-2"><i class="fa-solid fa-pen-to-square"></i> حجز نقاط التلاميذ</h2>
-<span class="text-[11px] text-slate-600">المعلومات الشخصية للقراءة فقط — يمكن تعديل النقاط والتقديرات فقط</span>
-</div>
-<div class="bg-blue-50 p-3 mb-4 grid grid-cols-2 md:grid-cols-5 gap-3">
-<select id="gbLevel" onchange="gbFillGroups();renderGradeBooking()" class="text-xs p-2 bg-white"><option value="">-- المستوى --</option><option value="أولى">أولى متوسط</option><option value="ثانية">ثانية متوسط</option><option value="ثالثة">ثالثة متوسط</option><option value="رابعة">رابعة متوسط</option></select>
-<select id="gbGroup" onchange="renderGradeBooking()" class="text-xs p-2 bg-white"><option value="">-- الفوج التربوي --</option></select>
-<select id="gbSubject" onchange="renderGradeBooking()" class="text-xs p-2 bg-white"><option value="">-- المادة --</option></select>
-<select id="gbTerm" onchange="renderGradeBooking()" class="text-xs p-2 bg-white"><option>الفصل الأول</option><option>الفصل الثاني</option><option>الفصل الثالث</option></select>
-<button onclick="saveGradeBooking()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 text-xs font-bold"><i class="fa-solid fa-floppy-disk"></i> حفظ النقاط</button>
-</div>
-<div class="overflow-x-auto border border-slate-200"><table class="w-full text-center text-xs border-collapse">
-<thead><tr class="bg-slate-100"><th class="p-2 border">رقم التعريف</th><th class="p-2 border">اللقب</th><th class="p-2 border">الاسم</th><th class="p-2 border">تاريخ الميلاد</th><th class="p-2 border">التقييم المستمر /20</th><th class="p-2 border">معدل الفروض /20</th><th class="p-2 border">الاختبار /20</th><th class="p-2 border">المعدل</th><th class="p-2 border">التقديرات</th></tr></thead>
-<tbody id="gbBody"><tr><td colspan="9" class="p-6 text-slate-500">اختر المستوى والفوج والمادة لعرض القائمة.</td></tr></tbody></table></div>
-<div class="flex justify-end mt-4"><button onclick="navigateTo('assign-subjects')" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold">رجوع</button></div>
-</div></div>
+                <div class="bg-white border border-slate-300 p-4 md:p-6">
+                    <div class="bg-slate-50 border border-slate-200 p-3 mb-4">
+                        <h2 class="text-lg font-bold text-slate-500 flex items-center gap-2">
+                            <i class="fa-solid fa-lock"></i> حجز النقاط (معطلة حالياً)
+                        </h2>
+                    </div>
+                    <p class="text-center text-slate-500 py-10">هذه الخاصية معطلة حالياً حسب الطلب.</p>
+                    <div class="flex justify-end">
+                        <button onclick="navigateTo('schooling')" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold">العودة</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- 11. فضاء أولياء التلاميذ -->
             <div id="view-parents" class="view-page hidden">
@@ -3002,8 +2869,6 @@ function saveGradeBooking() {
             else if (viewId === 'timetable') { setTimetableMode(timetableMode || 'student'); renderTimetableView(); }
             else if (viewId === 'numbers') renderNumbersView();
             else if (viewId === 'official-exams') { examsPage = 1; renderOfficialExams(); }
-else if (viewId === 'grade-booking') { try { renderGradeBooking(); } catch(e) {} }
-if (viewId === 'assign-subjects') { try { fillAssignGroupOptions(); } catch(e) {} }
             try { refreshAllGroupFilters(); } catch (e) {}
         }
 
@@ -3037,8 +2902,8 @@ if (viewId === 'assign-subjects') { try { fillAssignGroupOptions(); } catch(e) {
                         <td class="p-2 border border-slate-200">${u.subject || ''}</td>
                         <td class="p-2 border border-slate-200 font-mono">${u.ccp || ''}</td>
                         <td class="p-2 border border-slate-200 text-center">
-                            <button onclick="editUser('${u.id}')" class="square-btn bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 text-xs ml-1" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-<button onclick="deleteUser('${u.id}')" class="square-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs" title="حذف">
+                            <button onclick="openStaffModal('${u.id}')" class="square-btn bg-edu-blue hover:bg-edu-darkblue text-white px-2 py-1 text-xs ml-1" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteUser('${u.id}')" class="square-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs" title="حذف">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </td>`;
@@ -3570,8 +3435,6 @@ if (viewId === 'assign-subjects') { try { fillAssignGroupOptions(); } catch(e) {
                 const [lvl, grp] = groupFilter.split('-');
                 list = list.filter(a => a.level === lvl && String(a.group) === String(grp));
             }
-const levelFilter = (document.getElementById('assignSideLevel') || {}).value || '';
-if (levelFilter && !groupFilter) list = list.filter(a => a.level === levelFilter);
 
             // عند اختيار فوج: إظهار جميع المواد جاهزة حتى غير المسندة
             if (groupFilter) {
@@ -4009,7 +3872,7 @@ if (levelFilter && !groupFilter) list = list.filter(a => a.level === levelFilter
                     const data = new Uint8Array(evt.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+                    const json = sheetToJsonSmart(firstSheet);
                     if (json.length === 0) {
                         showToast('الملف فارغ أو غير صالح');
                         return;
@@ -4630,7 +4493,7 @@ if (levelFilter && !groupFilter) list = list.filter(a => a.level === levelFilter
                     const data = new Uint8Array(evt.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+                    const json = sheetToJsonSmart(firstSheet);
                     if (json.length === 0) {
                         showToast('الملف فارغ أو غير صالح');
                         return;
@@ -4681,7 +4544,7 @@ if (levelFilter && !groupFilter) list = list.filter(a => a.level === levelFilter
                     const data = new Uint8Array(evt.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+                    const json = sheetToJsonSmart(firstSheet);
                     if (json.length === 0) {
                         showToast('الملف فارغ أو غير صالح');
                         return;
@@ -6138,6 +6001,497 @@ if (levelFilter && !groupFilter) list = list.filter(a => a.level === levelFilter
         }
         document.addEventListener('DOMContentLoaded', () => { try { refreshAllGroupFilters(); } catch (e) {} });
     </script>
+
+    <script>
+    // =====================================================================
+    // توسعة: تصدير Excel منظّم (إطارات + ترويسة المؤسسة) · قوائم حجز النقاط
+    //        لكل أستاذ · إدارة الموظفين (إضافة/تعديل/تصدير/حذف)
+    // =====================================================================
+    const SCHOOL_HEADER_LINES = [
+        'الجمهورية الجزائرية الديمقراطية الشعبية',
+        'وزارة التربية الوطنية',
+        'مديرية التربية للجزائر غرب',
+        'متوسطة الشهيد خالد مكاوي (سطاوالي)'
+    ];
+    const XL_BORDER = (function () { const s = { style: 'thin', color: { argb: 'FF334155' } }; return { top: s, left: s, bottom: s, right: s }; })();
+    const XL_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+    function xlSafeName(s) { return String(s || '').replace(/[\\\/:*?"<>|]/g, ' ').trim().replace(/\s+/g, '_').slice(0, 80); }
+    function xlSheetName(base, used) {
+        const n = String(base).replace(/[\[\]:*?\/\\]/g, ' ').trim().slice(0, 31) || 'ورقة';
+        let cand = n, k = 2;
+        while (used.has(cand.toLowerCase())) { const suf = ' (' + k + ')'; cand = n.slice(0, 31 - suf.length) + suf; k++; }
+        used.add(cand.toLowerCase());
+        return cand;
+    }
+    function xlSaveBlob(blob, name) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    }
+    async function xlBuffer(wb) { return await wb.xlsx.writeBuffer(); }
+    async function xlSave(wb, fileName) {
+        const buf = await xlBuffer(wb);
+        xlSaveBlob(new Blob([buf], { type: XL_MIME }), fileName);
+    }
+    function xlSplit(n, k) {
+        k = Math.max(1, Math.min(k, n));
+        const base = Math.floor(n / k); let rem = n - base * k; const out = []; let c = 1;
+        for (let i = 0; i < k; i++) { const w = base + (rem > 0 ? 1 : 0); if (rem > 0) rem--; out.push([c, c + w - 1]); c += w; }
+        return out;
+    }
+    function xlToday() { return new Date().toLocaleDateString('fr-FR'); }
+
+    // بناء ورقة منظّمة: ترويسة المؤسسة + عنوان + معلومات + جدول بإطارات + تذييل
+    async function xlBuildSheet(wb, sheetName, o) {
+        const ws = wb.addWorksheet(sheetName, { views: [{ rightToLeft: true, showGridLines: false }] });
+        const cols = o.columns, n = cols.length;
+        cols.forEach(function (c, i) { ws.getColumn(i + 1).width = c.width || 15; });
+        const F = function (b, sz, color) { return { name: 'Arial', bold: !!b, size: sz || 11, color: { argb: color || 'FF0F172A' } }; };
+        const CEN = { horizontal: 'center', vertical: 'middle', wrapText: true, readingOrder: 'rtl' };
+        const solid = function (argb) { return { type: 'pattern', pattern: 'solid', fgColor: { argb: argb } }; };
+        const mergeRow = function (r, c1, c2, text, st) {
+            if (c2 > c1) ws.mergeCells(r, c1, r, c2);
+            ws.getCell(r, c1).value = text;
+            for (let c = c1; c <= c2; c++) {
+                const x = ws.getCell(r, c);
+                x.font = st.font; x.alignment = st.align || CEN;
+                if (st.fill) x.fill = st.fill;
+                if (st.border) x.border = XL_BORDER;
+            }
+            ws.getRow(r).height = st.h || 20;
+        };
+        let r = 1;
+        const hs = [[F(true, 13), 22], [F(true, 12), 20], [F(true, 12), 20], [F(true, 13, 'FF004B87'), 22]];
+        SCHOOL_HEADER_LINES.forEach(function (t, i) { mergeRow(r++, 1, n, t, { font: hs[i][0], h: hs[i][1] }); });
+        ws.getRow(r++).height = 8;
+        mergeRow(r++, 1, n, o.title, { font: F(true, 15, 'FF004B87'), fill: solid('FFE0ECF8'), border: true, h: 30 });
+        (o.infoRows || []).forEach(function (parts) {
+            const spans = xlSplit(n, parts.length);
+            spans.forEach(function (sp, i) { mergeRow(r, sp[0], sp[1], parts[i], { font: F(true, 11), fill: solid('FFF8FAFC'), border: true, h: 22 }); });
+            r++;
+        });
+        ws.getRow(r++).height = 8;
+        const hdr = r;
+        cols.forEach(function (c, i) {
+            const x = ws.getCell(hdr, i + 1);
+            x.value = c.header; x.font = F(true, 11, 'FFFFFFFF'); x.fill = solid('FF0066B2'); x.border = XL_BORDER; x.alignment = CEN;
+        });
+        ws.getRow(hdr).height = 28;
+        o.rows.forEach(function (row, ri) {
+            const rr = hdr + 1 + ri;
+            ws.getRow(rr).height = 21;
+            const last = o.boldLastRow && ri === o.rows.length - 1;
+            cols.forEach(function (c, ci) {
+                const cell = ws.getCell(rr, ci + 1);
+                let v = row[ci];
+                if (v === undefined || v === null) v = '';
+                cell.value = (v === '' && c.editable) ? null : v;
+                cell.font = F(last, 11);
+                cell.border = XL_BORDER;
+                cell.alignment = CEN;
+                if (c.editable) {
+                    cell.fill = solid('FFFFFBEB');
+                    cell.protection = { locked: false };
+                    if (c.validate === 'score') {
+                        cell.dataValidation = { type: 'decimal', operator: 'between', allowBlank: true, formulae: [0, 20], showErrorMessage: true, errorTitle: 'قيمة غير صالحة', error: 'أدخل نقطة بين 0 و 20' };
+                    }
+                } else if (last) cell.fill = solid('FFE2E8F0');
+                else if (ri % 2) cell.fill = solid('FFF8FAFC');
+            });
+        });
+        r = hdr + o.rows.length + 2;
+        if (o.protect) mergeRow(r++, 1, n, 'المعلومات الشخصية محمية من التعديل — الخانات الصفراء فقط (النقاط والتقديرات) قابلة للتعديل.', { font: F(false, 10, 'FF92400E'), h: 20 });
+        const footer = o.footer === undefined ? ('عدد السجلات: ' + o.rows.length + '  —  حُرّر بسطاوالي في: ' + xlToday()) : o.footer;
+        if (footer) mergeRow(r++, 1, n, footer, { font: F(false, 10, 'FF475569'), h: 20 });
+        if (o.signature) mergeRow(r++, 1, n, o.signature, { font: F(true, 11), h: 34, align: { horizontal: 'left', vertical: 'middle', readingOrder: 'rtl' } });
+        ws.pageSetup = { paperSize: 9, orientation: o.orientation || 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, horizontalCentered: true, printTitlesRow: hdr + ':' + hdr, margins: { left: 0.4, right: 0.4, top: 0.5, bottom: 0.5, header: 0.3, footer: 0.3 } };
+        if (o.protect) await ws.protect('');
+        return ws;
+    }
+    async function xlExportSimple(fileName, sheetName, o) {
+        const wb = new ExcelJS.Workbook();
+        wb.creator = 'منصة المؤسسة'; wb.created = new Date();
+        await xlBuildSheet(wb, sheetName, o);
+        await xlSave(wb, fileName);
+    }
+
+    // قراءة ملفات Excel المصدّرة (ذات الترويسة) مع اكتشاف صف العناوين تلقائياً
+    function sheetToJsonSmart(sheet) {
+        try {
+            const aoa = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', blankrows: true });
+            let idx = 0;
+            for (let i = 0; i < Math.min(aoa.length, 40); i++) {
+                const cells = (aoa[i] || []).map(function (v) { return String(v).trim(); });
+                const hit = cells.some(function (c) { return c === 'اللقب' || c === 'رقم التعريف'; }) && cells.filter(Boolean).length >= 3;
+                if (hit) { idx = i; break; }
+            }
+            return XLSX.utils.sheet_to_json(sheet, { defval: '', range: idx });
+        } catch (e) { return XLSX.utils.sheet_to_json(sheet, { defval: '' }); }
+    }
+
+    // ---------- تغليف دوال التصدير القديمة بنسخ منظّمة (مع الرجوع للقديمة عند الفشل) ----------
+    (function wrapExports() {
+        const legacyCand = exportCandidatesExcel;
+        exportCandidatesExcel = async function () {
+            if (typeof ExcelJS === 'undefined') return legacyCand();
+            try {
+                const list = getFilteredCandidates();
+                if (!list.length) { showToast('لا توجد بيانات للتصدير'); return; }
+                const rows = list.map(function (s, i) { return [i + 1, s.id || '', s.surname || '', s.name || '', s.gender || '', s.birthDate || '', s.birthPlace || '', s.group || '', s.status || 'خارجي', examRegStatus(s)]; });
+                await xlExportSimple('قائمة_مترشحي_الرابعة_متوسط.xlsx', 'مترشحو الرابعة متوسط', {
+                    title: 'القائمة الاسمية للمترشحين — السنة الرابعة متوسط',
+                    infoRows: [['السنة الدراسية: 2026-2027', 'عدد المترشحين: ' + list.length]],
+                    columns: [{ header: 'ر.ت', width: 7 }, { header: 'رقم التعريف', width: 18 }, { header: 'اللقب', width: 18 }, { header: 'الاسم', width: 18 }, { header: 'الجنس', width: 9 }, { header: 'تاريخ الميلاد', width: 15 }, { header: 'مكان الميلاد', width: 18 }, { header: 'رقم الفوج', width: 10 }, { header: 'الصفة', width: 12 }, { header: 'حالة التسجيل', width: 14 }],
+                    rows: rows, orientation: 'landscape'
+                });
+                showToast('تم تصدير قائمة المترشحين');
+            } catch (e) { console.error(e); legacyCand(); }
+        };
+        const legacyNum = exportNumbersExcel;
+        exportNumbersExcel = async function () {
+            if (typeof ExcelJS === 'undefined') return legacyNum();
+            try {
+                const rows = ['أولى', 'ثانية', 'ثالثة', 'رابعة'].map(function (lvl) {
+                    const list = studentsData.filter(function (s) { return s.level === lvl; });
+                    const males = list.filter(function (s) { return (s.gender || '').includes('ذكر'); }).length;
+                    return [lvl, groupsPerLevel[lvl] || 0, list.length, males, list.length - males];
+                });
+                const tot = rows.reduce(function (a, r) { return [a[0], a[1] + r[1], a[2] + r[2], a[3] + r[3], a[4] + r[4]]; }, ['المجموع', 0, 0, 0, 0]);
+                rows.push(tot);
+                await xlExportSimple('التمدرس_بالأرقام_2026_2027.xlsx', 'التمدرس بالأرقام', {
+                    title: 'التمدرس بالأرقام — السنة الدراسية 2026-2027',
+                    infoRows: [['السنة الدراسية: 2026-2027', 'مجموع التلاميذ: ' + tot[2]]],
+                    columns: [{ header: 'المستوى', width: 16 }, { header: 'عدد الأفواج', width: 14 }, { header: 'عدد التلاميذ', width: 14 }, { header: 'ذكور', width: 12 }, { header: 'إناث', width: 12 }],
+                    rows: rows, boldLastRow: true, footer: 'حُرّر بسطاوالي في: ' + xlToday()
+                });
+                showToast('تم تصدير الإحصائيات');
+            } catch (e) { console.error(e); legacyNum(); }
+        };
+        const legacyOct = exportOctoberData;
+        exportOctoberData = async function () {
+            if (typeof ExcelJS === 'undefined') return legacyOct();
+            try {
+                if (!studentsData.length) { showToast('لا توجد بيانات لتصديرها'); return; }
+                const lo = { 'رابعة': 1, 'ثالثة': 2, 'ثانية': 3, 'أولى': 4 };
+                const sorted = studentsData.slice().sort(function (a, b) { return (lo[a.level] || 99) - (lo[b.level] || 99); });
+                const rows = sorted.map(function (s, i) { return [i + 1, s.level || '', s.group || '', s.id || '', s.surname || '', s.name || '', s.gender || '', s.birthDate || '', s.status || 'خارجي']; });
+                await xlExportSimple('حالة_أول_أكتوبر_2026-2027.xlsx', 'حالة أول أكتوبر', {
+                    title: 'حالة أول أكتوبر — السنة الدراسية 2026-2027',
+                    infoRows: [['السنة الدراسية: 2026-2027', 'عدد التلاميذ: ' + rows.length]],
+                    columns: [{ header: 'ر.ت', width: 7 }, { header: 'المستوى', width: 12 }, { header: 'رقم الفوج', width: 10 }, { header: 'رقم التعريف', width: 18 }, { header: 'اللقب', width: 18 }, { header: 'الاسم', width: 18 }, { header: 'الجنس', width: 9 }, { header: 'تاريخ الميلاد', width: 15 }, { header: 'الصفة', width: 12 }],
+                    rows: rows, orientation: 'landscape'
+                });
+                showToast('تم تصدير البيانات بنجاح');
+            } catch (e) { console.error(e); legacyOct(); }
+        };
+        const legacyStu = exportStudentsExcel;
+        exportStudentsExcel = async function () {
+            if (typeof ExcelJS === 'undefined') return legacyStu();
+            try {
+                const g = function (id) { return (document.getElementById(id) || {}).value; };
+                const hasF = g('filterSchoolYear') || g('filterStudentLevel') || g('filterStudentGroup') || (g('entrySearch') || '').trim();
+                const list = hasF ? filteredStudents : studentsData;
+                if (!list.length) { showToast('لا توجد بيانات للتصدير'); return; }
+                const rows = list.map(function (s, i) { return [i + 1, s.id || '', s.surname || '', s.name || '', s.gender || '', s.birthDate || '', s.birthPlace || '', s.address || '', s.level || '', s.group || '', s.status || 'خارجي']; });
+                await xlExportSimple('قائمة_التلاميذ.xlsx', 'التلاميذ', {
+                    title: 'قائمة التلاميذ — السنة الدراسية 2026-2027',
+                    infoRows: [['السنة الدراسية: 2026-2027', 'عدد التلاميذ: ' + rows.length]],
+                    columns: [{ header: 'ر.ت', width: 7 }, { header: 'رقم التعريف', width: 18 }, { header: 'اللقب', width: 18 }, { header: 'الاسم', width: 18 }, { header: 'الجنس', width: 9 }, { header: 'تاريخ الميلاد', width: 15 }, { header: 'مكان الميلاد', width: 18 }, { header: 'العنوان', width: 30 }, { header: 'المستوى', width: 11 }, { header: 'رقم الفوج', width: 10 }, { header: 'الصفة', width: 12 }],
+                    rows: rows, orientation: 'landscape'
+                });
+                showToast('تم تصدير ' + list.length + ' تلميذ');
+            } catch (e) { console.error(e); legacyStu(); }
+        };
+        const legacyUsers = renderUsersTable;
+        renderUsersTable = function () { legacyUsers(); try { updateStaffStats(); } catch (e) {} };
+    })();
+
+    // ====================== قوائم حجز النقاط (Excel لكل أستاذ) ======================
+    const BOOKING_TERMS = ['الفصل الأول', 'الفصل الثاني', 'الفصل الثالث'];
+    function bookingGetTeachers() {
+        const yEl = document.getElementById('assignSideYear');
+        const year = (yEl && yEl.value) || '';
+        const order = { 'أولى': 1, 'ثانية': 2, 'ثالثة': 3, 'رابعة': 4 };
+        const map = new Map();
+        (assignmentsData || []).forEach(function (a) {
+            const name = String(a.teacher || '').trim();
+            if (!name) return;
+            if (year && (a.year || '2026-2027') !== year) return;
+            if (!map.has(name)) map.set(name, { name: name, items: [] });
+            const t = map.get(name);
+            if (!t.items.some(function (x) { return x.level === a.level && String(x.group) === String(a.group) && x.subject === (a.subject || ''); })) {
+                t.items.push({ level: a.level, group: String(a.group), subject: a.subject || '' });
+            }
+        });
+        const arr = Array.from(map.values());
+        arr.forEach(function (t) { t.items.sort(function (a, b) { return (order[a.level] || 9) - (order[b.level] || 9) || (parseInt(a.group, 10) || 0) - (parseInt(b.group, 10) || 0); }); });
+        arr.sort(function (a, b) { return a.name.localeCompare(b.name, 'ar'); });
+        return { year: year, teachers: arr };
+    }
+    function bookingPreview() {
+        const el = document.getElementById('bookingPreview');
+        const sel = document.getElementById('bookingTeacher');
+        if (!el || !sel) return;
+        const data = bookingGetTeachers();
+        if (sel.value === '__all__') {
+            const total = data.teachers.reduce(function (s, t) { return s + t.items.length; }, 0);
+            el.textContent = 'سيتم تحميل ملف ZIP يضم ' + data.teachers.length + ' ملف Excel (ملف لكل أستاذ) — مجموع الأفواج: ' + total;
+            return;
+        }
+        const t = data.teachers.find(function (x) { return x.name === sel.value; });
+        el.textContent = t ? ('الأفواج المسندة: ' + t.items.map(function (i) { return i.level + ' متوسط ' + i.group + ' (' + i.subject + ')'; }).join(' ، ')) : '';
+    }
+    function openBookingModal() {
+        const data = bookingGetTeachers();
+        if (!data.teachers.length) { showToast('لا توجد إسنادات لتحميل قوائم الحجز — أسند المواد للأساتذة أولاً'); return; }
+        const sel = document.getElementById('bookingTeacher');
+        let h = '<option value="__all__">جميع الأساتذة (' + data.teachers.length + ') — ملف ZIP</option>';
+        data.teachers.forEach(function (t) { h += '<option value="' + esc(t.name) + '">' + esc(t.name) + ' — ' + t.items.length + ' فوج</option>'; });
+        sel.innerHTML = h;
+        document.getElementById('bookingYearLabel').textContent = data.year || '2026-2027';
+        bookingPreview();
+        document.getElementById('bookingModalOverlay').classList.remove('hidden');
+    }
+    function closeBookingModal() { document.getElementById('bookingModalOverlay').classList.add('hidden'); }
+
+    async function bookingBuildWorkbook(t, term, year) {
+        const wb = new ExcelJS.Workbook();
+        wb.creator = 'منصة المؤسسة'; wb.created = new Date();
+        const used = new Set(), per = {};
+        t.items.forEach(function (it) { const k = it.level + '-' + it.group; per[k] = (per[k] || 0) + 1; });
+        for (const it of t.items) {
+            const label = it.level + ' متوسط ' + it.group;
+            const base = per[it.level + '-' + it.group] > 1 ? (label + ' - ' + it.subject) : label;
+            const students = studentsData.filter(function (s) { return s.level === it.level && String(s.group) === String(it.group); })
+                .sort(function (a, b) { return String(a.surname || '').localeCompare(String(b.surname || ''), 'ar') || String(a.name || '').localeCompare(String(b.name || ''), 'ar'); });
+            const rows = students.map(function (s) {
+                const ex = ((window._exemptions || {})[(s.id || (s.surname + s.name)) + '|' + it.subject]) || {};
+                return [s.id || '', s.surname || '', s.name || '', s.birthDate || '', ex.continuous || '', ex.tests || '', ex.exam || '', ex.average || '', ex.appreciation || ''];
+            });
+            await xlBuildSheet(wb, xlSheetName(base, used), {
+                title: 'حجز نقاط التلاميذ',
+                infoRows: [
+                    ['الفوج التربوي: ' + label, 'الفصل: ' + term, 'المادة: ' + it.subject, 'السنة الدراسية: ' + year],
+                    ['الأستاذ(ة): ' + t.name]
+                ],
+                columns: [
+                    { header: 'رقم التعريف', width: 17 }, { header: 'اللقب', width: 19 }, { header: 'الاسم', width: 19 }, { header: 'تاريخ الميلاد', width: 15 },
+                    { header: 'التقييم المستمر /20', width: 17, editable: true, validate: 'score' },
+                    { header: 'معدل الفروض /20', width: 16, editable: true, validate: 'score' },
+                    { header: 'الاختبار /20', width: 14, editable: true, validate: 'score' },
+                    { header: 'المعدل', width: 12, editable: true, validate: 'score' },
+                    { header: 'التقديرات', width: 22, editable: true }
+                ],
+                rows: rows, protect: true,
+                footer: 'عدد التلاميذ: ' + rows.length + '  —  حُرّر بسطاوالي في: ' + xlToday(),
+                signature: 'إمضاء الأستاذ(ة): ..............................'
+            });
+        }
+        return wb;
+    }
+    async function downloadBookingLists() {
+        if (typeof ExcelJS === 'undefined') { showError('مكتبة Excel غير محمّلة — تحقق من الاتصال بالإنترنت ثم أعد المحاولة.'); return; }
+        const data = bookingGetTeachers();
+        const year = data.year || '2026-2027';
+        const sel = document.getElementById('bookingTeacher').value;
+        const term = document.getElementById('bookingTerm').value;
+        const btn = document.getElementById('bookingDownloadBtn');
+        const fileOf = function (t) { return 'حجز_النقاط_' + xlSafeName(t.name) + '_' + xlSafeName(term) + '.xlsx'; };
+        btn.disabled = true; btn.style.opacity = '.6';
+        try {
+            if (sel === '__all__') {
+                if (typeof JSZip !== 'undefined') {
+                    const zip = new JSZip();
+                    const names = new Set();
+                    for (const t of data.teachers) {
+                        const wb = await bookingBuildWorkbook(t, term, year);
+                        let fn = fileOf(t), k = 2;
+                        while (names.has(fn)) { fn = fn.replace(/\.xlsx$/, '_' + k + '.xlsx'); k++; }
+                        names.add(fn);
+                        zip.file(fn, await xlBuffer(wb));
+                    }
+                    xlSaveBlob(await zip.generateAsync({ type: 'blob' }), 'قوائم_حجز_النقاط_' + xlSafeName(term) + '.zip');
+                } else {
+                    for (const t of data.teachers) {
+                        await xlSave(await bookingBuildWorkbook(t, term, year), fileOf(t));
+                        await new Promise(function (r) { setTimeout(r, 500); });
+                    }
+                }
+                showToast('تم تحميل قوائم الحجز لـ ' + data.teachers.length + ' أستاذ');
+            } else {
+                const t = data.teachers.find(function (x) { return x.name === sel; });
+                if (!t) { showToast('اختر الأستاذ'); return; }
+                await xlSave(await bookingBuildWorkbook(t, term, year), fileOf(t));
+                showToast('تم تحميل قائمة الحجز للأستاذ(ة) ' + t.name);
+            }
+            closeBookingModal();
+        } catch (e) {
+            console.error(e);
+            showError('تعذّر إنشاء ملفات Excel.');
+        } finally { btn.disabled = false; btn.style.opacity = ''; }
+    }
+
+    // ====================== إدارة الموظفين ======================
+    function updateStaffStats() {
+        const el = document.getElementById('staffStats');
+        if (!el) return;
+        const total = usersData.length;
+        const teachers = usersData.filter(function (u) { return u.role && u.role.includes('أستاذ'); }).length;
+        const chip = function (t, v) { return '<span class="bg-blue-50 text-blue-900 px-3 py-1 font-bold">' + t + ': ' + v + '</span>'; };
+        el.innerHTML = chip('إجمالي الموظفين', total) + chip('الأساتذة', teachers) + chip('الإداريون وغيرهم', total - teachers);
+    }
+    function staffFillSelect(selId, filterId, cur, def) {
+        const src = Array.from(document.getElementById(filterId).options).filter(function (o) { return o.value; }).map(function (o) { return o.value; });
+        if (cur && src.indexOf(cur) < 0) src.push(cur);
+        const el = document.getElementById(selId);
+        el.innerHTML = src.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
+        el.value = cur || def;
+    }
+    function openStaffModal(id) {
+        const u = id ? usersData.find(function (x) { return String(x.id) === String(id); }) : null;
+        document.getElementById('staffModalTitle').textContent = u ? 'تعديل بيانات الموظف' : 'إضافة موظف جديد';
+        document.getElementById('staffOrigId').value = u ? u.id : '';
+        const set = function (k, v) { document.getElementById('staff_' + k).value = v || ''; };
+        set('id', u && u.id); set('surname', u && u.surname); set('name', u && u.name);
+        set('birthDate', u && u.birthDate); set('birthPlace', u && u.birthPlace);
+        set('address', u && u.address); set('phone', u && u.phone); set('ccp', u && u.ccp);
+        staffFillSelect('staff_role', 'filterRole', u && u.role, 'أستاذ تعليم متوسط');
+        staffFillSelect('staff_subject', 'filterSubject', u && u.subject, 'إدارة');
+        document.getElementById('staffModalOverlay').classList.remove('hidden');
+    }
+    function closeStaffModal() { document.getElementById('staffModalOverlay').classList.add('hidden'); }
+    function saveStaff() {
+        const v = function (k) { return document.getElementById('staff_' + k).value.trim(); };
+        const orig = document.getElementById('staffOrigId').value;
+        const rec = { id: v('id'), surname: v('surname'), name: v('name'), birthDate: v('birthDate'), birthPlace: v('birthPlace'), address: v('address'), phone: v('phone'), role: v('role'), subject: v('subject'), ccp: v('ccp') };
+        if (!rec.surname && !rec.name) { showError('أدخل اللقب أو الاسم على الأقل.'); return; }
+        if (!rec.id) rec.id = 'EMP-' + Date.now();
+        if (usersData.some(function (x) { return String(x.id) === String(rec.id) && String(x.id) !== String(orig); })) { showError('رقم التعريف مستعمل لموظف آخر.'); return; }
+        if (orig) {
+            const old = usersData.find(function (x) { return String(x.id) === String(orig); });
+            if (old) {
+                const oldName = ((old.surname || '') + ' ' + (old.name || '')).trim();
+                const newName = ((rec.surname || '') + ' ' + (rec.name || '')).trim();
+                (assignmentsData || []).forEach(function (a) {
+                    if (String(a.teacherId) === String(orig) || a.teacher === oldName) {
+                        a.teacher = newName; a.teacherId = rec.id;
+                        if (a.responsible === oldName) a.responsible = newName;
+                    }
+                });
+                Object.assign(old, rec);
+            }
+        } else usersData.push(rec);
+        saveToDB();
+        filterUsers();
+        closeStaffModal();
+        showToast(orig ? 'تم حفظ تعديلات الموظف' : 'تمت إضافة الموظف بنجاح');
+    }
+    function staffDeleteMany(predicate, title, label) {
+        const n = usersData.filter(predicate).length;
+        if (!n) { showToast('لا يوجد ' + label + ' للحذف'); return; }
+        const run = function () {
+            usersData = usersData.filter(function (u) { return !predicate(u); });
+            saveToDB();
+            filterUsers();
+            showToast('تم حذف ' + n + ' ' + (label === 'أساتذة' ? 'أستاذ' : 'موظف'));
+        };
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({ title: title, html: 'سيتم حذف <strong>' + n + '</strong> ' + label + ' نهائياً.<br>لا يمكن التراجع عن هذه العملية.', icon: 'warning', showCancelButton: true, confirmButtonText: 'نعم، احذف', cancelButtonText: 'إلغاء', confirmButtonColor: '#b91c1c', cancelButtonColor: '#64748b', reverseButtons: true })
+                .then(function (r) { if (r.isConfirmed) run(); });
+        } else if (confirm('حذف ' + n + ' ' + label + ' نهائياً؟')) run();
+    }
+    function deleteAllTeachers() { staffDeleteMany(function (u) { return u.role && u.role.includes('أستاذ'); }, 'حذف جميع الأساتذة', 'أساتذة'); }
+    function deleteAllStaff() { staffDeleteMany(function () { return true; }, 'حذف كل الموظفين', 'موظفين'); }
+
+    const STAFF_COLUMNS = [
+        { header: 'ر.ت', width: 7 }, { header: 'رقم التعريف', width: 18 }, { header: 'اللقب', width: 18 }, { header: 'الاسم', width: 18 },
+        { header: 'تاريخ الميلاد', width: 15 }, { header: 'مكان الميلاد', width: 18 }, { header: 'العنوان', width: 30 },
+        { header: 'رقم الهاتف', width: 16 }, { header: 'الصفة', width: 20 }, { header: 'المادة', width: 22 }, { header: 'رقم الحساب البريدي', width: 22 }
+    ];
+    async function exportStaffExcel() {
+        const hasF = ['filterRole', 'filterSubject', 'filterSearch'].some(function (id) { const e = document.getElementById(id); return e && e.value; });
+        const list = hasF ? filteredUsers : usersData;
+        if (!list.length) { showToast('لا توجد بيانات موظفين للتصدير'); return; }
+        if (typeof ExcelJS === 'undefined') { showError('مكتبة Excel غير محمّلة — تحقق من الاتصال بالإنترنت.'); return; }
+        try {
+            const rows = list.map(function (u, i) { return [i + 1, u.id || '', u.surname || '', u.name || '', u.birthDate || '', u.birthPlace || '', u.address || '', u.phone || '', u.role || '', u.subject || '', u.ccp || '']; });
+            await xlExportSimple('بيانات_الموظفين.xlsx', 'الموظفون', {
+                title: 'قائمة الموظفين',
+                infoRows: [['السنة الدراسية: 2026-2027', 'عدد الموظفين: ' + rows.length]],
+                columns: STAFF_COLUMNS, rows: rows, orientation: 'landscape'
+            });
+            showToast('تم تصدير بيانات ' + rows.length + ' موظف');
+        } catch (e) { console.error(e); showError('تعذّر تصدير بيانات الموظفين.'); }
+    }
+    async function downloadStaffTemplate() {
+        if (typeof ExcelJS === 'undefined') { showError('مكتبة Excel غير محمّلة — تحقق من الاتصال بالإنترنت.'); return; }
+        const blank = []; for (let i = 0; i < 15; i++) blank.push([i + 1, '', '', '', '', '', '', '', '', '', '']);
+        await xlExportSimple('نموذج_استيراد_الموظفين.xlsx', 'الموظفون', {
+            title: 'نموذج استيراد بيانات الموظفين', infoRows: [['املأ الجدول ثم استورده من زر «استيراد بيانات الموظفين»']],
+            columns: STAFF_COLUMNS, rows: blank, orientation: 'landscape', footer: ''
+        });
+        showToast('تم تحميل نموذج الاستيراد');
+    }
+    document.addEventListener('DOMContentLoaded', function () { try { updateStaffStats(); } catch (e) {} });
+    </script>
+
+    <!-- نافذة إضافة / تعديل موظف -->
+    <div id="staffModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
+        <div class="modal-clean-box p-0 overflow-hidden flex flex-col" style="width:95vw;max-width:900px;max-height:92vh">
+            <div class="bg-white border border-slate-200 m-4 p-5 flex-1 overflow-y-auto">
+                <div class="bg-slate-50 border border-slate-200 p-3 mb-5 flex justify-between items-center">
+                    <h3 class="text-lg font-extrabold text-edu-blue flex items-center gap-2"><i class="fa-solid fa-user-pen"></i> <span id="staffModalTitle">بيانات الموظف</span></h3>
+                    <button onclick="closeStaffModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
+                </div>
+                <input type="hidden" id="staffOrigId">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div><label class="block text-xs font-bold mb-1">رقم التعريف</label><input type="text" id="staff_id" class="w-full text-xs p-2.5 bg-white font-mono"></div><div><label class="block text-xs font-bold mb-1">اللقب</label><input type="text" id="staff_surname" class="w-full text-xs p-2.5 bg-white "></div><div><label class="block text-xs font-bold mb-1">الاسم</label><input type="text" id="staff_name" class="w-full text-xs p-2.5 bg-white "></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div><label class="block text-xs font-bold mb-1">تاريخ الميلاد</label><input type="text" id="staff_birthDate" class="w-full text-xs p-2.5 bg-white font-mono"></div><div><label class="block text-xs font-bold mb-1">مكان الميلاد</label><input type="text" id="staff_birthPlace" class="w-full text-xs p-2.5 bg-white "></div><div><label class="block text-xs font-bold mb-1">رقم الهاتف</label><input type="text" id="staff_phone" class="w-full text-xs p-2.5 bg-white font-mono"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div><label class="block text-xs font-bold mb-1">العنوان</label><input type="text" id="staff_address" class="w-full text-xs p-2.5 bg-white "></div><div><label class="block text-xs font-bold mb-1">رقم الحساب البريدي</label><input type="text" id="staff_ccp" class="w-full text-xs p-2.5 bg-white font-mono"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div><label class="block text-xs font-bold mb-1">الصفة / الرتبة</label><select id="staff_role" class="w-full text-xs p-2.5 bg-white"></select></div>
+                    <div><label class="block text-xs font-bold mb-1">المادة</label><select id="staff_subject" class="w-full text-xs p-2.5 bg-white"></select></div>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button onclick="saveStaff()" class="square-btn bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+                    <button onclick="closeStaffModal()" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-xmark"></i> إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تحميل قوائم الحجز (Excel لكل أستاذ) -->
+    <div id="bookingModalOverlay" class="fixed inset-0 z-50 hidden modal-clean-overlay flex items-center justify-center p-2 sm:p-4 no-print">
+        <div class="modal-clean-box p-0 overflow-hidden" style="width:95vw;max-width:620px">
+            <div class="bg-white border border-slate-200 m-4 p-5">
+                <div class="bg-slate-50 border border-slate-200 p-3 mb-5 flex justify-between items-center">
+                    <h3 class="text-base font-extrabold text-edu-blue flex items-center gap-2"><i class="fa-solid fa-file-excel"></i> تحميل قوائم حجز النقاط</h3>
+                    <button onclick="closeBookingModal()" class="text-slate-500 hover:text-red-600 text-xl font-bold px-2">&times;</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div><label class="block text-xs font-bold mb-1">الأستاذ(ة)</label><select id="bookingTeacher" onchange="bookingPreview()" class="w-full text-xs p-2.5 bg-white"></select></div>
+                    <div><label class="block text-xs font-bold mb-1">الفصل</label>
+                        <select id="bookingTerm" class="w-full text-xs p-2.5 bg-white"><option>الفصل الأول</option><option>الفصل الثاني</option><option>الفصل الثالث</option></select></div>
+                </div>
+                <p class="text-xs text-slate-600 mb-1">السنة الدراسية: <strong id="bookingYearLabel">2026-2027</strong></p>
+                <p id="bookingPreview" class="text-xs text-slate-700 bg-slate-50 border border-slate-200 p-2 mb-3 leading-6"></p>
+                <p class="text-xs text-amber-800 bg-amber-50 p-2 mb-5 leading-6">كل ملف يضم ورقة لكل فوج مسند للأستاذ. المعلومات الشخصية للتلاميذ محمية، والتعديل متاح على النقاط والتقديرات فقط.</p>
+                <div class="flex justify-end gap-3">
+                    <button id="bookingDownloadBtn" onclick="downloadBookingLists()" class="square-btn bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 text-xs font-bold flex items-center gap-2"><i class="fa-solid fa-download"></i> تحميل</button>
+                    <button onclick="closeBookingModal()" class="square-btn bg-slate-300 hover:bg-slate-400 text-slate-800 px-6 py-2 text-xs font-bold">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- نافذة حساب المؤسسة — تصدير / استيراد قاعدة البيانات الموحدة -->
     <div id="accountDBModalOverlay" class="fixed inset-0 z-[120] hidden modal-clean-overlay flex items-center justify-center p-4 no-print">
